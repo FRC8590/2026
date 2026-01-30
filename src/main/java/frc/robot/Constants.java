@@ -20,6 +20,10 @@ import edu.wpi.first.wpilibj.Filesystem;
 import swervelib.math.Matter;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.OperatorConstants;
+import frc.robot.constants.ShooterConstants;
+import frc.robot.constants.IntakeConstants;
+import frc.robot.constants.BeltConstants;
+import frc.robot.constants.ClimbConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 
@@ -47,7 +51,7 @@ public final class Constants
     //     3.6068   // Field width (meters)
     // );
 
-    public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+    public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     // Robot Physical Properties
     public static final double ROBOT_MASS = Units.lbsToKilograms(135);
@@ -67,28 +71,21 @@ public final class Constants
     );
     public static Vision vision;
 
-
-
     public static double scaleFactor = 1;
 
-    public static int[] SCORING_IDS = {17, 18, 19, 20, 21, 22, 6, 7, 8, 9, 10, 11};
+    public static int[] SCORING_IDS = {};
 
     // Constants Records
     public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
-
-    public static double distancePerRotation = 1/14.36; //meters per rotations
+    public static final IntakeConstants INTAKE_CONSTANTS = IntakeConstants.DEFAULT;
+    public static final BeltConstants BELT_CONSTANTS = BeltConstants.DEFAULT;
+    public static final ShooterConstants SHOOTER_CONSTANTS = ShooterConstants.DEFAULT;
+    public static final ClimbConstants CLIMB_CONSTANTS = ClimbConstants.DEFAULT;
 
     public static final LaserCan laserCan = new LaserCan(8);
     public static int lockTimer = 0;
 
-
     // Enums
-    public enum ElevatorState {
-        ZEROED, 
-        SETPOINT, 
-        DISABLED
-    }
-
     public enum ScoreLocation {
         LEFT2, 
         LEFT3, 
@@ -96,31 +93,11 @@ public final class Constants
         RIGHT3
     }
 
-
-    public static final double minHeightMeters = 0.0;
-    public static final double maxHeightMeters = 3.35;
-    public static final int masterMotorID = 9;
-    public static final int followerMotorID = 10;
-
-    public final class feedforward{
-        public static final double kS = 0;
-        public static final double kG = 0.02;
-        public static final double kV = 0;
-        public static final double kA = 0.0;
-    }
-
     public final class pid{
         public static final double kP = 3.19; //heads up changing this will actually explode the robot not joking
         public static final double kI = 0;
         public static final double kD = 0.04;
-    }   
-
-    public static double maxVelocity = 0.0;
-    public static double maxAcceleration = 0.0;
-
-    public static double rampRate = 0.01;
-
-    public static boolean isClimbing;
+    }
 
     public static DriveConstants DRIVE_CONSTANTS = new DriveConstants(lockTimer, MAX_SPEED, LOOP_TIME, null, null);
 }
