@@ -1,8 +1,10 @@
 package frc.robot.subsystems.swervedrive;
 
 import frc.robot.Constants;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -30,13 +32,13 @@ public class ShooterSubsystem extends SubsystemBase
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
-    public void runMotors ()
+    private void runMotors ()
     {
         frontMotor.set(1);
         backMotor.set(1);
     }
 
-    public void stopMotors ()
+    private void stopMotors ()
     {
         frontMotor.set(0);
         backMotor.set(0);
