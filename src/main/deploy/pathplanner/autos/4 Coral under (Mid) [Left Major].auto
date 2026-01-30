@@ -1,0 +1,79 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid-5o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5o'clock-Coral(lower)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral(lower)-7o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7o'clock-Coral(lower)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral(lower)-7o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7o'clock-Coral(lower)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral(lower)-9o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "4 Coral Under [BLUE]",
+  "choreoAuto": false
+}

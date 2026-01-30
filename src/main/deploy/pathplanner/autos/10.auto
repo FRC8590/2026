@@ -1,0 +1,99 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RED bottom-5o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalLeftTopRemoveAlgae"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RED 5o'clock-coral (bottom)"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForCoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RED coral (bottom)-5o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalRightTop"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RED 5o'clock-coral (bottom)"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForCoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RED coral (bottom)-5o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalLeftBot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

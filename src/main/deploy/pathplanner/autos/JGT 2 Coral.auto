@@ -1,0 +1,136 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "JGT-1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "JGT-2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForCoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "JGT-1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalRightBot"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "JGT-2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForCoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "JGT-3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "JGT-4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForCoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "JGT-3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalRightBot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

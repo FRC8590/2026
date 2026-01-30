@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red Top Push Out"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score From Red Top Out"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TeleLeftBot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

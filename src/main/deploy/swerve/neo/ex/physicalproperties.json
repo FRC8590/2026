@@ -1,0 +1,12 @@
+{
+  "optimalVoltage": 12,
+  "conversionFactors": {
+    "angle": {
+      "gearRatio": 12.8
+    },
+    "drive": {
+      "diameter": 4,
+      "gearRatio": 6.75
+    }
+  }
+}

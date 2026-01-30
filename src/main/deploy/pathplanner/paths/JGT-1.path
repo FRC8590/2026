@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.11,
+        "y": 6.64
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.058592702423465,
+        "y": 7.068280105471173
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.2704616182572614,
+        "y": 5.326685684647303
+      },
+      "prevControl": {
+        "x": 5.259807831437779,
+        "y": 5.583644441494453
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.3,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -118.83228234535837
+  },
+  "reversed": false,
+  "folder": "JGT Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -90.89375104617812
+  },
+  "useDefaultConstraints": true
+}

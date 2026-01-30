@@ -1,0 +1,55 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top-1o'clock"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1o'clock-coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "coral-11o'clock"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "11o'clock-coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "coral-11o'clock"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "11o'clock-coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "coral-9o'clock"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "4 Coral Over [BLUE]",
+  "choreoAuto": false
+}

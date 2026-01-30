@@ -1,0 +1,81 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top-11o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalLeftTopRemoveAlgae"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "11o'clock-coral"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForCoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "coral-11o'clock"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UniversalRightTop"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ZeroElevator"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "11o'clock-coral"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
