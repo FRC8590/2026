@@ -54,7 +54,7 @@ public final class Constants
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     // Robot Physical Properties
-    public static final double ROBOT_MASS = Units.lbsToKilograms(135);
+    public static final double ROBOT_MASS = Units.lbsToKilograms(135); // TO CHANGE
     public static final Matter CHASSIS = new Matter(
         new Translation3d(0, 0, Units.inchesToMeters(14)), 
         ROBOT_MASS
@@ -86,17 +86,11 @@ public final class Constants
     public static int lockTimer = 0;
 
     // Enums
-    public enum ScoreLocation {
+    public enum ScoreLocation { // TO CHANGE
         LEFT2, 
         LEFT3, 
         RIGHT2, 
         RIGHT3
-    }
-
-    public final class pid{
-        public static final double kP = 3.19; //heads up changing this will actually explode the robot not joking
-        public static final double kI = 0;
-        public static final double kD = 0.04;
     }
 
     public static DriveConstants DRIVE_CONSTANTS = new DriveConstants(lockTimer, MAX_SPEED, LOOP_TIME, null, null);
