@@ -19,61 +19,57 @@ import java.util.concurrent.Callable;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 
-public class IntakeSubsystem extends SubsystemBase
-{
+public class IntakeSubsystem extends SubsystemBase {
     /**
      * This refers to how many rotations the pivotMotor must do
      * before intake does a (hypithetical) full rotation
+     * 
      * @see 100:15 ratio, subject to change
      */
     private final double pivotRatio = 100 / 15;
-    
+
     private final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
     private final SparkMax intakeMotor = new SparkMax(Constants.INTAKE_CONSTANTS.intakeMotorID(), MotorType.kBrushless);
 
     private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
     private final SparkMaxConfig pivotConfig = new SparkMaxConfig();
 
-    /**Constrains the velocity of the intake*/
-    private final Constraints velocityConstraints;
+    /** Constrains the velocity of the intake */
+    private final Constraints pidConstraints;
     private static ProfiledPIDController PIDpivotController;
 
-    /**Relitive Encoder */
+    /** Relitive Encoder */
     private final RelativeEncoder encoder;
 
-    public IntakeSubsystem ()
-    {
+    public IntakeSubsystem() {
         // Initiate velocity and acceleration constrainst & PID controller
-        velocityConstraints = new Constraints(1, 1);
-        PIDpivotController = new ProfiledPIDController
-            (
-            Constants.INTAKE_CONSTANTS.PID().kP(),
-            Constants.INTAKE_CONSTANTS.PID().kI(),
-            Constants.INTAKE_CONSTANTS.PID().kD(),
-            velocityConstraints
-            );
-        
+        pidConstraints = new Constraints(1, 1);
+        PIDpivotController = new ProfiledPIDController(
+                Constants.INTAKE_CONSTANTS.PID().kP(),
+                Constants.INTAKE_CONSTANTS.PID().kI(),
+                Constants.INTAKE_CONSTANTS.PID().kD(),
+                pidConstraints);
+
         // configure intake motor
         intakeConfig
-            .inverted(false)
-            .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(40)
-            .closedLoopRampRate(0.001);
+                .inverted(false)
+                .idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(40)
+                .closedLoopRampRate(0.001);
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // configure pivot motor
         pivotConfig
-            .inverted(false)
-            .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(40)
-            .closedLoopRampRate(0.001);
-        
+                .inverted(false)
+                .idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(40)
+                .closedLoopRampRate(0.001);
+
         pivotConfig.alternateEncoder
-            .setSparkMaxDataPortConfig()
-            .positionConversionFactor(pivotRatio);
+                .setSparkMaxDataPortConfig()
+                .positionConversionFactor(pivotRatio);
 
         pivotMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
 
         encoder = pivotMotor.getAlternateEncoder();
         encoder.setPosition(0); // zero encoder
@@ -87,10 +83,11 @@ public class IntakeSubsystem extends SubsystemBase
 
     /**
      * Set the intake up or down
-     * @param goalUp TRUE: set the intake to the up position, FALSE: set intake to down/on the ground position
+     * 
+     * @param goalUp TRUE: set the intake to the up position, FALSE: set intake to
+     *               down/on the ground position
      */
-    private void setGoal (boolean goalUp)
-    {
+    private void setGoal(boolean goalUp) {
         // Goal rotation of the intake's REAL PIVOT, not the motor
         double goalRotations;
         if (goalUp)
@@ -104,39 +101,34 @@ public class IntakeSubsystem extends SubsystemBase
         pivotMotor.set(PIDoutput);
     }
 
-
-    private void runIntakeMotor ()
-    {
+    private void runIntakeMotor() {
         intakeMotor.set(1);
     }
 
-    private void stopIntakeMotor ()
-    {
+    private void stopIntakeMotor() {
         intakeMotor.set(0);
     }
 
     /**
      * Start the intake
+     * 
      * @return Command that starts the intake
      */
-    public Command runIntake ()
-    {
+    public Command runIntake() {
         return run(() -> runIntakeMotor());
     }
 
     /**
      * stop the intake
+     * 
      * @return Command that stops the intake
      */
-    public Command stopIntake ()
-    {
+    public Command stopIntake() {
         return run(() -> stopIntakeMotor());
     }
 
-
     @Override
-    public void periodic ()
-    {
-        
+    public void periodic() {
+
     }
 }
