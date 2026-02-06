@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 
@@ -19,9 +20,14 @@ public class Climb extends SubsystemBase
      * but this is a start 
      * - Riley
      */
+    /**
+     * Climb is really not that difficult 
+     * - Nathan
+     */
     private final SparkMax climbMotor = new SparkMax(Constants.CLIMB_CONSTANTS.climbMotorID(), MotorType.kBrushless);
 
-    private final SparkMaxConfig climbMotorConfig = new SparkMaxConfig();
+    private final SparkMaxConfig climbMotorConfig = new SparkMaxConfig(); 
+    public RelativeEncoder climbEncoder = climbMotor.getEncoder();
 
     public Climb ()
     {
@@ -32,25 +38,46 @@ public class Climb extends SubsystemBase
             .closedLoopRampRate(0.001);
         
         climbMotor.configure(climbMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     }
 
-    private void startClimbMotor ()
-    {
-        climbMotor.set(1);
-    }
 
     private void stopClimbMotor ()
     {
         climbMotor.set(0);
+    } 
+    public void extendClimbMotor(){
+            climbMotor.set(-0.2);
+        
+    }
+    public void retractClimbMotor() {
+            climbMotor.set(0.2);
+        
+
+    }
+    public void extendComplete() {
+        if(climbEncoder.getPosition() < 100) {
+            extendClimbMotor();
+        }
+
     }
 
     /**
      * Start the ladder climb
      * @return Command that starts the ladder climb
      */
-    public Command startClimb ()
+    public Command extend ()
     {
-        return run(() -> startClimbMotor());
+        return run(() -> extendClimbMotor());
+    }
+
+     /**
+     * Retract the ladder climb 
+     * @return Command that starts the ladder climb
+     */
+    public Command retract ()
+    {
+        return run(() -> retractClimbMotor());
     }
 
     /**
