@@ -12,13 +12,13 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 
-public class BeltSubsystem extends SubsystemBase
+public class Belt extends SubsystemBase
 {
     private final SparkMax beltMotor = new SparkMax(Constants.BELT_CONSTANTS.beltMotorID(), MotorType.kBrushless);
 
     private final SparkMaxConfig beltMotorConfig = new SparkMaxConfig();
 
-    public BeltSubsystem ()
+    public Belt ()
     {
         beltMotorConfig
             .inverted(false)

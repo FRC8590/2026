@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class Intake extends SubsystemBase {
     /**
      * This refers to how many rotations the pivotMotor must do
      * before intake does a (hypithetical) full rotation
@@ -41,7 +41,7 @@ public class IntakeSubsystem extends SubsystemBase {
     /** Relitive Encoder */
     private final RelativeEncoder encoder;
 
-    public IntakeSubsystem() {
+    public Intake() {
         // Initiate velocity and acceleration constrainst & PID controller
         pidConstraints = new Constraints(1, 1);
         PIDpivotController = new ProfiledPIDController(
@@ -129,6 +129,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+        if (Constants.intakeState == "up")
+            setGoal(true);
+        else if (Constants.intakeState == "down")
+            setGoal(false);
+        else
+            System.err.println("Something went so wrong. intakestate was set as: " + Constants.intakeState);
     }
 }

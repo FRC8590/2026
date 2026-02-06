@@ -12,7 +12,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 
-public class ClimbSubsystem extends SubsystemBase
+public class Climb extends SubsystemBase
 {
     /**
      * Climb will deffinetly be more complicated,
@@ -23,7 +23,7 @@ public class ClimbSubsystem extends SubsystemBase
 
     private final SparkMaxConfig climbMotorConfig = new SparkMaxConfig();
 
-    public ClimbSubsystem ()
+    public Climb ()
     {
         climbMotorConfig
             .inverted(false)

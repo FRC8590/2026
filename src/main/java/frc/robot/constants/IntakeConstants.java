@@ -16,7 +16,7 @@ public record IntakeConstants
     )
     {}
     
-    // please for the love of god, do not froget to change these
+    // please for the love of god, do not forget to change these
     public static final IntakeConstants DEFAULT = new IntakeConstants
     (
         0,

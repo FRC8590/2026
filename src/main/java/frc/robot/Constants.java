@@ -24,6 +24,10 @@ import frc.robot.constants.ShooterConstants;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.BeltConstants;
 import frc.robot.constants.ClimbConstants;
+import frc.robot.subsystems.Belt;
+import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 
@@ -70,20 +74,28 @@ public final class Constants
         new File(Filesystem.getDeployDirectory(), "swerve/neo")
     );
     public static Vision vision;
+    public static Belt belt = new Belt();
+    public static Climb climb = new Climb();
+    public static Intake intake = new Intake();
+    public static Shooter shooter = new Shooter();
 
     public static double scaleFactor = 1;
 
     public static int[] SCORING_IDS = {};
 
     // Constants Records
-    public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
-    public static final IntakeConstants INTAKE_CONSTANTS = IntakeConstants.DEFAULT;
-    public static final BeltConstants BELT_CONSTANTS = BeltConstants.DEFAULT;
-    public static final ShooterConstants SHOOTER_CONSTANTS = ShooterConstants.DEFAULT;
-    public static final ClimbConstants CLIMB_CONSTANTS = ClimbConstants.DEFAULT;
 
+    public static final BeltConstants BELT_CONSTANTS = BeltConstants.DEFAULT;
+    public static final DriveConstants DRIVE_CONSTANTS = DriveConstants.DEFAULT;
+    public static final ClimbConstants CLIMB_CONSTANTS = ClimbConstants.DEFAULT;
+    public static final IntakeConstants INTAKE_CONSTANTS = IntakeConstants.DEFAULT;
+    public static final ShooterConstants SHOOTER_CONSTANTS = ShooterConstants.DEFAULT;
+    public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
     public static final LaserCan laserCan = new LaserCan(8);
-    public static int lockTimer = 0;
+
+
+    /** State of the intake arm. Should be either "down" or "up" */
+    public static String intakeState = "up"; // starting position
 
     // Enums
     public enum ScoreLocation { // TO CHANGE
@@ -93,5 +105,4 @@ public final class Constants
         RIGHT3
     }
 
-    public static DriveConstants DRIVE_CONSTANTS = new DriveConstants(lockTimer, MAX_SPEED, LOOP_TIME, null, null);
 }

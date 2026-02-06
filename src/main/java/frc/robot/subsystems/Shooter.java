@@ -12,14 +12,14 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 
-public class ShooterSubsystem extends SubsystemBase
+public class Shooter extends SubsystemBase
 {
     private final SparkMax frontMotor = new SparkMax(Constants.SHOOTER_CONSTANTS.frontMotorID(), MotorType.kBrushless);
     private final SparkMax backMotor = new SparkMax(Constants.SHOOTER_CONSTANTS.backMotorID(), MotorType.kBrushless);
 
     private final SparkMaxConfig shooterConfig = new SparkMaxConfig();
 
-    public ShooterSubsystem ()
+    public Shooter ()
     {
         shooterConfig
             .inverted(false)
