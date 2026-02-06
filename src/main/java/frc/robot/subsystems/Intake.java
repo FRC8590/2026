@@ -14,8 +14,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
 
-import java.util.concurrent.Callable;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 
@@ -109,6 +107,11 @@ public class Intake extends SubsystemBase {
         intakeMotor.set(0);
     }
 
+    private void updatePivotState (String state)
+    {
+        Constants.intakeState = state;
+    }
+
     /**
      * Start the intake
      * 
@@ -127,6 +130,26 @@ public class Intake extends SubsystemBase {
         return run(() -> stopIntakeMotor());
     }
 
+    /**
+     * pivot the intake up or down
+     * @param state "up" or "down"
+     */
+    public Command pivotIntake (String state)
+    {
+        if (state != "up" && state != "down")
+            System.err.println("Something went so wrong. intake state was attempted to set as: " + state);
+        return run(() -> updatePivotState(state));
+    }
+
+
+    /**
+     * "This method is called periodically by the CommandScheduler.
+     * Useful for updating subsystem-specific state that you don't want to offload to a Command.
+     * Teams should try to be consistent within their own codebases about which responsibilities will be handled by Commands,
+     * and which will be handled here."
+     *
+     * setGoal() is called in periotic so that the motor can be constantly be set to the PID values
+     */
     @Override
     public void periodic() {
         if (Constants.intakeState == "up")
