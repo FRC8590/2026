@@ -1,0 +1,8 @@
+when connected to the robot, open terminal and type:
+> ssh pi@photonvision.local 
+> raspberry
+> sudo shutdown -h now
+
+get into system
+password
+shutdown
