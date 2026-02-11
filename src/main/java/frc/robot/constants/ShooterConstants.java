@@ -9,7 +9,7 @@ public record ShooterConstants
     // please for the love of god, do not forget to change these
     public static final ShooterConstants DEFAULT = new ShooterConstants
     (
-        0,
-        0
+        12,
+        13
     );
 }

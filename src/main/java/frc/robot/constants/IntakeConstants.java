@@ -19,8 +19,8 @@ public record IntakeConstants
     // please for the love of god, do not forget to change these
     public static final IntakeConstants DEFAULT = new IntakeConstants
     (
-        0,
-        0,
+        9,
+        10,
         new IntakePIDConstants(1, 1, 1)
     );
 }

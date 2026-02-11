@@ -1,0 +1,17 @@
+Not used in code, just for keeping track.
+[AS OF 2/11/26]
+Motor ID Assignment:
+0  - Climb
+1  - SWERVE FR Drive
+2  - SWERVE BL Drive
+3  - SWERVE BR Drive
+4  - SWERVE FL Drive
+5  - SWERVE FR Angle
+6  - SWERVE BL Angle
+7  - SWERVE BR Angle
+8  - SWERVE FL Angle
+9  - Intake Pivot
+10 - Intake
+11 - Belt/Agitator
+12 - Shooter Front
+13 - Shooter Back
