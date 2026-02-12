@@ -4,6 +4,7 @@ import frc.robot.Constants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,7 +27,8 @@ public class Intake extends SubsystemBase {
      */
     private final double pivotRatio = 100 / 15;
 
-    private final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
+    // public so we can monitor the pivot motor in the dashboard.
+    public final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
     private final SparkMax intakeMotor = new SparkMax(Constants.INTAKE_CONSTANTS.intakeMotorID(), MotorType.kBrushless);
 
     private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
@@ -62,12 +64,12 @@ public class Intake extends SubsystemBase {
                 .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(40)
                 .closedLoopRampRate(0.001);
-
+        // configure encoder
         pivotConfig.alternateEncoder
                 .setSparkMaxDataPortConfig()
                 .positionConversionFactor(pivotRatio);
 
-        pivotMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         encoder = pivotMotor.getAlternateEncoder();
         encoder.setPosition(0); // zero encoder
@@ -99,48 +101,31 @@ public class Intake extends SubsystemBase {
         pivotMotor.set(PIDoutput);
     }
 
-    private void runIntakeMotor() {
+    private void up () {
         intakeMotor.set(1);
+        Constants.goalUp = true;
     }
 
-    private void stopIntakeMotor() {
+    private void down () {
         intakeMotor.set(0);
+        Constants.goalUp = false;
     }
 
-    private void updatePivotState (String state)
+    /** pivot up the and stop the intake
+     * @return runnable Command
+     */
+    public Command intakeUp ()
     {
-        Constants.intakeState = state;
+        return run(() -> up());
     }
 
-    /**
-     * Start the intake
-     * 
-     * @return Command that starts the intake
+    /** pivot down and start the intake
+     * @return runnable Command
      */
-    public Command runIntake() {
-        return run(() -> runIntakeMotor());
-    }
-
-    /**
-     * stop the intake
-     * 
-     * @return Command that stops the intake
-     */
-    public Command stopIntake() {
-        return run(() -> stopIntakeMotor());
-    }
-
-    /**
-     * pivot the intake up or down
-     * @param state "up" or "down"
-     */
-    public Command pivotIntake (String state)
+    public Command intakeDown ()
     {
-        if (state != "up" && state != "down")
-            System.err.println("Something went so wrong. intake state was attempted to set as: " + state);
-        return run(() -> updatePivotState(state));
+        return run(() -> down());
     }
-
 
     /**
      * "This method is called periodically by the CommandScheduler.
@@ -152,11 +137,8 @@ public class Intake extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        if (Constants.intakeState == "up")
-            setGoal(true);
-        else if (Constants.intakeState == "down")
-            setGoal(false);
-        else
-            System.err.println("Something went so wrong. intakestate was set as: " + Constants.intakeState);
+        setGoal(Constants.goalUp);
+
+        SmartDashboard.putNumber("pivot",Math.random() /*Constants.intake.pivotMotor.getEncoder().getPosition()*/);
     }
 }

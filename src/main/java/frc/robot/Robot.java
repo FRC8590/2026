@@ -164,16 +164,10 @@ public class Robot extends TimedRobot
   @Override
   public void teleopPeriodic()
   {
-
-    m_robotContainer.autoLock();
-
-    //SmartDashboard.putBoolean("Right Camera Enabled", Constants.vision.getEnabled(1));
-
     SmartDashboard.putNumberArray("front left motor temps", Constants.drivebase.getMotorTemperatures()[0]);
     SmartDashboard.putNumberArray("front right motor temps", Constants.drivebase.getMotorTemperatures()[1]);
     SmartDashboard.putNumberArray("back left motor temps", Constants.drivebase.getMotorTemperatures()[2]);
     SmartDashboard.putNumberArray("back right motor temps", Constants.drivebase.getMotorTemperatures()[3]);
-
   }
 
 

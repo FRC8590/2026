@@ -7,12 +7,8 @@ package frc.robot;
 import au.grapplerobotics.LaserCan;
 
 import java.io.File;
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -96,7 +92,7 @@ public final class Constants {
     public static int[] SCORING_IDS = {};
 
     /** State of the intake arm. Should be either "down" or "up" */
-    public static String intakeState = "up"; // starting position
+    public static boolean goalUp = true; // starting position
 
     // Enums
     public enum ScoreLocation { // TO CHANGE
