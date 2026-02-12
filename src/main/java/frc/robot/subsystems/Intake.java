@@ -26,6 +26,7 @@ public class Intake extends SubsystemBase {
      * @see 100:15 ratio, subject to change
      */
     private final double pivotRatio = 100 / 15;
+    private static boolean goalUp = true; // pivot starting position
 
     // public so we can monitor the pivot motor in the dashboard.
     public final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
@@ -103,12 +104,12 @@ public class Intake extends SubsystemBase {
 
     private void up () {
         intakeMotor.set(1);
-        Constants.goalUp = true;
+        goalUp = true;
     }
 
     private void down () {
         intakeMotor.set(0);
-        Constants.goalUp = false;
+        goalUp = false;
     }
 
     /** pivot up the and stop the intake
@@ -137,7 +138,7 @@ public class Intake extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        setGoal(Constants.goalUp);
+        setGoal(goalUp);
 
         SmartDashboard.putNumber("pivot",Math.random() /*Constants.intake.pivotMotor.getEncoder().getPosition()*/);
     }

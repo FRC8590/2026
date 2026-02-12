@@ -89,10 +89,7 @@ public final class Constants {
 
     public static double scaleFactor = 1;
 
-    public static int[] SCORING_IDS = {};
-
-    /** State of the intake arm. Should be either "down" or "up" */
-    public static boolean goalUp = true; // starting position
+    public static int[] SCORING_IDS = {}; // TO DO
 
     // Enums
     public enum ScoreLocation { // TO CHANGE
