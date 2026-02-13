@@ -6,10 +6,10 @@ public record ShooterConstants
         int backMotorID
     )
 {   
-    // please for the love of god, do not froget to change these
+    // please for the love of god, do not forget to change these
     public static final ShooterConstants DEFAULT = new ShooterConstants
     (
-        0,
-        0
+        12,
+        13
     );
 }

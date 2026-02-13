@@ -124,7 +124,8 @@ public class SwerveSubsystem extends SubsystemBase
     swerveDrive.setModuleEncoderAutoSynchronize(false,
                                                 1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
     
-    swerveDrive.pushOffsetsToEncoders();
+    // swerveDrive.pushOffsetsToEncoders(); // DEPRECATED, but might break things if suggested replacement doesn't work
+    swerveDrive.useExternalFeedbackSensor(); // we will see if this destroys things
     if (visionDriveTest)
     {
       setupPhotonVision();
