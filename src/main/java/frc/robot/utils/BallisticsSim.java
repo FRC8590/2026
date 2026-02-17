@@ -231,7 +231,6 @@ public class BallisticsSim {
             }
 
             public EventHandler.Action eventOccurred(double t, double[] y, boolean increasing) {
-                System.out.println(y[0] + "," + y[1] + "," + y[2] + "," + y[3]);
                 if (numCrossed == 0) {
                     numCrossed = 1;
                     return (EventHandler.Action.CONTINUE);
