@@ -197,7 +197,10 @@ public class RobotContainer
       driverXbox.start().onTrue(Commands.runOnce(() -> Constants.drivebase.resetOdometry(new Pose2d(2, 2, new Rotation2d()))));
     } else
     {
-      // Create a default command for the shooter to always run the intake logic
+      Constants.shooter.setDefaultCommand(new ShooterStop());
+      driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
+      driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
+      driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(.5));
   }
 }
 
