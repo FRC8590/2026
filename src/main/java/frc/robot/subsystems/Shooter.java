@@ -32,10 +32,10 @@ public class Shooter extends SubsystemBase
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
-    private void runMotors ()
+    private void runMotors (double speed)
     {
-        frontMotor.set(1);
-        backMotor.set(1);
+        frontMotor.set(speed);
+        backMotor.set(speed);
     }
 
     private void stopMotors ()
@@ -46,11 +46,12 @@ public class Shooter extends SubsystemBase
 
     /**
      * runs both shooter motors at full speed
+     * @param speed number from -1 to 1 for the motors to run at
      * @return Command that sets both motors to full speed
      */
-    public Command runShooter ()
+    public Command runShooter (double speed)
     {
-        return run(() -> runMotors());
+        return run(() -> runMotors(speed));
     }
 
     /**
