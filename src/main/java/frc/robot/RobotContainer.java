@@ -167,7 +167,9 @@ public class RobotContainer {
     driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
     driverXbox.povUp().whileTrue(new IncreaseSpeed());
     driverXbox.povDown().whileTrue(new DecreaseSpeed());
-    driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(Constants.shooterspeed));      
+    // TODO: Peter: Turn this into a command group
+    //driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(Constants.shooterspeed));
+    driverXbox.rightTrigger().toggleOnTrue(Constants.drivebase.aimAtTarget());
   }
 
 
