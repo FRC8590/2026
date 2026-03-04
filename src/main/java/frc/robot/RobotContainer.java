@@ -114,31 +114,6 @@ public class RobotContainer
 
 
   Command driveSetpointGen = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
-
-
-  SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-                                                                   () -> driverXbox.getLeftY() * getSide(), //getSide will invert if on Red side
-                                                                   () -> driverXbox.getLeftX() * getSide())
-                                                               .withControllerRotationAxis(() -> -driverXbox.getRightX())
-                                                               .deadband(Constants.OPERATOR_CONSTANTS.deadband())
-                                                               .scaleTranslation(0.8)
-                                                               .allianceRelativeControl(true);
-  // Derive the heading axis with math!
-  SwerveInputStream driveDirectAngleSim     = driveAngularVelocitySim.copy()
-                                                                     .withControllerHeadingAxis(() -> Math.sin(
-                                                                                                    driverXbox.getRawAxis(
-                                                                                                        2) * Math.PI) * (Math.PI * 2),
-                                                                                                () -> Math.cos(
-                                                                                                    driverXbox.getRawAxis(
-                                                                                                        2) * Math.PI) *
-                                                                                                      (Math.PI * 2))
-                                                                     .headingWhile(true);
-
-  Command driveFieldOrientedDirectAngleSim = Constants.drivebase.driveFieldOriented(driveDirectAngleSim);
-  Command driveFieldOrientedAngularVelocitySim = Constants.drivebase.driveFieldOriented(driveAngularVelocitySim);
-
-  Command driveSetpointGenSim = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -187,21 +162,14 @@ public class RobotContainer
    */
   private void configureBindings()
   {
+    assert(!RobotBase.isSimulation());
     // (Condition) ? Return-On-True : Return-on-False
-    Constants.drivebase.setDefaultCommand(!RobotBase.isSimulation() ?
-                                driveFieldOrientedAnglularVelocity :
-                                driveFieldOrientedAngularVelocitySim);
+    Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
-    if (Robot.isSimulation())
-    {
-      driverXbox.start().onTrue(Commands.runOnce(() -> Constants.drivebase.resetOdometry(new Pose2d(2, 2, new Rotation2d()))));
-    } else
-    {
       Constants.shooter.setDefaultCommand(new ShooterStop());
       driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
       driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
       driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(.5));
-  }
 }
 
   /**

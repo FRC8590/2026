@@ -58,11 +58,9 @@ public class Robot extends TimedRobot
 
     // Constants.visionTimerOffset = Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
 
-    
-
     if (isSimulation())
     {
-      DriverStation.silenceJoystickConnectionWarning(true);
+      throw new RuntimeException("We don't support simulations right now");
     }
 
     m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
