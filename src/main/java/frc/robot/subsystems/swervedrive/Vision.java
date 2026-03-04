@@ -36,7 +36,6 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
 import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -59,10 +58,7 @@ public class Vision {
    * {@link Vision#filterPose}.
    */
   private final double maximumAmbiguity = 0.15;
-  /**
-   * Photon Vision Simulation
-   */
-  public VisionSystemSim visionSim;
+ 
   /**
    * Count of times that the odom thinks we're more than 10meters away from the
    * april tag.
@@ -162,19 +158,6 @@ public class Vision {
    * @param swerveDrive {@link SwerveDrive} instance.
    */
   public void updatePoseEstimation(SwerveDrive swerveDrive) {
-    if (SwerveDriveTelemetry.isSimulation && swerveDrive.getSimulationDriveTrainPose().isPresent()) {
-      /*
-       * In the maple-sim, odometry is simulated using encoder values, accounting for
-       * factors like skidding and drifting.
-       * As a result, the odometry may not always be 100% accurate.
-       * However, the vision system should be able to provide a reasonably accurate
-       * pose estimation, even when odometry is incorrect.
-       * (This is why teams implement vision system to correct odometry.)
-       * Therefore, we must ensure that the actual robot pose is provided in the
-       * simulator when updating the vision simulation during the simulation.
-       */
-      visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
-    }
     for (Cameras camera : Cameras.values()) {
       Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
 
@@ -281,33 +264,6 @@ public class Vision {
     }
     return target;
 
-  }
-
-  /**
-   * Vision simulation.
-   *
-   * @return Vision Simulation
-   */
-  public VisionSystemSim getVisionSim() {
-    return visionSim;
-  }
-
-  /**
-   * Open up the photon vision camera streams on the localhost, assumes running
-   * photon vision on localhost.
-   */
-  private void openSimCameraViews() {
-    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-      // try
-      // {
-      // Desktop.getDesktop().browse(new URI("http://localhost:1182/"));
-      // Desktop.getDesktop().browse(new URI("http://localhost:1184/"));
-      // Desktop.getDesktop().browse(new URI("http://localhost:1186/"));
-      // } catch (IOException | URISyntaxException e)
-      // {
-      // e.printStackTrace();
-      // }
-    }
   }
 
   /**
