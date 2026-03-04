@@ -633,15 +633,4 @@ public class Vision {
     // -1 will never be a valid tag
     return getBestDoubleTagPoseEstimate(tagId, -1);
   }
-
-  // TODO: Delete this
-  public void testVision() {
-    for (Cameras c : Cameras.values()) {
-      PhotonPipelineResult result = c.camera.getLatestResult();
-      for (PhotonTrackedTarget target : result.getTargets()) {
-        System.out.println("April tag seen");
-        System.out.println(target.getFiducialId());
-      }
-    }
-  }
 }
