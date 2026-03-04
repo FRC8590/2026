@@ -298,12 +298,7 @@ public class SwerveSubsystem extends SubsystemBase {
         secondaryId = 26;
       }
 
-      // TODO: Peter: We should choose the closest result if both are present.
-      Optional<Pose2d> result = vision.getBestSingleTagPoseEstimate(primaryId);
-      if (result.isEmpty()) {
-        result = vision.getBestSingleTagPoseEstimate(secondaryId);
-      }
-
+      Optional<Pose2d> result = vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
       if (result.isEmpty()) {
         // Nothing was found :(
         return;
