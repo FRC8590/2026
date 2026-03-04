@@ -77,8 +77,9 @@ public class SwerveSubsystem extends SubsystemBase {
   private final boolean visionDriveTest = true;
 
   /**
-   * PhotonVision class to keep an accurate odometry.
+   * Interface to the cameras.
    */
+  private final Vision vision = Constants.vision;
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -284,19 +285,31 @@ public class SwerveSubsystem extends SubsystemBase {
    *
    * @return A {@link Command} which will run the alignment.
    */
-  public Command aimAtTarget(Cameras camera) {
-
+  public Command aimAtTarget() {
     return run(() -> {
-      Optional<PhotonPipelineResult> resultO = camera.getBestResult();
-      if (resultO.isPresent()) {
-        var result = resultO.get();
-        if (result.hasTargets()) {
-          drive(getTargetSpeeds(0,
-              0,
-              Rotation2d.fromDegrees(result.getBestTarget()
-                  .getYaw()))); // Not sure if this will work, more math may be required.
-        }
+      int primaryId;
+      int secondaryId;
+
+      if (isRedAlliance()) {
+        primaryId = 9;
+        secondaryId = 10;
+      } else {
+        primaryId = 25;
+        secondaryId = 26;
       }
+
+      // TODO: Peter: We should choose the closest result if both are present.
+      Optional<Pose2d> result = vision.getBestSingleTagPoseEstimate(primaryId);
+      if (result.isEmpty()) {
+        result = vision.getBestSingleTagPoseEstimate(secondaryId);
+      }
+
+      if (result.isEmpty()) {
+        // Nothing was found :(
+        return;
+      }
+
+      drive(getTargetSpeeds(0, 0, result.get().getRotation()));
     });
   }
 
