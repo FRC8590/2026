@@ -58,7 +58,7 @@ public class Vision {
    * {@link Vision#filterPose}.
    */
   private final double maximumAmbiguity = 0.15;
- 
+
   /**
    * Count of times that the odom thinks we're more than 10meters away from the
    * april tag.
