@@ -25,7 +25,6 @@ public class Intake extends SubsystemBase {
      * 
      * @see 100:15 ratio, subject to change
      */
-    private final double pivotRatio = 100 / 15;
     private static boolean goalUp = true; // pivot starting position
 
     // public so we can monitor the pivot motor in the dashboard.
@@ -67,8 +66,7 @@ public class Intake extends SubsystemBase {
                 .closedLoopRampRate(0.001);
         // configure encoder
         pivotConfig.alternateEncoder
-                .setSparkMaxDataPortConfig()
-                .positionConversionFactor(pivotRatio);
+                .setSparkMaxDataPortConfig();
 
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
