@@ -90,7 +90,8 @@ public final class Constants {
     public static double scaleFactor = 1;
 
     public static int[] SCORING_IDS = {}; // TO DO
-
+    //Shooter Speed
+    public static double shooterspeed = 0.5;
     // Enums
     public enum ScoreLocation { // TO CHANGE
         LEFT2,

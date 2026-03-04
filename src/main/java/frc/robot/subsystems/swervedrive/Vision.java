@@ -626,4 +626,14 @@ public class Vision {
     return bestPose;
   }
 
+  // TODO: Delete this
+  public void testVision() {
+    for (Cameras c : Cameras.values()) {
+      PhotonPipelineResult result = c.camera.getLatestResult();
+      for (PhotonTrackedTarget target : result.getTargets()) {
+        System.out.println("April tag seen");
+        System.out.println(target.getFiducialId());
+      }
+    }
+  }
 }
