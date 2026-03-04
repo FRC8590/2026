@@ -8,8 +8,16 @@ import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 public class BallisticsSim {
+    // -----CONFIG-----
+    public static final double shooterAngle                 = 45;
+    public static final double findAngleDerivativeStep      = 0.01;
+    public static final double maxTargetingVelocity         = 0.5;
+    public static final double firingSolutionDerivativeStep = 0.01;
+    // ----------------
+
 
     // Earth stats
     // Air density (kg/m^3)
@@ -61,29 +69,43 @@ public class BallisticsSim {
         return (polarToCartesian(coordinate.getX(), coordinate.getY()));
     }
 
-    public static class BallisticsSimResult {
+    public static class BallisticsSimResult2D {
         public Translation2d endPos;
         public Translation2d endVel;
         public double endTime;
         public boolean endReached;
 
-        public BallisticsSimResult(Translation2d endPos, Translation2d endVel, double endTime, boolean endReached) {
+        public BallisticsSimResult2D(Translation2d endPos, Translation2d endVel, double endTime, boolean endReached) {
             this.endPos = endPos;
             this.endVel = endVel;
             this.endTime = endTime;
             this.endReached = endReached;
         }
 
-        public BallisticsSimResult(double[] endPos, double[] endVel, double endTime, boolean endReached) {
+        public BallisticsSimResult2D(double[] endPos, double[] endVel, double endTime, boolean endReached) {
             this.endPos = new Translation2d(endPos[0], endPos[1]);
             this.endVel = new Translation2d(endVel[0], endVel[1]);
             this.endTime = endTime;
             this.endReached = endReached;
         }
 
-        public BallisticsSimResult(double[] y, double endTime, boolean endReached) {
+        public BallisticsSimResult2D(double[] y, double endTime, boolean endReached) {
             this.endPos = new Translation2d(y[0], y[1]);
             this.endVel = new Translation2d(y[2], y[3]);
+            this.endTime = endTime;
+            this.endReached = endReached;
+        }
+    }
+
+    public static class BallisticsSimResult3D {
+        public Translation3d endPos;
+        public Translation3d endVel;
+        public double endTime;
+        public boolean endReached;
+
+        public BallisticsSimResult3D(Translation3d endPos, Translation3d endVel, double endTime, boolean endReached) {
+            this.endPos = endPos;
+            this.endVel = endVel;
             this.endTime = endTime;
             this.endReached = endReached;
         }
@@ -122,7 +144,7 @@ public class BallisticsSim {
      *                 (M)
      * @return
      */
-    public static BallisticsSimResult ODESimulate(Translation2d startPos, Translation2d startVel, double targetX) {
+    public static BallisticsSimResult2D ODESimulate(Translation2d startPos, Translation2d startVel, double targetX) {
         endReached = true;
         endTime = 0;
         // The event handler that will end the integration when the ball passes the X
@@ -182,7 +204,22 @@ public class BallisticsSim {
         integrator.addStepHandler(stepHandler);
         double[] y = new double[] { startPos.getX(), startPos.getY(), startVel.getX(), startVel.getY() };
         integrator.integrate(ode, 0, y, 100, y);
-        return (new BallisticsSimResult(y, endTime, endReached));
+        return (new BallisticsSimResult2D(y, endTime, endReached));
+    }
+
+    public static BallisticsSimResult3D ODESimulate(Translation3d startVel, double targetX) {
+        double angle = Math.atan2(startVel.getZ(), startVel.getY());
+        double transTargetX = Math.hypot(targetX, (startVel.getZ() / startVel.getX()) * targetX);
+        // double velMag = Math.hypot(startVel.getX(), startVel.getZ());
+        BallisticsSimResult2D simResult = ODESimulate(new Translation2d(0, 0),
+                new Translation2d(Math.hypot(startVel.getX(), startVel.getZ()), startVel.getY()), transTargetX);
+        return (new BallisticsSimResult3D(
+                new Translation3d(Math.cos(angle) * simResult.endPos.getX(), simResult.endPos.getY(),
+                        Math.sin(angle) * simResult.endPos.getX()),
+                new Translation3d(Math.cos(angle) * simResult.endVel.getX(), simResult.endVel.getY(),
+                        Math.sin(angle) * simResult.endVel.getX()),
+                simResult.endTime, simResult.endReached));
+
     }
 
     /**
@@ -195,7 +232,7 @@ public class BallisticsSim {
      * @return The speed in meters/second required to send the projectile through
      *         the position
      */
-    public static double targetPositionNaive(Translation2d position, double angle) {
+    public static double findSpeedNaive(Translation2d position, double angle) {
         double a = angle;
         double x = position.getX();
         double y = position.getY();
@@ -209,40 +246,52 @@ public class BallisticsSim {
         return (value <= center + margin && value >= center - margin);
     }
 
-    public static final double shooterAngle = 45;
-    public static final double derivativeStep = 0.01;
+
+    public static BallisticsSimResult3D simulate2D(double currentGuess, Translation3d initialVelocity, double targetX) {
+        Translation2d vel2d = polarToCartesian(currentGuess, shooterAngle);
+        Translation3d vel3d = initialVelocity.plus(new Translation3d(vel2d.getX(), vel2d.getY(), 0));
+        return (ODESimulate(vel3d, targetX));
+    }
 
     /**
      * A function that can determine the necessary initial velocity to send a
      * projectile through a point in space
      * 
-     * @param target The target point (M)
+     * @param target         The target point (M)
      * @param accuracyMargin The margin of accuracy (M)
      * @return The speed required to send the projectile through the point (M/s)
      */
-    public static double targetPosition(Translation2d target, double accuracyMargin) {
+    public static double findSpeed(Translation2d target, double accuracyMargin, Translation3d initialVelocity,
+            double maxVelocity) {
         if ((target.getY() / target.getX()) >= Math.tan(Math.toRadians(shooterAngle))) {
             System.err.println("Invalid target position");
             return (-1);
         }
-        double currentGuess = targetPositionNaive(target, shooterAngle);
-        BallisticsSimResult currentResult = ODESimulate(new Translation2d(0, 0),
-                polarToCartesian(currentGuess, shooterAngle), target.getX());
+        double currentGuess = findSpeedNaive(target, shooterAngle);
+        BallisticsSimResult3D currentResult = simulate2D(currentGuess, initialVelocity, target.getX());
         if (withinMargin(target.getY(), accuracyMargin, currentResult.endPos.getY())) {
             return (currentGuess);
         } else {
-            while (!withinMargin(target.getY(), accuracyMargin, currentResult.endPos.getY())) {
+            while (!withinMargin(target.getY(), accuracyMargin, currentResult.endPos.getY())
+                    && currentGuess <= maxVelocity) {
                 // Use Newton's method to find the correct speed
-                BallisticsSimResult slopeResult = ODESimulate(new Translation2d(0, 0),
-                        polarToCartesian(currentGuess + derivativeStep, shooterAngle), target.getX());
-                double slope = (slopeResult.endPos.getY() - currentResult.endPos.getY()) / derivativeStep;
-                currentGuess = currentGuess - (currentResult.endPos.getY() - target.getY()) / slope;
-                currentResult = ODESimulate(new Translation2d(0, 0), polarToCartesian(currentGuess, shooterAngle),
+                BallisticsSimResult3D slopeResult = simulate2D(currentGuess + findAngleDerivativeStep, initialVelocity,
                         target.getX());
-                double currentError = currentResult.endPos.getY() - target.getY();
-                System.out.println(currentError);
+                double slope = (slopeResult.endPos.getY() - currentResult.endPos.getY()) / findAngleDerivativeStep;
+                currentGuess = currentGuess - (currentResult.endPos.getY() - target.getY()) / slope;
+                currentResult = simulate2D(currentGuess, initialVelocity, target.getX());
+                // Uncomment for debugging
+                // double currentError = currentResult.endPos.getY() - target.getY();
+                // System.out.println(currentError);
             }
             return (currentGuess);
         }
     }
+
+
+    // public static Translation2d firingSolution(Translation3d target, Translation2d robotVelocity, double accuracyMargin) {
+    //     // IN RADIANS, DON'T FORGET
+    //     double currentGuess = Math.atan2(target.getZ(), target.getX());
+    //     
+    // }
 }
