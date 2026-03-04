@@ -129,29 +129,6 @@ public class Vision {
   }
 
   /**
-   * gets closest tag. Might need modification because not sure if the
-   * getBestTarget will return the closest one consistently. It should!
-   * 
-   * @return Closest tag's fiducial id
-   */
-  public int getClosestTag() {
-    for (Cameras c : Cameras.values()) {
-      if (!c.resultsList.isEmpty()) {
-        for (PhotonPipelineResult result : c.resultsList) {
-
-          int tester = result.getBestTarget().getFiducialId();
-          PhotonTrackedTarget targetTest = result.getBestTarget();
-          // change later if needed
-          if (getDistanceFromAprilTag(tester) < 4.5 && targetTest.getYaw() < 20) {
-            return result.getBestTarget().getFiducialId();
-          }
-        }
-      }
-    }
-    return -1;
-  }
-
-  /**
    * Update the pose estimation inside of {@link SwerveDrive} with all of the
    * given poses.
    *
@@ -191,46 +168,6 @@ public class Vision {
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Cameras camera) {
     Optional<EstimatedRobotPose> poseEst = camera.getEstimatedGlobalPose();
     return poseEst;
-  }
-
-  /**
-   * Filter pose via the ambiguity and find best estimate between all of the
-   * camera's throwing out distances more than
-   * 10m for a short amount of time.
-   *
-   * @param pose Estimated robot pose.
-   * @return Could be empty if there isn't a good reading.
-   */
-  @Deprecated(since = "2024", forRemoval = true)
-  private Optional<EstimatedRobotPose> filterPose(Optional<EstimatedRobotPose> pose) {
-    if (pose.isPresent()) {
-      double bestTargetAmbiguity = 1; // 1 is max ambiguity
-      for (PhotonTrackedTarget target : pose.get().targetsUsed) {
-        double ambiguity = target.getPoseAmbiguity();
-        if (ambiguity != -1 && ambiguity < bestTargetAmbiguity) {
-          bestTargetAmbiguity = ambiguity;
-        }
-      }
-      // ambiguity to high dont use estimate
-      if (bestTargetAmbiguity > maximumAmbiguity) {
-        return Optional.empty();
-      }
-
-      // est pose is very far from recorded robot pose
-      if (PhotonUtils.getDistanceToPose(currentPose.get(), pose.get().estimatedPose.toPose2d()) > 1) {
-        longDistangePoseEstimationCount++;
-
-        // if it calculates that were 10 meter away for more than 10 times in a row its
-        // probably right
-        if (longDistangePoseEstimationCount < 10) {
-          return Optional.empty();
-        }
-      } else {
-        longDistangePoseEstimationCount = 0;
-      }
-      return pose;
-    }
-    return Optional.empty();
   }
 
   /**
@@ -429,16 +366,6 @@ public class Vision {
         }
       }
       return Optional.of(bestResult);
-    }
-
-    /**
-     * Get the latest result from the current cache.
-     *
-     * @return Empty optional if nothing is found. Latest result if something is
-     *         there.
-     */
-    public Optional<PhotonPipelineResult> getLatestResult() {
-      return resultsList.isEmpty() ? Optional.empty() : Optional.of(resultsList.get(0));
     }
 
     /**
