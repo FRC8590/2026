@@ -3,25 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.052132530120482,
-        "y": 6.154975903614457
+        "x": 2.0630602409638557,
+        "y": 6.559301204819277
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.325325301204819,
-        "y": 5.859927710843373
+        "x": 2.4455301204819277,
+        "y": 7.018265060240964
       },
       "isLocked": false,
-      "linkedName": "Blue-Shoot-start"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.8280000000000003,
-        "y": 4.69066265060241
+        "x": 3.855204819277109,
+        "y": 7.422590361445783
       },
       "prevControl": {
-        "x": 2.8021226818830254,
-        "y": 4.975313149889143
+        "x": 2.855204819277109,
+        "y": 7.422590361445783
+      },
+      "nextControl": {
+        "x": 4.855204819277109,
+        "y": 7.422590361445783
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.450421686746989,
+        "y": 6.231469879518072
+      },
+      "prevControl": {
+        "x": 6.882180722891566,
+        "y": 7.149397590361444
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -24.102234501161163
+    "rotation": -46.08092418666084
   },
   "reversed": false,
   "folder": "Blue Side Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -24.102234501161163
+    "rotation": 18.43494882292201
   },
   "useDefaultConstraints": true
 }
