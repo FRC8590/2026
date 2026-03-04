@@ -110,8 +110,6 @@ public class RobotContainer {
   // right stick controls the angular velocity of the robot
   Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
-  Command driveSetpointGen = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
