@@ -366,57 +366,7 @@ public class SwerveSubsystem extends SubsystemBase
     return new PathPlannerAuto(pathName);
   }
 
-  /**
-   * Use PathPlanner Path finding to go to a point on the field.
-   *
-   * @param pose Target {@link Pose2d} to go to.
-   * @return PathFinding command
-   */
-  public Command driveToPose(Pose2d pose)
-  {
-
-
-    PathConstraints constraints = new PathConstraints(
-        swerveDrive.getMaximumChassisVelocity(), 3,
-        swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
-
-  
-        
-
-      return new AutoAlignment(
-        constraints,
-        this::getPose,  // robotPoseSupplier
-        this::setChassisSpeeds,  // robotRelativeSpeedsOutput
-        this,  // driveSubsystem
-        pose   // targetPose
-    );
-
-  }
-
-  public Command driveToPose(Pose2d pose, boolean auto)
-  {
-
-
-    PathConstraints constraints = new PathConstraints(
-        swerveDrive.getMaximumChassisVelocity(), 3,
-        swerveDrive.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
-
-  
-        
-
-      return new AutoAlignment(
-        constraints,
-        this::getPose,  // robotPoseSupplier
-        this::setChassisSpeeds,  // robotRelativeSpeedsOutput
-        this,  // driveSubsystem
-        pose   // targetPose
-    );
-
-
-  }
-
-
-
+ 
   /**
    * Drive with {@link SwerveSetpointGenerator} from 254, implemented by PathPlanner.
    *
