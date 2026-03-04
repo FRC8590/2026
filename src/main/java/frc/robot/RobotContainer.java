@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import frc.robot.commands.*;
+import frc.robot.utils.*;
+import frc.robot.Constants;
 
 import swervelib.SwerveInputStream;
 
@@ -43,6 +45,7 @@ public class RobotContainer
 
   //auto list object
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
   //red or blue side object
 
   // The robot's subsystems and commands are defined here...
@@ -200,9 +203,13 @@ public class RobotContainer
       Constants.shooter.setDefaultCommand(new ShooterStop());
       driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
       driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
-      driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(.5));
+      driverXbox.povUp().whileTrue(new IncreaseSpeed());
+      driverXbox.povDown().whileTrue(new DecreaseSpeed());
+      driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(Constants.shooterspeed));
+      
   }
 }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
