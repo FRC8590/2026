@@ -4,6 +4,7 @@ import frc.robot.Constants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,9 +25,10 @@ public class Intake extends SubsystemBase {
      * 
      * @see 100:15 ratio, subject to change
      */
-    private final double pivotRatio = 100 / 15;
+    private static boolean goalUp = true; // pivot starting position
 
-    private final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
+    // public so we can monitor the pivot motor in the dashboard.
+    public final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
     private final SparkMax intakeMotor = new SparkMax(Constants.INTAKE_CONSTANTS.intakeMotorID(), MotorType.kBrushless);
 
     private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
@@ -62,12 +64,11 @@ public class Intake extends SubsystemBase {
                 .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(40)
                 .closedLoopRampRate(0.001);
-
+        // configure encoder
         pivotConfig.alternateEncoder
-                .setSparkMaxDataPortConfig()
-                .positionConversionFactor(pivotRatio);
+                .setSparkMaxDataPortConfig();
 
-        pivotMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         encoder = pivotMotor.getAlternateEncoder();
         encoder.setPosition(0); // zero encoder
@@ -99,64 +100,49 @@ public class Intake extends SubsystemBase {
         pivotMotor.set(PIDoutput);
     }
 
-    private void runIntakeMotor() {
+    private void up() {
         intakeMotor.set(1);
+        goalUp = true;
     }
 
-    private void stopIntakeMotor() {
+    private void down() {
         intakeMotor.set(0);
-    }
-
-    private void updatePivotState (String state)
-    {
-        Constants.intakeState = state;
+        goalUp = false;
     }
 
     /**
-     * Start the intake
+     * pivot up the and stop the intake
      * 
-     * @return Command that starts the intake
+     * @return runnable Command
      */
-    public Command runIntake() {
-        return run(() -> runIntakeMotor());
+    public Command intakeUp() {
+        return run(() -> up());
     }
 
     /**
-     * stop the intake
+     * pivot down and start the intake
      * 
-     * @return Command that stops the intake
+     * @return runnable Command
      */
-    public Command stopIntake() {
-        return run(() -> stopIntakeMotor());
+    public Command intakeDown() {
+        return run(() -> down());
     }
-
-    /**
-     * pivot the intake up or down
-     * @param state "up" or "down"
-     */
-    public Command pivotIntake (String state)
-    {
-        if (state != "up" && state != "down")
-            System.err.println("Something went so wrong. intake state was attempted to set as: " + state);
-        return run(() -> updatePivotState(state));
-    }
-
 
     /**
      * "This method is called periodically by the CommandScheduler.
-     * Useful for updating subsystem-specific state that you don't want to offload to a Command.
-     * Teams should try to be consistent within their own codebases about which responsibilities will be handled by Commands,
+     * Useful for updating subsystem-specific state that you don't want to offload
+     * to a Command.
+     * Teams should try to be consistent within their own codebases about which
+     * responsibilities will be handled by Commands,
      * and which will be handled here."
      *
-     * setGoal() is called in periotic so that the motor can be constantly be set to the PID values
+     * setGoal() is called in periotic so that the motor can be constantly be set to
+     * the PID values
      */
     @Override
     public void periodic() {
-        if (Constants.intakeState == "up")
-            setGoal(true);
-        else if (Constants.intakeState == "down")
-            setGoal(false);
-        else
-            System.err.println("Something went so wrong. intakestate was set as: " + Constants.intakeState);
+        setGoal(goalUp);
+
+        SmartDashboard.putNumber("pivot", Math.random() /* Constants.intake.pivotMotor.getEncoder().getPosition() */);
     }
 }

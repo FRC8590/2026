@@ -1,0 +1,68 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BT-DEPOT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Down"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Activate"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BDEPOT-push in"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BDEPOT-push out"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Deactivate"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BDEPOT-BHUB TOP"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot @ Hub"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "BLUE AUTOS",
+  "choreoAuto": false
+}
