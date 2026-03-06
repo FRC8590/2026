@@ -1,5 +1,7 @@
 package frc.robot.utils;
 
+import java.util.Vector;
+
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.events.EventHandler;
@@ -7,15 +9,21 @@ import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
 
 public class BallisticsSim {
     // -----CONFIG-----
     public static final double shooterAngle                 = 45;
     public static final double findAngleDerivativeStep      = 0.01;
+    public static final int    findAngleMaxIterations       = 100;
     public static final double maxTargetingVelocity         = 0.5;
     public static final double firingSolutionDerivativeStep = 0.01;
+    public static final double firingSolutionErrorNudge     = Math.toRadians(1);
     // ----------------
 
 
@@ -199,8 +207,8 @@ public class BallisticsSim {
         // for this use case, I would appreciate them
         FirstOrderIntegrator integrator = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-10, 1.0e-10);
         FirstOrderDifferentialEquations ode = new BallisticsODE();
-        integrator.addEventHandler(mainEventHandler, 0.1, 1.0e-6, 1000);
-        integrator.addEventHandler(backupEventHandler, 0.1, 1.0e-6, 1000);
+        integrator.addEventHandler(mainEventHandler, 0.1, 1.0e-6, 100);
+        integrator.addEventHandler(backupEventHandler, 0.1, 1.0e-6, 100);
         integrator.addStepHandler(stepHandler);
         double[] y = new double[] { startPos.getX(), startPos.getY(), startVel.getX(), startVel.getY() };
         integrator.integrate(ode, 0, y, 100, y);
@@ -209,6 +217,10 @@ public class BallisticsSim {
 
     public static BallisticsSimResult3D ODESimulate(Translation3d startVel, double targetX) {
         double angle = Math.atan2(startVel.getZ(), startVel.getY());
+        double startVelX = startVel.getX();
+        if(startVelX == 0){
+            startVelX = 0.000001;
+        }
         double transTargetX = Math.hypot(targetX, (startVel.getZ() / startVel.getX()) * targetX);
         // double velMag = Math.hypot(startVel.getX(), startVel.getZ());
         BallisticsSimResult2D simResult = ODESimulate(new Translation2d(0, 0),
@@ -261,8 +273,7 @@ public class BallisticsSim {
      * @param accuracyMargin The margin of accuracy (M)
      * @return The speed required to send the projectile through the point (M/s)
      */
-    public static double findSpeed(Translation2d target, double accuracyMargin, Translation3d initialVelocity,
-            double maxVelocity) {
+    public static double findSpeed(Translation2d target, double accuracyMargin, Translation3d initialVelocity) {
         if ((target.getY() / target.getX()) >= Math.tan(Math.toRadians(shooterAngle))) {
             System.err.println("Invalid target position");
             return (-1);
@@ -273,7 +284,8 @@ public class BallisticsSim {
             return (currentGuess);
         } else {
             while (!withinMargin(target.getY(), accuracyMargin, currentResult.endPos.getY())
-                    && currentGuess <= maxVelocity) {
+                    && currentGuess > maxTargetingVelocity) {
+                
                 // Use Newton's method to find the correct speed
                 BallisticsSimResult3D slopeResult = simulate2D(currentGuess + findAngleDerivativeStep, initialVelocity,
                         target.getX());
@@ -284,14 +296,59 @@ public class BallisticsSim {
                 // double currentError = currentResult.endPos.getY() - target.getY();
                 // System.out.println(currentError);
             }
+
             return (currentGuess);
         }
     }
-
-
-    // public static Translation2d firingSolution(Translation3d target, Translation2d robotVelocity, double accuracyMargin) {
-    //     // IN RADIANS, DON'T FORGET
-    //     double currentGuess = Math.atan2(target.getZ(), target.getX());
-    //     
-    // }
+    // TODO - Come up with better name for this class
+    private static class resultOfCheck {
+        double error;
+        double speed;
+        public resultOfCheck(double error, double speed){
+            this.error = error;
+            this.speed = speed;
+        }
+    }
+    public static resultOfCheck checkFiringSolution(double currentGuess, Translation3d target, Translation2d robotVelocity){
+        Translation3d transTarget = target.rotateBy(new Rotation3d(0, currentGuess, 0));
+        Translation2d target2d = new Translation2d(transTarget.getX(), transTarget.getY());
+        Translation2d transVel = robotVelocity.rotateBy(new Rotation2d(currentGuess));
+        Translation3d transVel3d = new Translation3d(transVel.getX(), 0, transVel.getY());
+        double speed = findSpeed(target2d, 0.01, new Translation3d(transVel.getX(), 0, transVel.getY()));
+        BallisticsSimResult3D simResult = ODESimulate(transVel3d.plus(new Translation3d(Math.cos(shooterAngle) * speed, Math.sin(shooterAngle) * speed, 0)), speed);
+        double error = simResult.endPos.getDistance(transTarget);
+        return(new resultOfCheck(error, speed));
+    }
+    /**
+     * Finds the correct angle and speed to get the fuel to pass through a target point
+     * @param target The position of the target <b>relative to where the ball comes out of the shooter</b>
+     * @param robotVelocity The horizontal velocity of the robot. If the robot is going to do jumps, this function won't work
+     * @param accuracyMargin The acceptable margin of accuracy in meters
+     * @return A {@link Translation2d} containing the speed and angle
+     */
+    public static Translation2d firingSolution(Translation3d target, Translation2d robotVelocity, double accuracyMargin) {
+        // IN RADIANS, DON'T FORGET
+        double currentGuess = Math.atan2(target.getZ(), target.getX());
+        resultOfCheck currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
+        if(Math.abs(currentResult.error) <= accuracyMargin){
+            return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
+        }else{
+            int findSpeedErrs = 0;
+            while(Math.abs(currentResult.error) > accuracyMargin){
+                // Use Newton's method to find the correct angle
+                System.out.println("Slope");
+                resultOfCheck slopeResult = checkFiringSolution(currentGuess + firingSolutionDerivativeStep, target, robotVelocity);
+                if(slopeResult.speed == -1){
+                    findSpeedErrs++;
+                    currentGuess += firingSolutionErrorNudge * findSpeedErrs;
+                }else{
+                    double slope = (slopeResult.error - currentResult.error) / firingSolutionDerivativeStep;
+                    currentGuess = currentGuess - currentResult.error / slope;
+                }
+                System.out.println("Actual");
+                currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
+            }
+            return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
+        }
+    }
 }
