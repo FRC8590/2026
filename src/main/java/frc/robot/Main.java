@@ -4,11 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.utils.BallisticsSim;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what you are doing, do
@@ -28,7 +24,6 @@ public final class Main
    */
   public static void main(String... args)
   {
-    System.out.println(BallisticsSim.firingSolution(new Translation3d(5,2,5), new Translation2d(10,10), 0.1));
-    // RobotBase.startRobot(Robot::new);
+    RobotBase.startRobot(Robot::new);
   }
 }

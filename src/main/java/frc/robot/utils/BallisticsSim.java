@@ -8,6 +8,7 @@ import org.apache.commons.math3.ode.events.EventHandler;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
+import org.opencv.core.Mat;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,7 +23,7 @@ public class BallisticsSim {
     public static final double findAngleDerivativeStep      = 0.01;
     public static final int    findAngleMaxIterations       = 100;
     public static final double maxTargetingVelocity         = 0.5;
-    public static final double firingSolutionDerivativeStep = 0.01;
+    public static final double firingSolutionDerivativeStep = 0.001;
     public static final double firingSolutionErrorNudge     = Math.toRadians(1);
     // ----------------
 
@@ -216,6 +217,7 @@ public class BallisticsSim {
     }
 
     public static BallisticsSimResult3D ODESimulate(Translation3d startVel, double targetX) {
+        
         double angle = Math.atan2(startVel.getZ(), startVel.getY());
         double startVelX = startVel.getX();
         if(startVelX == 0){
@@ -223,6 +225,8 @@ public class BallisticsSim {
         }
         double transTargetX = Math.hypot(targetX, (startVel.getZ() / startVel.getX()) * targetX);
         // double velMag = Math.hypot(startVel.getX(), startVel.getZ());
+        System.out.println("Startvel");
+        System.out.println(startVel);
         BallisticsSimResult2D simResult = ODESimulate(new Translation2d(0, 0),
                 new Translation2d(Math.hypot(startVel.getX(), startVel.getZ()), startVel.getY()), transTargetX);
         return (new BallisticsSimResult3D(
@@ -279,6 +283,9 @@ public class BallisticsSim {
             return (-1);
         }
         double currentGuess = findSpeedNaive(target, shooterAngle);
+        if(Double.isNaN(currentGuess)){
+            currentGuess = 0;
+        }
         BallisticsSimResult3D currentResult = simulate2D(currentGuess, initialVelocity, target.getX());
         if (withinMargin(target.getY(), accuracyMargin, currentResult.endPos.getY())) {
             return (currentGuess);
@@ -336,16 +343,21 @@ public class BallisticsSim {
             int findSpeedErrs = 0;
             while(Math.abs(currentResult.error) > accuracyMargin){
                 // Use Newton's method to find the correct angle
-                System.out.println("Slope");
-                resultOfCheck slopeResult = checkFiringSolution(currentGuess + firingSolutionDerivativeStep, target, robotVelocity);
-                if(slopeResult.speed == -1){
-                    findSpeedErrs++;
-                    currentGuess += firingSolutionErrorNudge * findSpeedErrs;
-                }else{
-                    double slope = (slopeResult.error - currentResult.error) / firingSolutionDerivativeStep;
-                    currentGuess = currentGuess - currentResult.error / slope;
-                }
-                System.out.println("Actual");
+                
+                // System.out.println("Slope");
+                // System.out.println(Math.toDegrees(currentGuess));
+                // resultOfCheck slopeResult = checkFiringSolution(currentGuess + firingSolutionDerivativeStep, target, robotVelocity);
+                // if(slopeResult.speed == -1){
+                    // findSpeedErrs++;
+                    // currentGuess += firingSolutionErrorNudge * findSpeedErrs;
+                // }else{
+                    // double slope = (slopeResult.error - currentResult.error) / firingSolutionDerivativeStep;
+                    // currentGuess = currentGuess - currentResult.error / slope;
+                // }
+                // System.out.println("Actual");
+                // System.out.println(Math.toDegrees(currentGuess));
+                currentGuess += Math.toRadians(1);
+                System.out.println(Math.toDegrees(currentGuess));
                 currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
             }
             return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
