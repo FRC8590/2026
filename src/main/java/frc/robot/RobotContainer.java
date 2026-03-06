@@ -129,7 +129,7 @@ public class RobotContainer {
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
 
-    new IntakeDown().schedule();
+    //new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
     Constants.drivebase.zeroGyroWithAlliance();
@@ -161,12 +161,14 @@ public class RobotContainer {
   private void configureBindings() {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    /*
     Constants.shooter.setDefaultCommand(new ShooterStop());
     driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
     driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
     driverXbox.povUp().whileTrue(new IncreaseSpeed());
     driverXbox.povDown().whileTrue(new DecreaseSpeed());
     driverXbox.rightTrigger().toggleOnTrue(new Shoot());
+    */
   }
 
 

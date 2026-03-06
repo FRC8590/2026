@@ -141,7 +141,7 @@ public class Intake extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        setGoal(goalUp);
+        //setGoal(goalUp);
 
         SmartDashboard.putNumber("pivot", Math.random() /* Constants.intake.pivotMotor.getEncoder().getPosition() */);
     }
