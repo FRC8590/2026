@@ -32,7 +32,7 @@ public class Shooter extends SubsystemBase {
 
     private void runMotors(double speed) {
         frontMotor.set(speed);
-        backMotor.set(speed);
+        backMotor.set(-speed);
     }
 
     private void stopMotors() {
