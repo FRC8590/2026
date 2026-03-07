@@ -161,18 +161,18 @@ public class RobotContainer {
   private void configureBindings() {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    /*
+    
     Constants.shooter.setDefaultCommand(new ShooterStop());
-    driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
-    driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
-    driverXbox.povUp().whileTrue(new IncreaseSpeed());
-    driverXbox.povDown().whileTrue(new DecreaseSpeed());
-    driverXbox.rightTrigger().toggleOnTrue(new Shoot());
-    */
+    //Constants.belt.setDefaultCommand(new BeltStop());
+    //driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
+    //driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
+    //driverXbox.povUp().whileTrue(new IncreaseSpeed());
+    //driverXbox.povDown().whileTrue(new DecreaseSpeed());
+    driverXbox.rightTrigger().whileTrue(new Shoot());
+    driverXbox.rightTrigger().whileFalse(new BeltStop());
+
   }
-
-
-  /**
+/*
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous

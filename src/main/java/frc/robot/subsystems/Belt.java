@@ -19,7 +19,7 @@ public class Belt extends SubsystemBase {
 
     public Belt() {
         beltMotorConfig
-                .inverted(false)
+                .inverted(true)
                 .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(40)
                 .closedLoopRampRate(0.001);
@@ -28,7 +28,7 @@ public class Belt extends SubsystemBase {
     }
 
     private void runMotor() {
-        beltMotor.set(1);
+        beltMotor.set(.5);
     }
 
     private void stopMotor() {

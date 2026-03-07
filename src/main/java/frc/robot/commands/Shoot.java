@@ -12,7 +12,7 @@ import frc.robot.commands.ShooterSetSpeed;
 public class Shoot extends SequentialCommandGroup {
     public Shoot() {
         addCommands(
-            Constants.drivebase.aimAtTarget(),
+            //Constants.drivebase.aimAtTarget(),
             new ShooterSetSpeed(Constants.shooterspeed)
         );
 
