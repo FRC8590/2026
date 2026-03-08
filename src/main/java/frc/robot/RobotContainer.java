@@ -169,8 +169,8 @@ public class RobotContainer {
     //driverXbox.povUp().whileTrue(new IncreaseSpeed());
     //driverXbox.povDown().whileTrue(new DecreaseSpeed());
 
-    driverXbox.rightTrigger().whileTrue(new Shoot());
-    driverXbox.rightTrigger().whileFalse(new BeltStop());
+    driverXbox.rightTrigger().whileTrue(Constants.shooter.runShooter());
+    // driverXbox.rightTrigger().whileFalse(new BeltStop());
 
   }
 /*

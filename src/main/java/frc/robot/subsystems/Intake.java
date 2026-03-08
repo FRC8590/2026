@@ -10,14 +10,12 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 
@@ -39,7 +37,6 @@ public class Intake extends SubsystemBase {
 
     /** Constrains the velocity of the intake */
     private final Constraints pidConstraints;
-    private static ProfiledPIDController PIDpivotController;
 
     /** Relative Encoder */
     private final RelativeEncoder encoder;
@@ -51,9 +48,9 @@ public class Intake extends SubsystemBase {
     private double kv = 0.1;
     private double kcos = 0.45;
     private double kcosratio = 1;
-    private double setPoint = 0.6; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
+    private double setPoint = 0.51; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
                                     // also kcos messing things up
-    private double goalUpRadians = 0.6;
+    private double goalUpRadians = setPoint;
     private double goalDownRadians = -0.05;
     // used for tracking max outputs
     private double maxCurrent = 0; // max amps
@@ -62,11 +59,6 @@ public class Intake extends SubsystemBase {
     public Intake() {
         // Initiate velocity and acceleration constrainst & PID controller
         pidConstraints = new Constraints(1, 1);
-        PIDpivotController = new ProfiledPIDController(
-                Constants.INTAKE_CONSTANTS.PID().kP(),
-                Constants.INTAKE_CONSTANTS.PID().kI(),
-                Constants.INTAKE_CONSTANTS.PID().kD(),
-                pidConstraints);
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -120,27 +112,12 @@ public class Intake extends SubsystemBase {
     /**
      * Set the intake up or down
      * 
-     * @param goalUp TRUE: set the intake to the up position, FALSE: set intake to
-     *               down/on the ground position
+     * @param pointSet rotation, in radians at the encoder, that the pivot motor
+     *                 should go to. 0 is down, 0.5 is up, starts at 0.744 when all
+     *                 the way back
      */
     private void setGoal(double pointSet) {
-        // Goal rotation of the intake's REAL PIVOT, not the motor
-        /**
-         * double goalRotations;
-         * if (goalUp)
-         * goalRotations = 0;
-         * else
-         * goalRotations = 0.25;
-         * 
-         * double PIDoutput = PIDpivotController.calculate(encoder.getPosition(),
-         * goalRotations);
-         * PIDoutput = MathUtil.clamp(PIDoutput, -1, 1); // Clamp the value bc motor can
-         * not go > or < 100%
-         * 
-         * pivotMotor.set(PIDoutput);
-         */
         setPoint = pointSet;
-        // setPoint = pointSet;
     }
 
     private void up() {
@@ -184,6 +161,7 @@ public class Intake extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+        // TODO: uncomment this
+        // pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
     }
 }
