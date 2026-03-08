@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -43,16 +44,21 @@ public class Intake extends SubsystemBase {
     /** Relative Encoder */
     private final RelativeEncoder encoder;
     /** PID */
-    private double p = 0;
+    private double p = 0.4;
     private double i = 0;
     private double d = 0;
     /** FeedForward */
-    private double ks = 0;
-    private double kv = 0;
-    private double ka = 0;
-    private double kcos = 0;
-    private double kcosratio = 0;
-    private double setPoint = 0.25;
+    private double kv = 0.1;
+    private double kcos = 0.45;
+    private double kcosratio = 1;
+    private double setPoint = 0.6; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
+                                    // also kcos messing things up
+    private double goalUpRadians = 0.6;
+    private double goalDownRadians = -0.05;
+    // used for tracking max outputs
+    private double maxCurrent = 0; // max amps
+    private double maxVoltage = 0; // max volts
+
     public Intake() {
         // Initiate velocity and acceleration constrainst & PID controller
         pidConstraints = new Constraints(1, 1);
@@ -61,37 +67,48 @@ public class Intake extends SubsystemBase {
                 Constants.INTAKE_CONSTANTS.PID().kI(),
                 Constants.INTAKE_CONSTANTS.PID().kD(),
                 pidConstraints);
+        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // configure intake motor
         intakeConfig
-                .inverted(false)
+                .inverted(true)
                 .idleMode(IdleMode.kCoast)
-                .smartCurrentLimit(40)
+                .smartCurrentLimit(20)
                 .closedLoopRampRate(0.001);
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // configure pivot motor
         pivotConfig
-                .inverted(false)
+                .inverted(true)
                 .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(40)
-                .closedLoopRampRate(0.001)
-                .closedLoop
-        .pid(p, i, d) // slot 0
-        .feedForward
-            .kS(ks) // slot 0 by default
-            .kV(kv)
-            .kA(ka)
-            .kCos(kcos)
-            .kCosRatio(kcosratio);
+                .smartCurrentLimit(60)
+                .closedLoopRampRate(0.001).closedLoop
+                .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder); // slot 0
+        // configure PID for the closed loop controller
+        pivotConfig.closedLoop
+                .pid(p, i, d).feedForward
+                .kV(kv)
+                .kCos(kcos)
+                .kCosRatio(kcosratio);
+        // .kS(ks)
+        // .kA(ka)
+        // .kG(0)
+        // configure constrainsts(?) for maxMotion
+        pivotConfig.closedLoop.maxMotion
+                // Set MAXMotion parameters for position control. We don't need to pass
+                // a closed loop slot, as it will default to slot 0.
+                .cruiseVelocity(120)
+                .maxAcceleration(20)
+                .allowedProfileError(1);
         // configure encoder
         pivotConfig.alternateEncoder
                 .setSparkMaxDataPortConfig();
 
-        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        pivotMotor.configure(pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         encoder = pivotMotor.getAlternateEncoder();
-        encoder.setPosition(0); // zero encoder
+        encoder.setPosition(0.744); // zero encoder, such that the down position is 0 and the up position is 0.7
     }
 
     /**
@@ -108,27 +125,32 @@ public class Intake extends SubsystemBase {
      */
     private void setGoal(double pointSet) {
         // Goal rotation of the intake's REAL PIVOT, not the motor
-       /**  double goalRotations;
-        if (goalUp)
-            goalRotations = 0;
-        else
-            goalRotations = 0.25;
-
-        double PIDoutput = PIDpivotController.calculate(encoder.getPosition(), goalRotations);
-        PIDoutput = MathUtil.clamp(PIDoutput, -1, 1); // Clamp the value bc motor can not go > or < 100%
-
-        pivotMotor.set(PIDoutput);*/
+        /**
+         * double goalRotations;
+         * if (goalUp)
+         * goalRotations = 0;
+         * else
+         * goalRotations = 0.25;
+         * 
+         * double PIDoutput = PIDpivotController.calculate(encoder.getPosition(),
+         * goalRotations);
+         * PIDoutput = MathUtil.clamp(PIDoutput, -1, 1); // Clamp the value bc motor can
+         * not go > or < 100%
+         * 
+         * pivotMotor.set(PIDoutput);
+         */
         setPoint = pointSet;
+        // setPoint = pointSet;
     }
 
     private void up() {
         intakeMotor.set(0);
-        setGoal(0);
+        setGoal(goalUpRadians);
     }
 
     private void down() {
-        intakeMotor.set(0);
-        setGoal(.25);
+        intakeMotor.set(.3);
+        setGoal(goalDownRadians);
     }
 
     /**
@@ -162,26 +184,6 @@ public class Intake extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        //setGoal(goalUp);
         pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
-        SmartDashboard.putNumber("P",  p);
-        SmartDashboard.putNumber("I",  i);
-        SmartDashboard.putNumber("D",  d);
-        SmartDashboard.putNumber("kS",  ks);
-        SmartDashboard.putNumber("kV",  kv);
-        SmartDashboard.putNumber("kA",  ka);
-        SmartDashboard.putNumber("kCos",  kcos);
-        SmartDashboard.putNumber("kCosRatio",  kcosratio);
-        SmartDashboard.putNumber("EncoderAngle",  encoder.getPosition());
-        SmartDashboard.putNumber("setPoint",  setPoint);
-        p = SmartDashboard.getNumber("P",-1.0);
-        i = SmartDashboard.getNumber("I",-1.0);
-        d = SmartDashboard.getNumber("D",-1.0);
-        ks = SmartDashboard.getNumber("kS",-1.0);
-        kv = SmartDashboard.getNumber("kV",-1.0);
-        ka = SmartDashboard.getNumber("kA",-1.0);
-        kcos = SmartDashboard.getNumber("kCos",-1.0);
-        kcosratio = SmartDashboard.getNumber("kCosRatio",-1.0);
-
     }
 }

@@ -20,7 +20,6 @@ import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.BeltConstants;
 import frc.robot.constants.ClimbConstants;
 import frc.robot.subsystems.Belt;
-import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -83,7 +82,6 @@ public final class Constants {
 
     // Subsystem Instances
     public static Belt belt = new Belt();
-    public static Climb climb = new Climb();
     public static Intake intake = new Intake();
     public static Shooter shooter = new Shooter();
 

@@ -164,10 +164,11 @@ public class RobotContainer {
     
     Constants.shooter.setDefaultCommand(new ShooterStop());
     //Constants.belt.setDefaultCommand(new BeltStop());
-    driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
-    driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
+    driverXbox.a().onTrue(new IntakeUp());
+    driverXbox.b().onTrue(new IntakeDown());
     //driverXbox.povUp().whileTrue(new IncreaseSpeed());
     //driverXbox.povDown().whileTrue(new DecreaseSpeed());
+
     driverXbox.rightTrigger().whileTrue(new Shoot());
     driverXbox.rightTrigger().whileFalse(new BeltStop());
 

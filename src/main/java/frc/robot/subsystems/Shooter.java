@@ -5,33 +5,33 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 
 public class Shooter extends SubsystemBase {
-    private final SparkMax frontMotor = new SparkMax(Constants.SHOOTER_CONSTANTS.frontMotorID(), MotorType.kBrushless);
-    private final SparkMax backMotor = new SparkMax(Constants.SHOOTER_CONSTANTS.backMotorID(), MotorType.kBrushless);
+    private final SparkFlex frontMotor = new SparkFlex(Constants.SHOOTER_CONSTANTS.frontMotorID(), MotorType.kBrushless);
+    private final SparkFlex backMotor = new SparkFlex(Constants.SHOOTER_CONSTANTS.backMotorID(), MotorType.kBrushless);
 
-    private final SparkMaxConfig shooterConfig = new SparkMaxConfig();
+    private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
 
     public Shooter() {
         shooterConfig
-                .inverted(false)
+                .inverted(true)
                 .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(40)
                 .closedLoopRampRate(0.001);
         frontMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        shooterConfig.inverted(true);
+        
+        shooterConfig.inverted(false);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     private void runMotors(double speed) {
-        frontMotor.set(speed);
+        frontMotor.set(-speed);
         backMotor.set(-speed);
     }
 
