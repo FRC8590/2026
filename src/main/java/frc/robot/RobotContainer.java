@@ -163,20 +163,22 @@ public class RobotContainer {
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     
     Constants.shooter.setDefaultCommand(new ShooterStop());
-    //Constants.belt.setDefaultCommand(new BeltStop());
+    Constants.belt.setDefaultCommand(new BeltStop());
     driverXbox.a().onTrue(new IntakeUp());
     driverXbox.b().onTrue(new IntakeDown());
     //driverXbox.povUp().whileTrue(new IncreaseSpeed());
     //driverXbox.povDown().whileTrue(new DecreaseSpeed());
 
     driverXbox.rightTrigger().whileTrue(Constants.shooter.runShooter());
-    // driverXbox.rightTrigger().whileFalse(new BeltStop());
+    driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
+    driverXbox.rightTrigger().whileFalse(new BeltStop());
 
   }
 /*
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
-   * @return the command to run in autonomous
+   * @ret
+   * urn the command to run in autonomous
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
