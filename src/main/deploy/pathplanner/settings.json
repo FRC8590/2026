@@ -3,16 +3,12 @@
   "robotLength": 0.8636,
   "holonomicMode": true,
   "pathFolders": [
-    "Blue Side Paths",
-    "JGT Paths",
-    "Red Side Paths"
+    "RED PATHS",
+    "BLUE PATHS"
   ],
   "autoFolders": [
-    "4 Coral Behind [BLUE]",
-    "4 Coral Blitz [BLUE]",
-    "4 Coral Over [BLUE]",
-    "4 Coral Under [BLUE]",
-    "Test Paths"
+    "BLUE AUTOS",
+    "RED AUTOS"
   ],
   "defaultMaxVel": 4.5,
   "defaultMaxAccel": 3.3,

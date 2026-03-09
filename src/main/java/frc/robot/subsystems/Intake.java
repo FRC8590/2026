@@ -25,7 +25,6 @@ public class Intake extends SubsystemBase {
      * 
      * @see 100:15 ratio, subject to change
      */
-    private final double pivotRatio = 100 / 15;
     private static boolean goalUp = true; // pivot starting position
 
     // public so we can monitor the pivot motor in the dashboard.
@@ -67,8 +66,7 @@ public class Intake extends SubsystemBase {
                 .closedLoopRampRate(0.001);
         // configure encoder
         pivotConfig.alternateEncoder
-                .setSparkMaxDataPortConfig()
-                .positionConversionFactor(pivotRatio);
+                .setSparkMaxDataPortConfig();
 
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -102,44 +100,49 @@ public class Intake extends SubsystemBase {
         pivotMotor.set(PIDoutput);
     }
 
-    private void up () {
+    private void up() {
         intakeMotor.set(1);
         goalUp = true;
     }
 
-    private void down () {
+    private void down() {
         intakeMotor.set(0);
         goalUp = false;
     }
 
-    /** pivot up the and stop the intake
+    /**
+     * pivot up the and stop the intake
+     * 
      * @return runnable Command
      */
-    public Command intakeUp ()
-    {
+    public Command intakeUp() {
         return run(() -> up());
     }
 
-    /** pivot down and start the intake
+    /**
+     * pivot down and start the intake
+     * 
      * @return runnable Command
      */
-    public Command intakeDown ()
-    {
+    public Command intakeDown() {
         return run(() -> down());
     }
 
     /**
      * "This method is called periodically by the CommandScheduler.
-     * Useful for updating subsystem-specific state that you don't want to offload to a Command.
-     * Teams should try to be consistent within their own codebases about which responsibilities will be handled by Commands,
+     * Useful for updating subsystem-specific state that you don't want to offload
+     * to a Command.
+     * Teams should try to be consistent within their own codebases about which
+     * responsibilities will be handled by Commands,
      * and which will be handled here."
      *
-     * setGoal() is called in periotic so that the motor can be constantly be set to the PID values
+     * setGoal() is called in periotic so that the motor can be constantly be set to
+     * the PID values
      */
     @Override
     public void periodic() {
         setGoal(goalUp);
 
-        SmartDashboard.putNumber("pivot",Math.random() /*Constants.intake.pivotMotor.getEncoder().getPosition()*/);
+        SmartDashboard.putNumber("pivot", Math.random() /* Constants.intake.pivotMotor.getEncoder().getPosition() */);
     }
 }
