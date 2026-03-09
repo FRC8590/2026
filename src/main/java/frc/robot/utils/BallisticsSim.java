@@ -15,13 +15,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 
 public class BallisticsSim {
     // -----CONFIG-----
     public static final double shooterAngle                 = 45;
-    public static final double findAngleDerivativeStep      = 0.01;
-    public static final int    findAngleMaxIterations       = 100;
+    public static final double findSpeedDerivativeStep      = 0.01;
+    public static final int    findSpeedMaxIterations       = 100;
+    public static final double findSpeedMaxSpeed            = 100;
     public static final double maxTargetingVelocity         = 0.5;
     public static final double firingSolutionDerivativeStep = 0.001;
     public static final double firingSolutionErrorNudge     = Math.toRadians(1);
@@ -43,6 +45,12 @@ public class BallisticsSim {
     private static final double mass = 0.21;
     // Ball coefficient of drag (unitless)
     private static final double dragCoeff = 0.471;
+
+    // Bot stats
+    private static final double wheelDiameter = Units.inchesToMeters(3);
+    private static final double maxRPM = 6784;
+    private static final double maxRPS = maxRPM/60;
+
 
     // Basic functions
     /**
@@ -209,7 +217,7 @@ public class BallisticsSim {
         FirstOrderIntegrator integrator = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-10, 1.0e-10);
         FirstOrderDifferentialEquations ode = new BallisticsODE();
         integrator.addEventHandler(mainEventHandler, 0.1, 1.0e-6, 100);
-        integrator.addEventHandler(backupEventHandler, 0.1, 1.0e-6, 100);
+        // integrator.addEventHandler(backupEventHandler, 0.1, 1.0e-6, 100);
         integrator.addStepHandler(stepHandler);
         double[] y = new double[] { startPos.getX(), startPos.getY(), startVel.getX(), startVel.getY() };
         integrator.integrate(ode, 0, y, 100, y);
@@ -221,12 +229,12 @@ public class BallisticsSim {
         double angle = Math.atan2(startVel.getZ(), startVel.getY());
         double startVelX = startVel.getX();
         if(startVelX == 0){
-            startVelX = 0.000001;
+            System.err.println("NaN in ODESimulate");
         }
         double transTargetX = Math.hypot(targetX, (startVel.getZ() / startVel.getX()) * targetX);
         // double velMag = Math.hypot(startVel.getX(), startVel.getZ());
-        System.out.println("Startvel");
-        System.out.println(startVel);
+        // System.out.println("Startvel");
+        // System.out.println(startVel);
         BallisticsSimResult2D simResult = ODESimulate(new Translation2d(0, 0),
                 new Translation2d(Math.hypot(startVel.getX(), startVel.getZ()), startVel.getY()), transTargetX);
         return (new BallisticsSimResult3D(
@@ -284,6 +292,7 @@ public class BallisticsSim {
         }
         double currentGuess = findSpeedNaive(target, shooterAngle);
         if(Double.isNaN(currentGuess)){
+            System.out.println("NaN");
             currentGuess = 0;
         }
         BallisticsSimResult3D currentResult = simulate2D(currentGuess, initialVelocity, target.getX());
@@ -294,23 +303,27 @@ public class BallisticsSim {
                     && currentGuess > maxTargetingVelocity) {
                 
                 // Use Newton's method to find the correct speed
-                BallisticsSimResult3D slopeResult = simulate2D(currentGuess + findAngleDerivativeStep, initialVelocity,
+                BallisticsSimResult3D slopeResult = simulate2D(currentGuess + findSpeedDerivativeStep, initialVelocity,
                         target.getX());
-                double slope = (slopeResult.endPos.getY() - currentResult.endPos.getY()) / findAngleDerivativeStep;
+                double slope = (slopeResult.endPos.getY() - currentResult.endPos.getY()) / findSpeedDerivativeStep;
                 currentGuess = currentGuess - (currentResult.endPos.getY() - target.getY()) / slope;
                 currentResult = simulate2D(currentGuess, initialVelocity, target.getX());
                 // Uncomment for debugging
                 // double currentError = currentResult.endPos.getY() - target.getY();
                 // System.out.println(currentError);
+                if(currentGuess > findSpeedMaxSpeed){
+                    System.err.println("Invalid target position ");
+                    return(-1);
+                }
             }
 
             return (currentGuess);
         }
     }
     // TODO - Come up with better name for this class
-    private static class resultOfCheck {
-        double error;
-        double speed;
+    public static class resultOfCheck {
+        public double error;
+        public double speed;
         public resultOfCheck(double error, double speed){
             this.error = error;
             this.speed = speed;
@@ -319,10 +332,10 @@ public class BallisticsSim {
     public static resultOfCheck checkFiringSolution(double currentGuess, Translation3d target, Translation2d robotVelocity){
         Translation3d transTarget = target.rotateBy(new Rotation3d(0, currentGuess, 0));
         Translation2d target2d = new Translation2d(transTarget.getX(), transTarget.getY());
-        Translation2d transVel = robotVelocity.rotateBy(new Rotation2d(currentGuess));
+        Translation2d transVel = robotVelocity.rotateBy(new Rotation2d(-currentGuess));
         Translation3d transVel3d = new Translation3d(transVel.getX(), 0, transVel.getY());
         double speed = findSpeed(target2d, 0.01, new Translation3d(transVel.getX(), 0, transVel.getY()));
-        BallisticsSimResult3D simResult = ODESimulate(transVel3d.plus(new Translation3d(Math.cos(shooterAngle) * speed, Math.sin(shooterAngle) * speed, 0)), speed);
+        BallisticsSimResult3D simResult = ODESimulate(transVel3d.plus(new Translation3d(Math.cos(Math.toRadians(shooterAngle)) * speed, Math.sin(Math.toRadians(shooterAngle)) * speed, 0)), transTarget.getX());
         double error = simResult.endPos.getDistance(transTarget);
         return(new resultOfCheck(error, speed));
     }
@@ -346,20 +359,21 @@ public class BallisticsSim {
                 
                 // System.out.println("Slope");
                 // System.out.println(Math.toDegrees(currentGuess));
-                // resultOfCheck slopeResult = checkFiringSolution(currentGuess + firingSolutionDerivativeStep, target, robotVelocity);
-                // if(slopeResult.speed == -1){
-                    // findSpeedErrs++;
-                    // currentGuess += firingSolutionErrorNudge * findSpeedErrs;
-                // }else{
-                    // double slope = (slopeResult.error - currentResult.error) / firingSolutionDerivativeStep;
-                    // currentGuess = currentGuess - currentResult.error / slope;
-                // }
+                resultOfCheck slopeResult = checkFiringSolution(currentGuess + firingSolutionDerivativeStep, target, robotVelocity);
+                if(slopeResult.speed == -1){
+                    findSpeedErrs++;
+                    currentGuess += firingSolutionErrorNudge * findSpeedErrs;
+                }else{
+                    double slope = (slopeResult.error - currentResult.error) / firingSolutionDerivativeStep;
+                    currentGuess = currentGuess - currentResult.error / slope;
+                }
                 // System.out.println("Actual");
                 // System.out.println(Math.toDegrees(currentGuess));
-                currentGuess += Math.toRadians(1);
-                System.out.println(Math.toDegrees(currentGuess));
                 currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
+                // currentGuess += Math.toRadians(1);
+
             }
+            // currentGuess -= Math.toRadians(1);
             return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
         }
     }
