@@ -3,15 +3,10 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -26,7 +21,6 @@ public class Intake extends SubsystemBase {
      * 
      * @see 100:15 ratio, subject to change
      */
-    private static boolean goalUp = true; // pivot starting position
 
     // public so we can monitor the pivot motor in the dashboard.
     public final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
@@ -34,9 +28,6 @@ public class Intake extends SubsystemBase {
 
     private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
     private final SparkMaxConfig pivotConfig = new SparkMaxConfig();
-
-    /** Constrains the velocity of the intake */
-    private final Constraints pidConstraints;
 
     /** Relative Encoder */
     private final RelativeEncoder encoder;
@@ -52,13 +43,8 @@ public class Intake extends SubsystemBase {
                                     // also kcos messing things up
     private double goalUpRadians = setPoint;
     private double goalDownRadians = -0.05;
-    // used for tracking max outputs
-    private double maxCurrent = 0; // max amps
-    private double maxVoltage = 0; // max volts
 
     public Intake() {
-        // Initiate velocity and acceleration constrainst & PID controller
-        pidConstraints = new Constraints(1, 1);
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -148,20 +134,9 @@ public class Intake extends SubsystemBase {
         return run(() -> down());
     }
 
-    /**
-     * "This method is called periodically by the CommandScheduler.
-     * Useful for updating subsystem-specific state that you don't want to offload
-     * to a Command.
-     * Teams should try to be consistent within their own codebases about which
-     * responsibilities will be handled by Commands,
-     * and which will be handled here."
-     *
-     * setGoal() is called in periotic so that the motor can be constantly be set to
-     * the PID values
-     */
     @Override
     public void periodic() {
-        // TODO: uncomment this
+        // TODO: uncomment this so the intake pivots
         // pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
     }
 }

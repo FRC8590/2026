@@ -3,12 +3,7 @@ package frc.robot.utils;
 
 import java.util.ArrayList;
 
-import javax.tools.Diagnostic;
-
-import com.ctre.phoenix6.signals.MagnetHealthValue;
-
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.Timer;
 
 public class BallisticsSim {
 
@@ -25,8 +20,8 @@ public class BallisticsSim {
     private static final double area = Math.pow(diameter / 2, 2) * Math.PI;
     // Ball mass (kg)
     private static final double mass = 0.21;
-    // Ball weight (N)
-    private static final double weight = mass * g;
+    // Ball weight (N) [TODO: Note from Riley: This is never used]
+    // private static final double weight = mass * g;
     // Ball coefficient of drag (unitless)
     private static final double dragCoeff = 0.471;
 
