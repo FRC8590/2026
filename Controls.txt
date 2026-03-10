@@ -1,0 +1,22 @@
+Right Trigger (H): Auto Shoot
+Left Trigger (H): Intake Run
+Right Bumper (H): Neutral Shoot
+Left Bumper (T): Intake Down
+M2 (H): Far Shoot
+A (H): Reverse Action
+Left Stick: Move
+Right Stick: Rotate
+
+
+
+UNUSED:
+M1
+X
+Y
+B
+DUp
+DDown
+DLeft
+DRight
+Left Stick Down
+Right Stick Down

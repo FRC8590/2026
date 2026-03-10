@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -110,8 +109,6 @@ public class RobotContainer {
   // right stick controls the angular velocity of the robot
   Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
-  Command driveSetpointGen = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -132,7 +129,7 @@ public class RobotContainer {
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
 
-    new IntakeDown().schedule();
+    //new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
     Constants.drivebase.zeroGyroWithAlliance();
@@ -164,19 +161,24 @@ public class RobotContainer {
   private void configureBindings() {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    
     Constants.shooter.setDefaultCommand(new ShooterStop());
-    driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
-    driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
-    driverXbox.povUp().whileTrue(new IncreaseSpeed());
-    driverXbox.povDown().whileTrue(new DecreaseSpeed());
-    driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(Constants.shooterspeed));      
+    Constants.belt.setDefaultCommand(new BeltStop());
+    driverXbox.a().onTrue(new IntakeUp());
+    driverXbox.b().onTrue(new IntakeDown());
+    //driverXbox.povUp().whileTrue(new IncreaseSpeed());
+    //driverXbox.povDown().whileTrue(new DecreaseSpeed());
+
+    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(0));
+    driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
+    driverXbox.rightTrigger().whileFalse(new BeltStop());
+
   }
-
-
-  /**
+/*
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
-   * @return the command to run in autonomous
+   * @ret
+   * urn the command to run in autonomous
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous

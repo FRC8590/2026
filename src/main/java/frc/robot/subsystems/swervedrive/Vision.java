@@ -592,31 +592,34 @@ public class Vision {
    * @return Optional containing the estimated robot pose, or empty if the tag
    *         isn't visible
    */
-  public Optional<Pose2d> getBestSingleTagPoseEstimate(int tagId) {
+  public Optional<Pose2d> getBestDoubleTagPoseEstimate(int firstTagId, int secondTagId) {
     Optional<Pose2d> bestPose = Optional.empty();
     double bestDistance = Double.MAX_VALUE;
 
+    int usedId = -1;
     for (Cameras camera : Cameras.values()) {
       // Get the target from this camera if it exists
       Optional<PhotonTrackedTarget> targetOpt = Optional.empty();
       for (PhotonPipelineResult result : camera.resultsList) {
         if (result.hasTargets()) {
           for (PhotonTrackedTarget target : result.getTargets()) {
-            if (target.getFiducialId() == tagId) {
+            int tagId = target.getFiducialId();
+            if (tagId == firstTagId || tagId == secondTagId) {
               double distance = target.getBestCameraToTarget().getTranslation().getNorm();
               // Only process if this is closer than the current best
               if (distance < bestDistance) {
                 bestDistance = distance;
                 targetOpt = Optional.of(target);
+                usedId = tagId;
               }
-              break;
+              // break;
             }
           }
         }
       }
 
       if (targetOpt.isPresent()) {
-        Optional<Pose2d> pose = getSingleTagPoseEstimate(tagId, camera);
+        Optional<Pose2d> pose = getSingleTagPoseEstimate(usedId, camera);
         if (pose.isPresent()) {
           bestPose = pose;
         }
@@ -626,14 +629,8 @@ public class Vision {
     return bestPose;
   }
 
-  // TODO: Delete this
-  public void testVision() {
-    for (Cameras c : Cameras.values()) {
-      PhotonPipelineResult result = c.camera.getLatestResult();
-      for (PhotonTrackedTarget target : result.getTargets()) {
-        System.out.println("April tag seen");
-        System.out.println(target.getFiducialId());
-      }
-    }
+  public Optional<Pose2d> getBestSingleTagPoseEstimate(int tagId) {
+    // -1 will never be a valid tag
+    return getBestDoubleTagPoseEstimate(tagId, -1);
   }
 }
