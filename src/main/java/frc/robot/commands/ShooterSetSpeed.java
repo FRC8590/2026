@@ -10,7 +10,7 @@ public class ShooterSetSpeed extends ParallelCommandGroup {
      */
     public ShooterSetSpeed(double speed) {
         addCommands(
-                Constants.shooter.runShooter(speed),
+                Constants.shooter.shooterSetGoalRPM(speed),
                 Constants.belt.runBelt());
 
         addRequirements(getRequirements());

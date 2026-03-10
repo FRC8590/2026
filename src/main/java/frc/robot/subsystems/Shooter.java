@@ -22,7 +22,7 @@ public class Shooter extends SubsystemBase {
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
 
     /**cV: cruiseVelocity. mA: maxAcceleration */
-    private double setSpeed = 0, p, i, d, kA, kV, cV, mA;
+    private double goalRPM = 0, p, i, d, kA, kV, cV, mA;
 
     public Shooter() {
         p = 0.0001;
@@ -52,43 +52,31 @@ public class Shooter extends SubsystemBase {
         shooterConfig.inverted(true);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        SmartDashboard.putNumber("Shooter Speed", setSpeed);
+        SmartDashboard.putNumber("Shooter Speed", goalRPM);
     }
 
-    private void runMotors(double speed) {
-        setSpeed = speed;
-    }
-
-    private void stopMotors() {
-        setSpeed = 0;
+    private void setGoalRPM (double rpm) {
+        goalRPM = rpm;
     }
 
     /**
-     * Run the shooter motors at the speed set on the SmartDashboard
-     * 
-     * @return a command tht runs the shooter motors at a set speed
+     * Change the goal RPM of the shooter. If rpm is greater than 6784, goal RPM is not changed.
+     * @param rpm rotations per minute you want the shooter to run at
+     * @return command that sets the goal RPM
      */
-    public Command runShooter() {
-        return run(() -> runMotors(setSpeed));
+    public Command shooterSetGoalRPM (double rpm)
+    {
+        if (rpm > 6784) return run(()->setGoalRPM(goalRPM));
+        return run(()->setGoalRPM (rpm));
     }
 
     /**
-     * runs both shooter motors at full speed
-     * 
-     * @param speed target RPM for the shooter motors
-     * @return Command that sets both motors to full speed
+     * Sets the goal RPM to zero
+     * @return command that sets the goal RPM to 0
      */
-    public Command runShooter(double speed) {
-        return run(() -> runMotors(speed));
-    }
-
-    /**
-     * stops both shooter motors
-     * 
-     * @return Command that stops both motors
-     */
-    public Command stopShooter() {
-        return run(() -> stopMotors());
+    public Command shooterStop ()
+    {
+        return run(()->setGoalRPM(0));
     }
 
     /**
@@ -97,11 +85,11 @@ public class Shooter extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        frontMotor.getClosedLoopController().setSetpoint(setSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
-        backMotor.getClosedLoopController().setSetpoint(setSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
+        frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
+        backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
 
-        setSpeed = SmartDashboard.getNumber("Shooter Speed", setSpeed);
-        SmartDashboard.putNumber("Set Shooter Speed ", setSpeed);
+        goalRPM = SmartDashboard.getNumber("Shooter Speed", goalRPM);
+        SmartDashboard.putNumber("Set Shooter Speed ", goalRPM);
         SmartDashboard.putNumber("Front Motor RPM ", frontMotor.getEncoder().getVelocity());
         SmartDashboard.putNumber("Back Motor RPM ", backMotor.getEncoder().getVelocity());
     }

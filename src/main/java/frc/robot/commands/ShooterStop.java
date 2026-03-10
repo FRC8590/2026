@@ -9,7 +9,7 @@ public class ShooterStop extends SequentialCommandGroup {
      */
     public ShooterStop() {
         addCommands(
-                Constants.shooter.stopShooter(),
+                Constants.shooter.shooterStop(),
                 Constants.belt.stopBelt());
 
         addRequirements(getRequirements());

@@ -169,7 +169,7 @@ public class RobotContainer {
     //driverXbox.povUp().whileTrue(new IncreaseSpeed());
     //driverXbox.povDown().whileTrue(new DecreaseSpeed());
 
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.runShooter());
+    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(0));
     driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
     driverXbox.rightTrigger().whileFalse(new BeltStop());
 
