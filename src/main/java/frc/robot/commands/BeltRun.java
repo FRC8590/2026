@@ -3,14 +3,12 @@ package frc.robot.commands;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
-public class StopBelt extends ParallelCommandGroup
-{
-    public StopBelt()
-    {
+public class BeltRun extends ParallelCommandGroup {
+    public BeltRun() {
         addCommands(
-                Constants.belt.stopBelt());
+                Constants.belt.runBelt());
 
         addRequirements(getRequirements());
-        
     }
+
 }
