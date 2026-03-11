@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -112,7 +113,7 @@ public class Intake extends SubsystemBase {
     }
 
     private void down() {
-        intakeMotor.set(.3);
+        intakeMotor.set(.8);
         setGoal(goalDownRadians);
     }
 

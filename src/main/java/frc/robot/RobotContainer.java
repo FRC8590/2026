@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -123,7 +124,7 @@ public class RobotContainer {
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
 
-    //new IntakeDown().schedule();
+    // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
     Constants.drivebase.zeroGyroWithAlliance();
@@ -155,20 +156,12 @@ public class RobotContainer {
   private void configureBindings() {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    
-    Constants.shooter.setDefaultCommand(new ShooterStop());
-    Constants.belt.setDefaultCommand(new BeltStop());
-    driverXbox.a().onTrue(new IntakeUp());
-    driverXbox.b().onTrue(new IntakeDown());
-    //driverXbox.povUp().whileTrue(new IncreaseSpeed());
-    //driverXbox.povDown().whileTrue(new DecreaseSpeed());
 
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(0));
-    driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
-    driverXbox.rightTrigger().whileFalse(new BeltStop());
+
 
   }
-/*
+
+  /*
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @ret
