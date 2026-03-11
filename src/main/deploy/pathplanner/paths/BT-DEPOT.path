@@ -16,16 +16,32 @@
     },
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 1.9688730385164046,
+        "y": 6.499814550641941
       },
       "prevControl": {
-        "x": 1.793089743589745,
-        "y": 6.035051282051281
+        "x": 2.5449237381488325,
+        "y": 6.787839900458154
+      },
+      "nextControl": {
+        "x": 1.4254493580599141,
+        "y": 6.228102710413696
+      },
+      "isLocked": false,
+      "linkedName": "BDEPOT"
+    },
+    {
+      "anchor": {
+        "x": 1.0114122681883024,
+        "y": 6.034022824536376
+      },
+      "prevControl": {
+        "x": 1.3736947218259623,
+        "y": 6.228102710413695
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BDEPOT"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,7 +58,7 @@
   },
   "goalEndState": {
     "velocity": 0.5,
-    "rotation": 0.0
+    "rotation": -177.52540277090546
   },
   "reversed": false,
   "folder": "BLUE PATHS",

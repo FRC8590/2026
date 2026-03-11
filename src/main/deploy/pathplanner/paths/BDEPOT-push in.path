@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 1.9688730385164046,
+        "y": 6.499814550641941
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.862351367800871,
-        "y": 6.02546303149555
+        "x": 0.985534950071326,
+        "y": 6.13753209700428
       },
       "isLocked": false,
       "linkedName": "BDEPOT"
@@ -20,8 +20,8 @@
         "y": 6.0
       },
       "prevControl": {
-        "x": 1.1414704473807453,
-        "y": 5.948131141145053
+        "x": 1.309001426533523,
+        "y": 6.344550641940086
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -173.41633113377213
   },
   "reversed": false,
   "folder": "BLUE PATHS",
   "idealStartingState": {
     "velocity": 0.5,
-    "rotation": 0.0
+    "rotation": -177.52540277090546
   },
   "useDefaultConstraints": false
 }

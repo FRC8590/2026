@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 1.9688730385164046,
+        "y": 6.499814550641941
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8744871794871805,
-        "y": 5.930397435897436
+        "x": 2.693360218003585,
+        "y": 6.430211986539376
       },
       "isLocked": false,
       "linkedName": "BDEPOT"
@@ -48,7 +48,7 @@
   "folder": "BLUE PATHS",
   "idealStartingState": {
     "velocity": 1.5,
-    "rotation": 0.0
+    "rotation": -177.52540277090546
   },
   "useDefaultConstraints": true
 }

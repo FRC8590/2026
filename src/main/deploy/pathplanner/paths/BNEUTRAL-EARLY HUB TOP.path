@@ -69,7 +69,7 @@
   "folder": "BLUE PATHS",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -9.385753024648256
   },
   "useDefaultConstraints": true
 }

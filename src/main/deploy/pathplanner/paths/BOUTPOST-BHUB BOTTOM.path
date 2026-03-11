@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.4791025641025657,
-        "y": 0.6628205128205127
+        "x": 0.8302710413694718,
+        "y": 0.71623395149786
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4222892574512607,
-        "y": 0.8238078874993029
+        "x": 1.4513266761768897,
+        "y": 0.5350927246790309
       },
       "isLocked": false,
       "linkedName": "BOUTPOST"
     },
     {
       "anchor": {
-        "x": 3.1768461538461548,
-        "y": 3.267538461538462
+        "x": 2.0465049928673325,
+        "y": 1.9971611982881607
       },
       "prevControl": {
-        "x": 2.808253342000886,
-        "y": 3.2072769638766077
+        "x": 1.9178810540104507,
+        "y": 1.7827879668600248
+      },
+      "nextControl": {
+        "x": 2.5779312695284577,
+        "y": 2.8828716593900348
+      },
+      "isLocked": false,
+      "linkedName": "BHUB BOTTOM"
+    },
+    {
+      "anchor": {
+        "x": 3.1768461538461548,
+        "y": 3.5368616262482178
+      },
+      "prevControl": {
+        "x": 2.7840085592011405,
+        "y": 3.0840085592011417
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BHUB BOTTOM"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -48,7 +64,7 @@
   "folder": "BLUE PATHS",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -178.68085859408285
   },
   "useDefaultConstraints": true
 }

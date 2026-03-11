@@ -63,15 +63,15 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.6213017751479321,
-      "rotationDegrees": -129.25590087832614
+      "rotationDegrees": -154.20446365040493
     },
     {
       "waypointRelativePos": 1.0,
-      "rotationDegrees": 180.0
+      "rotationDegrees": -177.6607716066561
     },
     {
       "waypointRelativePos": 2.0,
-      "rotationDegrees": 90.0
+      "rotationDegrees": 67.80624846794518
     }
   ],
   "constraintZones": [
@@ -101,7 +101,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -9.385753024648256
   },
   "reversed": false,
   "folder": "BLUE PATHS",
