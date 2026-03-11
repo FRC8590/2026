@@ -5,26 +5,20 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import frc.robot.commands.*;
-import frc.robot.utils.*;
-import frc.robot.Constants;
-
 import swervelib.SwerveInputStream;
 
 /**
@@ -110,8 +104,6 @@ public class RobotContainer {
   // right stick controls the angular velocity of the robot
   Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
-  Command driveSetpointGen = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -132,7 +124,7 @@ public class RobotContainer {
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
 
-    new IntakeDown().schedule();
+    // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
     Constants.drivebase.zeroGyroWithAlliance();
@@ -164,19 +156,16 @@ public class RobotContainer {
   private void configureBindings() {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    Constants.shooter.setDefaultCommand(new ShooterStop());
-    driverXbox.leftTrigger().toggleOnTrue(new IntakeDown());
-    driverXbox.leftTrigger().toggleOnFalse(new IntakeUp());
-    driverXbox.povUp().whileTrue(new IncreaseSpeed());
-    driverXbox.povDown().whileTrue(new DecreaseSpeed());
-    driverXbox.rightTrigger().toggleOnTrue(new ShooterSetSpeed(Constants.shooterspeed));      
+
+
+
   }
 
-
-  /**
+  /*
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
-   * @return the command to run in autonomous
+   * @ret
+   * urn the command to run in autonomous
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous

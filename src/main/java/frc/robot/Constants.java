@@ -20,7 +20,6 @@ import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.BeltConstants;
 import frc.robot.constants.ClimbConstants;
 import frc.robot.subsystems.Belt;
-import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -57,7 +56,7 @@ public final class Constants {
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     // Robot Physical Properties
-    public static final double ROBOT_MASS = Units.lbsToKilograms(135); // TO CHANGE
+    public static final double ROBOT_MASS = Units.lbsToKilograms(135); //TODO: record 2026 mass
     public static final Matter CHASSIS = new Matter(
             new Translation3d(0, 0, Units.inchesToMeters(14)),
             ROBOT_MASS);
@@ -78,26 +77,23 @@ public final class Constants {
     public static final IntakeConstants INTAKE_CONSTANTS = IntakeConstants.DEFAULT;
     public static final ShooterConstants SHOOTER_CONSTANTS = ShooterConstants.DEFAULT;
     public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
-    public static final LaserCan laserCan = new LaserCan(8);
-    public static Vision vision;
+
 
     // Subsystem Instances
+    public static Vision vision;
     public static Belt belt = new Belt();
-    public static Climb climb = new Climb();
     public static Intake intake = new Intake();
-    public static Shooter shooter = new Shooter();
+    public static Shooter shooter = new Shooter(); 
+    public static final LaserCan laserCan = new LaserCan(8);
 
+    // As far as I can tell, it's the speed of the robot?
     public static double scaleFactor = 1;
 
-    public static int[] SCORING_IDS = {}; // TO DO
-    //Shooter Speed
-    public static double shooterspeed = 0.5;
-    // Enums
-    public enum ScoreLocation { // TO CHANGE
+    public enum ScoreLocation
+    {
         LEFT2,
         LEFT3,
         RIGHT2,
         RIGHT3
     }
-
 }

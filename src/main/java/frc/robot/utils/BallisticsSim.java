@@ -18,6 +18,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Timer;
+import java.util.ArrayList;
+
+import edu.wpi.first.math.geometry.Translation2d;
 
 public class BallisticsSim {
     // -----CONFIG-----
@@ -46,6 +49,8 @@ public class BallisticsSim {
     private static final double area = Math.pow(diameter / 2, 2) * Math.PI;
     // Ball mass (kg)
     private static final double mass = 0.21;
+    // Ball weight (N) [TODO: Note from Riley: This is never used]
+    // private static final double weight = mass * g;
     // Ball coefficient of drag (unitless)
     private static final double dragCoeff = 0.471;
 
