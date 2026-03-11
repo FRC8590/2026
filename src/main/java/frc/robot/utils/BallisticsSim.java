@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -30,6 +31,8 @@ public class BallisticsSim {
     public static final double maxTargetingVelocity         = 0.5;
     public static final double firingSolutionDerivativeStep = 0.001;
     public static final double firingSolutionErrorNudge     = Math.toRadians(1);
+    public static final double firingSolutionMaxTime        = 1;
+    public static final boolean verbose                     = true;
     // ----------------
 
 
@@ -233,7 +236,7 @@ public class BallisticsSim {
         
         double angle = Math.atan2(startVel.getZ(), startVel.getY());
         double startVelX = startVel.getX();
-        if(startVelX == 0){
+        if(startVelX == 0 && verbose){
             System.err.println("NaN in ODESimulate");
         }
         double transTargetX = Math.hypot(targetX, (startVel.getZ() / startVel.getX()) * targetX);
@@ -291,12 +294,12 @@ public class BallisticsSim {
      * @return The speed required to send the projectile through the point (M/s)
      */
     public static double findSpeed(Translation2d target, double accuracyMargin, Translation3d initialVelocity) {
-        if ((target.getY() / target.getX()) >= Math.tan(Math.toRadians(shooterAngle))) {
+        if ((target.getY() / target.getX()) >= Math.tan(Math.toRadians(shooterAngle)) && verbose) {
             System.err.println("Invalid target position");
             return (-1);
         }
         double currentGuess = findSpeedNaive(target, shooterAngle);
-        if(Double.isNaN(currentGuess)){
+        if(Double.isNaN(currentGuess) && verbose){
             System.out.println("NaN");
             currentGuess = 0;
         }
@@ -316,7 +319,7 @@ public class BallisticsSim {
                 // Uncomment for debugging
                 // double currentError = currentResult.endPos.getY() - target.getY();
                 // System.out.println(currentError);
-                if(currentGuess > findSpeedMaxSpeed){
+                if(currentGuess > findSpeedMaxSpeed && verbose){
                     System.err.println("Invalid target position ");
                     return(-1);
                 }
@@ -352,6 +355,7 @@ public class BallisticsSim {
      * @return A {@link Translation2d} containing the speed and angle
      */
     public static Translation2d firingSolution(Translation3d target, Translation2d robotVelocity, double accuracyMargin) {
+        double startTime = (double)System.currentTimeMillis() / 1000;
         // IN RADIANS, DON'T FORGET
         double currentGuess = Math.atan2(target.getZ(), target.getX());
         resultOfCheck currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
@@ -359,7 +363,8 @@ public class BallisticsSim {
             return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
         }else{
             int findSpeedErrs = 0;
-            while(Math.abs(currentResult.error) > accuracyMargin){
+            boolean timedOut = false;
+            while(Math.abs(currentResult.error) > accuracyMargin && !timedOut){
                 // Use Newton's method to find the correct angle
                 
                 // System.out.println("Slope");
@@ -375,11 +380,24 @@ public class BallisticsSim {
                 // System.out.println("Actual");
                 // System.out.println(Math.toDegrees(currentGuess));
                 currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
+                if(((double)System.currentTimeMillis() / 1000) - startTime > firingSolutionMaxTime){
+                    timedOut = true;
+                }
                 // currentGuess += Math.toRadians(1);
-
             }
+
             // currentGuess -= Math.toRadians(1);
-            return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
+            System.out.println((System.currentTimeMillis() / 1000) - startTime);
+            if(timedOut){
+                System.err.println("firingSolution timed out");
+                return(new Translation2d(-1,-1));
+            }else{
+                return(new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
+            }
         }
+    }
+
+    public static void dummy(){
+        System.out.println("Dummy function run");
     }
 }
