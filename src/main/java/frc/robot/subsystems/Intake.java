@@ -122,14 +122,29 @@ public class Intake extends SubsystemBase {
 
     private void up() {
         intakeMotor.set(0);
-        setGoal(goalUpRadians);
+        //setGoal(goalUpRadians);
     }
+
 
     private void down() {
         intakeMotor.set(.3);
-        setGoal(goalDownRadians);
+        //setGoal(goalDownRadians);
+    }
+    private void run()
+    {
+       intakeMotor.set(.3); 
+    }
+    private void stop()
+    {
+       intakeMotor.set(0); 
     }
 
+    public Command intakeRun() {
+        return run(() -> run());
+    }
+    public Command intakeStop() {
+        return run(() -> stop());
+    }
     /**
      * pivot up the and stop the intake
      * 
