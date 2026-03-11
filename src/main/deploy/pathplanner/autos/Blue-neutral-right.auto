@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Blue-Right-Neutral-Enter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeUp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Blue-Right-Neutral-Leave"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Blue-Shoot-Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShooterSetSpeed"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShooterStop"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Blue Paths",
+  "choreoAuto": false
+}

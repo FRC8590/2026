@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.525235378031383,
-        "y": 5.7364336661911555
+        "x": 2.052132530120482,
+        "y": 6.154975903614457
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.2147075606276743,
-        "y": 5.904636233951498
+        "x": 1.7416047127167733,
+        "y": 6.3231784713748
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Blue-Shoot-start"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Blue-depost-end"
     }
   ],
   "rotationTargets": [],
@@ -45,10 +45,10 @@
     "rotation": 178.89829388479365
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Blue Side Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 155.55604521958344
+    "rotation": -24.102234501161163
   },
   "useDefaultConstraints": true
 }

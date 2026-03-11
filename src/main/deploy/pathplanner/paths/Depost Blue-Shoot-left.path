@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.052132530120482,
-        "y": 6.154975903614457
+        "x": 0.8173323823109842,
+        "y": 5.943452211126962
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.325325301204819,
-        "y": 5.859927710843373
+        "x": 1.0905251533953213,
+        "y": 5.648404018355878
       },
       "isLocked": false,
-      "linkedName": "Blue-Shoot-start"
+      "linkedName": "Blue-depost-end"
     },
     {
       "anchor": {
@@ -48,7 +48,7 @@
   "folder": "Blue Side Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -24.102234501161163
+    "rotation": 178.89829388479365
   },
   "useDefaultConstraints": true
 }

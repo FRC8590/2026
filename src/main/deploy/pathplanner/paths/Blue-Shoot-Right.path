@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.052132530120482,
-        "y": 6.154975903614457
+        "x": 0.9047228915662651,
+        "y": 0.669265060240964
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.325325301204819,
-        "y": 5.859927710843373
+        "x": 1.9047228915662648,
+        "y": 0.669265060240964
       },
       "isLocked": false,
-      "linkedName": "Blue-Shoot-start"
+      "linkedName": "Blue-outpost-end"
     },
     {
       "anchor": {
-        "x": 2.8280000000000003,
-        "y": 4.69066265060241
+        "x": 2.675012048192771,
+        "y": 2.887590361445783
       },
       "prevControl": {
-        "x": 2.8021226818830254,
-        "y": 4.975313149889143
+        "x": 2.9372771084337352,
+        "y": 2.352132530120481
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -24.102234501161163
+    "rotation": 25.463345061871692
   },
   "reversed": false,
   "folder": "Blue Side Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -24.102234501161163
+    "rotation": -178.9390883097358
   },
   "useDefaultConstraints": true
 }
