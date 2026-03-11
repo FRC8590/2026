@@ -60,6 +60,15 @@ public class Shooter extends SubsystemBase {
     }
 
     /**
+     * If the average RPM of the front and back shooter motors is at or above the goal RPM
+     * @return true if average RPM is at or above goal RPM
+     */
+    public boolean atRPM ()
+    {
+        return (frontMotor.getEncoder().getVelocity() + frontMotor.getEncoder().getVelocity()) / 2 >= goalRPM;
+    }
+
+    /**
      * Change the goal RPM of the shooter. If rpm is greater than 6784, goal RPM is not changed.
      * @param rpm rotations per minute you want the shooter to run at
      * @return command that sets the goal RPM
