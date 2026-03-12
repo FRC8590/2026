@@ -39,7 +39,6 @@ public class Belt extends SubsystemBase {
     }
 
     private void runMotor() {
-        System.out.println("start moter");
         beltMotor.set(1);
         indexMotor.set(1);
     }
@@ -51,7 +50,6 @@ public class Belt extends SubsystemBase {
     }
 
     private void stopMotor() {
-        System.out.println("stop motor");
         beltMotor.set(0);
         indexMotor.set(0);
     }
