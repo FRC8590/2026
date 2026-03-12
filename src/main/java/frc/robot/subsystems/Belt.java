@@ -28,8 +28,8 @@ public class Belt extends SubsystemBase {
     }
 
     private void runMotor() {
-        if (Constants.shooter.atRPM())
-            beltMotor.set(1);
+        System.out.println("start moter");
+        beltMotor.set(1);
     }
 
     private void runMotorReversed ()
@@ -38,6 +38,7 @@ public class Belt extends SubsystemBase {
     }
 
     private void stopMotor() {
+        System.out.println("stop motor");
         beltMotor.set(0);
     }
 
