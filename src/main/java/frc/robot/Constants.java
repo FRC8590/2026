@@ -80,7 +80,7 @@ public final class Constants {
 
 
     // Subsystem Instances
-    public static Vision vision;
+    public static Vision vision = new Vision(() -> drivebase.getPose());
     public static Belt belt = new Belt();
     public static Intake intake = new Intake();
     public static Shooter shooter = new Shooter(); 

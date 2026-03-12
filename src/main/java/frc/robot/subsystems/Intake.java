@@ -115,7 +115,7 @@ public class Intake extends SubsystemBase {
 
     private void down() {
         intakeMotor.set(.3);
-        //setGoal(goalDownRadians);
+        setGoal(goalDownRadians);
     }
     private void run()
     {
@@ -152,7 +152,6 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // TODO: uncomment this so the intake pivots
-        // pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+        pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
     }
 }

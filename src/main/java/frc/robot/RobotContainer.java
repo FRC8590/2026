@@ -155,13 +155,14 @@ public class RobotContainer {
    */
   private void configureBindings() {
     assert (!RobotBase.isSimulation());
-    //Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     
     // Constants.shooter.setDefaultCommand(new ShooterStop());
     // Constants.belt.setDefaultCommand(new BeltStop());
     // Constants.intake.setDefaultCommand(new IntakeStop());
     // Constants.intake.setDefaultCommand(new IntakeUp());
     driverXbox.leftBumper().whileTrue(new IntakeDown());
+    driverXbox.leftTrigger().whileFalse(new IntakeStop());
     driverXbox.leftTrigger().whileTrue(new IntakeRun());
 
     driverXbox.rightBumper().whileTrue(Constants.belt.runBelt());
@@ -170,8 +171,12 @@ public class RobotContainer {
     driverXbox.a().whileTrue(Constants.belt.runBeltReversed());
     driverXbox.a().whileFalse(new BeltStop());
 
+    driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
+
+    driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
+    driverXbox.rightTrigger().whileFalse(new BeltStop());
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(500));
+    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(4000));
 
     //driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
     //driverXbox.rightTrigger().whileFalse(new BeltStop());

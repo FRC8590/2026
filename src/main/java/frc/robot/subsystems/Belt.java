@@ -40,7 +40,7 @@ public class Belt extends SubsystemBase {
 
     private void runMotor() {
         beltMotor.set(1);
-        indexMotor.set(1);
+        indexMotor.set(0.5);
     }
 
     private void runMotorReversed ()

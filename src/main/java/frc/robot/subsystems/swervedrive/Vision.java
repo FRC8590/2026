@@ -21,7 +21,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -67,10 +66,6 @@ public class Vision {
    * Current pose from the pose estimator using wheel odometry.
    */
   private Supplier<Pose2d> currentPose;
-  /**
-   * Field from {@link swervelib.SwerveDrive#field}
-   */
-  private Field2d field2d;
 
   public EstimatedRobotPose estimatedVisionPose;
 
@@ -79,11 +74,9 @@ public class Vision {
    *
    * @param currentPose Current pose supplier, should reference
    *                    {@link SwerveDrive#getPose()}
-   * @param field       Current field, should be {@link SwerveDrive#field}
    */
-  public Vision(Supplier<Pose2d> currentPose, Field2d field) {
+  public Vision(Supplier<Pose2d> currentPose) {
     this.currentPose = currentPose;
-    this.field2d = field;
   }
 
   /**
@@ -202,9 +195,6 @@ public class Vision {
 
   }
 
-  /**
-   * Update the {@link Field2d} to include tracked targets/
-   */
   public void updateVisionField() {
 
     List<PhotonTrackedTarget> targets = new ArrayList<PhotonTrackedTarget>();
@@ -224,8 +214,6 @@ public class Vision {
         poses.add(targetPose);
       }
     }
-
-    field2d.getObject("tracked targets").setPoses(poses);
   }
 
   /**
