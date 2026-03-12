@@ -39,14 +39,17 @@ public class Belt extends SubsystemBase {
     }
 
     private void runMotor() {
+        if (Constants.shooter.atRPM())
+        {
         beltMotor.set(1);
         indexMotor.set(0.5);
+        }
     }
 
     private void runMotorReversed ()
     {
         beltMotor.set(-.8);
-        indexMotor.set(-.8);
+        indexMotor.set(-.5);
     }
 
     private void stopMotor() {
