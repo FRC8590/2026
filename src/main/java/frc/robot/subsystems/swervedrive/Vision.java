@@ -240,7 +240,7 @@ public class Vision {
     // This is where the cameras are created, with their name and and position
     // relative to the robot's center
     RIGHT_CAM("right",
-        new Rotation3d(0, 0, Units.degreesToRadians(0)),
+        new Rotation3d(Units.degreesToRadians(90), 0, Units.degreesToRadians(0)),
         new Translation3d(Units.inchesToMeters(5),
             Units.inchesToMeters(-1.5),
             Units.inchesToMeters(12.5)),
