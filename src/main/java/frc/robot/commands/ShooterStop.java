@@ -10,7 +10,8 @@ public class ShooterStop extends ParallelCommandGroup {
     public ShooterStop() {
         addCommands(
                 Constants.shooter.shooterStop(),
-                Constants.belt.stopBelt());
+                Constants.belt.beltStop(),
+                Constants.belt.indexerStop());
 
         addRequirements(getRequirements());
     }
