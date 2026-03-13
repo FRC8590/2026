@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -161,25 +162,24 @@ public class RobotContainer {
     // Constants.belt.setDefaultCommand(new BeltStop());
     // Constants.intake.setDefaultCommand(new IntakeStop());
     // Constants.intake.setDefaultCommand(new IntakeUp());
-    driverXbox.leftBumper().whileTrue(new IntakeDown());
+    // driverXbox.leftBumper().whileTrue(new IntakeDown());
     driverXbox.leftTrigger().whileFalse(new IntakeStop());
     driverXbox.leftTrigger().whileTrue(new IntakeRun());
 
-    driverXbox.rightBumper().whileTrue(Constants.belt.runBelt());
-    driverXbox.rightBumper().whileFalse(new BeltStop());
+    driverXbox.povRight().whileTrue(Constants.belt.indexerRun());
+    driverXbox.povRight().whileTrue(Constants.belt.beltRun());
+    driverXbox.povRight().whileFalse(Constants.belt.indexerStop());
+    driverXbox.povRight().whileFalse(Constants.belt.beltStop());
 
-    driverXbox.a().whileTrue(Constants.belt.runBeltReversed());
-    driverXbox.a().whileFalse(new BeltStop());
+    driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
+    driverXbox.a().whileFalse(Constants.belt.beltStop());
+    driverXbox.a().whileFalse(Constants.belt.indexerRunReversed());
+    driverXbox.a().whileFalse(Constants.belt.indexerStop());
 
     driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
 
-    driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
-    driverXbox.rightTrigger().whileFalse(new BeltStop());
+    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(4000));
-
-    //driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
-    //driverXbox.rightTrigger().whileFalse(new BeltStop());
   }
 
   /*

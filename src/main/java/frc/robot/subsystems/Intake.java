@@ -40,9 +40,9 @@ public class Intake extends SubsystemBase {
     private double kv = 0.1;
     private double kcos = 0.45;
     private double kcosratio = 1;
-    private double setPoint = 0.51; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
+    private double setPoint = -0.05; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
                                     // also kcos messing things up
-    private double goalUpRadians = setPoint;
+    private double goalUpRadians = 0.51;
     private double goalDownRadians = -0.05;
 
     public Intake() {
@@ -114,12 +114,12 @@ public class Intake extends SubsystemBase {
 
 
     private void down() {
-        intakeMotor.set(.3);
+        intakeMotor.set(1);
         setGoal(goalDownRadians);
     }
     private void run()
     {
-       intakeMotor.set(.3); 
+       intakeMotor.set(1); 
     }
     private void stop()
     {
