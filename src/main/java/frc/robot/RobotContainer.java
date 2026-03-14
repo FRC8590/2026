@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import frc.robot.commands.*;
 import swervelib.SwerveInputStream;
@@ -129,6 +129,12 @@ public class RobotContainer {
 
     // Initialize with proper alliance orientation
     Constants.drivebase.zeroGyroWithAlliance();
+    NamedCommands.registerCommand("Shoot", new ShooterSetSpeed(2000));
+    NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
+    NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
+    NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
+    NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+    
   }
 
   public int getSide() {
@@ -176,7 +182,7 @@ public class RobotContainer {
     driverXbox.a().whileFalse(Constants.belt.indexerRunReversed());
     driverXbox.a().whileFalse(Constants.belt.indexerStop());
 
-    driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
+    //driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
 
     driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
