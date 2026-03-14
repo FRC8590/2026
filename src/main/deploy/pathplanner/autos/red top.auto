@@ -26,13 +26,7 @@
         {
           "type": "named",
           "data": {
-            "name": "IndexerRun"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "BeltRun"
+            "name": "BeltAndIndexerRun"
           }
         }
       ]
