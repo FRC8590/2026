@@ -145,6 +145,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
     NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
     NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+    NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
     
   }
 
@@ -183,8 +184,8 @@ public class RobotContainer {
     driverXbox.leftTrigger().whileFalse(new IntakeStop());
     driverXbox.leftTrigger().whileTrue(new IntakeRun());
 
-    driverXbox.povUp().whileTrue(Constants.belt.beltAndIndexerRun());
-    driverXbox.povUp().whileFalse(Constants.belt.beltAndIndexerRun());
+    driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
+    driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
 
     driverXbox.b().whileTrue(Constants.intake.intakeUp());
     driverXbox.x().whileTrue(Constants.intake.intakeDown());

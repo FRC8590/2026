@@ -31,7 +31,7 @@ public class Shooter extends SubsystemBase {
         kA = 0;
         kV = 0.0019;
         cV = 6700;
-        mA = 2000; //todo increase
+        mA = 4000; //todo increase
 
         shooterConfig // configure motors
             .inverted(false)
