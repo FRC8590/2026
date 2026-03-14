@@ -52,6 +52,8 @@ public final class Constants {
     // 7.62, // Field length (meters)
     // 3.6068 // Field width (meters)
     // );
+    public static final boolean ennableIntakeArm = true;
+
 
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
@@ -80,7 +82,7 @@ public final class Constants {
 
 
     // Subsystem Instances
-    public static Vision vision;
+    public static Vision vision = new Vision(() -> drivebase.getPose());
     public static Belt belt = new Belt();
     public static Intake intake = new Intake();
     public static Shooter shooter = new Shooter(); 

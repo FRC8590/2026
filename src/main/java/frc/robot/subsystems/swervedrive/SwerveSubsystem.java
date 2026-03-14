@@ -116,7 +116,6 @@ public class SwerveSubsystem extends SubsystemBase {
     // suggested replacement doesn't work
     swerveDrive.useExternalFeedbackSensor(); // we will see if this destroys things
     if (visionDriveTest) {
-      setupPhotonVision();
       // Stop the odometry thread if we are using vision that way we can synchronize
       // updates better.
       swerveDrive.stopOdometryThread();
@@ -136,13 +135,6 @@ public class SwerveSubsystem extends SubsystemBase {
         Constants.MAX_SPEED,
         new Pose2d(new Translation2d(Meter.of(7.566), Meter.of(6.19)),
             Rotation2d.fromDegrees(180)));
-  }
-
-  /**
-   * Setup the photon vision class.
-   */
-  public void setupPhotonVision() {
-    Constants.vision = new Vision(swerveDrive::getPose, swerveDrive.field);
   }
 
   @Override

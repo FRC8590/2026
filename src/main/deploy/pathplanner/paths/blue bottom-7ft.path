@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.0,
-        "y": 7.314153846153846
+        "x": 3.57,
+        "y": 0.6628205128205127
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.61648991060912,
-        "y": 7.166050848526538
+        "x": 3.1548398544188663,
+        "y": 1.9020915621635226
       },
       "isLocked": false,
-      "linkedName": "BT"
+      "linkedName": "BB"
     },
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 2.46639999,
+        "y": 4.04
       },
       "prevControl": {
-        "x": 1.793089743589745,
-        "y": 6.035051282051281
+        "x": 2.680729218201722,
+        "y": 3.2588272648392778
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BDEPOT"
+      "linkedName": "BHUB 7FT"
     }
   ],
   "rotationTargets": [],
@@ -41,11 +41,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.5,
+    "velocity": 0,
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "BLUE PATHS",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

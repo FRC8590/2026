@@ -31,13 +31,13 @@ public class Shooter extends SubsystemBase {
         kA = 0;
         kV = 0.0019;
         cV = 6700;
-        mA = 2000;
+        mA = 4000; //todo increase
 
         shooterConfig // configure motors
             .inverted(false)
             .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(40)
-            .closedLoopRampRate(0.001);
+            .smartCurrentLimit(60)
+            .closedLoopRampRate(0.001); //todo look at this
         shooterConfig.closedLoop // configure PID
             .pid(p,i,d);
         shooterConfig.closedLoop.feedForward
@@ -59,13 +59,19 @@ public class Shooter extends SubsystemBase {
         goalRPM = rpm;
     }
 
+    public double distanceToRPM ()
+    {
+        return 0;
+    }
+
     /**
      * If the average RPM of the front and back shooter motors is at or above the goal RPM
      * @return true if average RPM is at or above goal RPM
      */
     public boolean atRPM ()
     {
-        return (frontMotor.getEncoder().getVelocity() + frontMotor.getEncoder().getVelocity()) / 2 >= goalRPM;
+        System.out.println("DEBUG " + goalRPM);
+        return (frontMotor.getEncoder().getVelocity() + backMotor.getEncoder().getVelocity()) / 2 >= goalRPM;
     }
 
     /**

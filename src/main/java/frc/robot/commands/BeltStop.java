@@ -9,7 +9,7 @@ public class BeltStop extends SequentialCommandGroup {
      */
     public BeltStop() {
         addCommands(
-                Constants.belt.stopBelt());
+                Constants.belt.beltStop());
 
         addRequirements(getRequirements());
     }

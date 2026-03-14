@@ -11,13 +11,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "BT-DEPOT"
+                  "pathName": "red top-7ft2.1336"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake Down"
+                  "name": "Shoot"
                 }
               }
             ]
@@ -26,37 +26,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Intake Activate"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BDEPOT-push in"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BDEPOT-push out"
+            "name": "IndexerRun"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Intake Deactivate"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BDEPOT-BHUB TOP"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot @ Hub"
+            "name": "BeltRun"
           }
         }
       ]

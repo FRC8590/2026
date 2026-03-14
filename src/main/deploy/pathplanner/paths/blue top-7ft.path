@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.61648991060912,
-        "y": 7.166050848526538
+        "x": 3.541051021787255,
+        "y": 5.880782825641183
       },
       "isLocked": false,
       "linkedName": "BT"
     },
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 2.46639999,
+        "y": 4.04
       },
       "prevControl": {
-        "x": 1.793089743589745,
-        "y": 6.035051282051281
+        "x": 2.700438509411203,
+        "y": 4.781542802201426
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BDEPOT"
+      "linkedName": "BHUB 7FT"
     }
   ],
   "rotationTargets": [],
@@ -41,11 +41,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.5,
+    "velocity": 0,
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "BLUE PATHS",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

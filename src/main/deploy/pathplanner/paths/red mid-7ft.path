@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.0,
-        "y": 7.314153846153846
+        "x": 12.892421686746989,
+        "y": 5.237048192771084
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.61648991060912,
-        "y": 7.166050848526538
+        "x": 13.193232202209918,
+        "y": 4.922682353463415
       },
       "isLocked": false,
-      "linkedName": "BT"
+      "linkedName": "RM"
     },
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 13.296746987951808,
+        "y": 4.821795180722892
       },
       "prevControl": {
-        "x": 1.793089743589745,
-        "y": 6.035051282051281
+        "x": 13.111139333008389,
+        "y": 5.0207524230563205
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BDEPOT"
+      "linkedName": "RHUB 7FT"
     }
   ],
   "rotationTargets": [],
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.5,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": -147.71113256552948
   },
   "reversed": false,
-  "folder": "BLUE PATHS",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

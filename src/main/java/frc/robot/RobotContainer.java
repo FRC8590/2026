@@ -13,10 +13,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import frc.robot.commands.*;
 import swervelib.SwerveInputStream;
@@ -123,11 +126,27 @@ public class RobotContainer {
         .add("On Red Side?", true)
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
-
+    SmartDashboard.putData("Auto choices", m_chooser);
+     m_chooser.setDefaultOption("red top", "red top");
+     m_chooser.addOption("Do nothing", "nada");
+     m_chooser.addOption("red top", "red top");
+     m_chooser.addOption("red mid", "red mid");
+     m_chooser.addOption("red bot", "red bot");
+     m_chooser.addOption("blue top", "blue top");
+     m_chooser.addOption("blue mid", "blue mid");
+     m_chooser.addOption("blue bot", "blue bot");
+     
     // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
     Constants.drivebase.zeroGyroWithAlliance();
+    NamedCommands.registerCommand("Shoot", new ShooterSetSpeed(2000));
+    NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
+    NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
+    NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
+    NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+    NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+    
   }
 
   public int getSide() {
@@ -157,21 +176,28 @@ public class RobotContainer {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     
-    Constants.shooter.setDefaultCommand(new ShooterStop());
-    Constants.belt.setDefaultCommand(new BeltStop());
-    Constants.intake.setDefaultCommand(new IntakeStop());
-    Constants.intake.setDefaultCommand(new IntakeUp());
-    driverXbox.leftBumper().toggleOnTrue(new IntakeDown());
-    driverXbox.rightBumper().whileTrue(Constants.belt.runBelt());
-    driverXbox.rightBumper().whileFalse(new BeltStop());
-    driverXbox.b().onTrue(new IntakeDown());
-    //driverXbox.povUp().whileTrue(new IncreaseSpeed());
-    //driverXbox.povDown().whileTrue(new DecreaseSpeed());
-    driverXbox.leftTrigger().onTrue(new IntakeRun());
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(0));
-    driverXbox.rightBumper().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
-    driverXbox.rightTrigger().whileTrue(Constants.belt.runBelt());
-    driverXbox.rightTrigger().whileFalse(new BeltStop());
+    // Constants.shooter.setDefaultCommand(new ShooterStop());
+    // Constants.belt.setDefaultCommand(new BeltStop());
+    // Constants.intake.setDefaultCommand(new IntakeStop());
+    // Constants.intake.setDefaultCommand(new IntakeUp());
+    // driverXbox.leftBumper().whileTrue(new IntakeDown());
+    driverXbox.leftTrigger().whileFalse(new IntakeStop());
+    driverXbox.leftTrigger().whileTrue(new IntakeRun());
+
+    driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
+    driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
+
+    driverXbox.b().whileTrue(Constants.intake.intakeUp());
+    driverXbox.x().whileTrue(Constants.intake.intakeDown());
+
+    // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
+    // driverXbox.a().whileFalse(Constants.belt.beltStop());
+    // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
+    // driverXbox.a().whileFalse(Constants.belt.indexerStop());
+    //driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
+
+    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
+    driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
   }
 
   /*
