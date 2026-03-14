@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 12.892421686746989,
+        "y": 5.237048192771084
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 13.193232202209918,
+        "y": 4.922682353463415
+      },
+      "isLocked": false,
+      "linkedName": "RM"
+    },
+    {
+      "anchor": {
+        "x": 13.296746987951808,
+        "y": 4.821795180722892
+      },
+      "prevControl": {
+        "x": 13.111139333008389,
+        "y": 5.0207524230563205
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "RHUB 7FT"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.3,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -147.71113256552948
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
