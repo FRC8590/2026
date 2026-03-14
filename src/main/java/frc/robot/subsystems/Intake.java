@@ -108,13 +108,13 @@ public class Intake extends SubsystemBase {
     }
 
     private void up() {
-        intakeMotor.set(0);
-        //setGoal(goalUpRadians);
+        //intakeMotor.set(0);
+        setGoal(goalUpRadians);
     }
 
 
     private void down() {
-        intakeMotor.set(1);
+        // intakeMotor.set(1);
         setGoal(goalDownRadians);
     }
     private void run()
