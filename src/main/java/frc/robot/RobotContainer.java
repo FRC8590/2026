@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -124,7 +125,15 @@ public class RobotContainer {
         .add("On Red Side?", true)
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
-
+    SmartDashboard.putData("Auto choices", m_chooser);
+     m_chooser.setDefaultOption("red top", "red top");
+     m_chooser.addOption("red top", "red top");
+     m_chooser.addOption("red mid", "red mid");
+     m_chooser.addOption("red bot", "red bot");
+     m_chooser.addOption("blue top", "blue top");
+     m_chooser.addOption("blue mid", "blue mid");
+     m_chooser.addOption("blue bot", "blue bot");
+     
     // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
