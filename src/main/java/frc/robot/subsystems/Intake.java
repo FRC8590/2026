@@ -152,6 +152,7 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+        if (Constants.ennableIntakeArm)
+            pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
     }
 }

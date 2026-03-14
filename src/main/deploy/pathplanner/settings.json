@@ -6,10 +6,7 @@
     "RED PATHS",
     "BLUE PATHS"
   ],
-  "autoFolders": [
-    "BLUE AUTOS",
-    "RED AUTOS"
-  ],
+  "autoFolders": [],
   "defaultMaxVel": 4.5,
   "defaultMaxAccel": 3.3,
   "defaultMaxAngVel": 540.0,

@@ -31,13 +31,13 @@ public class Shooter extends SubsystemBase {
         kA = 0;
         kV = 0.0019;
         cV = 6700;
-        mA = 2000;
+        mA = 2000; //todo increase
 
         shooterConfig // configure motors
             .inverted(false)
             .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(60)
-            .closedLoopRampRate(0.001);
+            .closedLoopRampRate(0.001); //todo look at this
         shooterConfig.closedLoop // configure PID
             .pid(p,i,d);
         shooterConfig.closedLoop.feedForward

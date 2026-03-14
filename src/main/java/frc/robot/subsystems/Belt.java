@@ -4,7 +4,6 @@ import frc.robot.Constants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
@@ -70,6 +69,18 @@ public class Belt extends SubsystemBase {
         indexMotor.set(-0.5);
     }
 
+    public void runBeltAndIndexer ()
+    {
+        runBelt();
+        runIndexer();
+    }
+
+    public void stopBeltAndIndexer ()
+    {
+        stopBelt();
+        stopIndexer();
+    }
+
     /**
      * Runs the belt in the fuel container
      * 
@@ -106,5 +117,15 @@ public class Belt extends SubsystemBase {
     public Command indexerRunReversed ()
     {
         return run(()->runIndexerReversed());
+    }
+
+    public Command beltAndIndexerRun ()
+    {
+        return run(()->runBeltAndIndexer());
+    }
+
+    public Command beltAndIndexerStop ()
+    {
+        return run(()->stopBeltAndIndexer());
     }
 }

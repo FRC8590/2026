@@ -52,6 +52,8 @@ public final class Constants {
     // 7.62, // Field length (meters)
     // 3.6068 // Field width (meters)
     // );
+    public static final boolean ennableIntakeArm = false;
+
 
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
