@@ -187,7 +187,7 @@ public class RobotContainer {
     driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
     driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
 
-    driverXbox.b().whileTrue(Constants.intake.intakeUp());
+    // driverXbox.b().whileTrue(Constants.intake.intakeUp());
     driverXbox.x().whileTrue(Constants.intake.intakeDown());
 
     // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
