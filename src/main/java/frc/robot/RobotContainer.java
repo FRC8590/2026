@@ -194,10 +194,10 @@ public class RobotContainer {
     // driverXbox.a().whileFalse(Constants.belt.beltStop());
     // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
     // driverXbox.a().whileFalse(Constants.belt.indexerStop());
-    //driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
-
     driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
+  
+    driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
   }
 
   /*

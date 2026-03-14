@@ -59,11 +59,6 @@ public class SwerveSubsystem extends SubsystemBase {
   private final boolean visionDriveTest = true;
 
   /**
-   * Interface to the cameras.
-   */
-  private final Vision vision = Constants.vision;
-
-  /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
    * @param directory Directory of swerve drive config files.
@@ -272,7 +267,7 @@ public class SwerveSubsystem extends SubsystemBase {
         secondaryId = 26;
       }
 
-      Optional<Pose2d> result = vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
+      Optional<Pose2d> result = Constants.vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
       if (result.isEmpty()) {
         // Nothing was found :(
         return;
