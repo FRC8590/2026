@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.57,
+        "y": 0.6628205128205127
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.1548398544188663,
+        "y": 1.9020915621635226
+      },
+      "isLocked": false,
+      "linkedName": "BB"
+    },
+    {
+      "anchor": {
+        "x": 2.46639999,
+        "y": 4.04
+      },
+      "prevControl": {
+        "x": 2.680729218201722,
+        "y": 3.2588272648392778
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "BHUB 7FT"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.3,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
