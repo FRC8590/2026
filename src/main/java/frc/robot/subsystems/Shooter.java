@@ -56,6 +56,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void setGoalRPM (double rpm) {
+        System.out.println("Set shooter goal RPM to " + rpm);
         goalRPM = rpm;
     }
 

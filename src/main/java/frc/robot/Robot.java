@@ -61,6 +61,10 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
+    System.out.println("gyro start");
+    Constants.drivebase.zeroGyroWithAlliance();
+    System.out.println("gyro calibrated");
+
   }
 
   /**
@@ -92,7 +96,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-
+    System.out.println("Robot disabled");
     disabledTimer.reset();
     disabledTimer.start();
 
@@ -114,14 +118,18 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    Constants.drivebase.zeroGyroWithAlliance();
+    System.out.println("Robot in auto");
+    //Constants.drivebase.zeroGyroWithAlliance();
 
+    /*
+    Peter: FIXME: This breaks the comp it seems
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
+    */
 
   }
 
@@ -135,14 +143,18 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-
+    System.out.println("Robot in teleop");
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+    System.out.println(m_autonomousCommand);
     if (m_autonomousCommand != null) {
+      System.out.println("Cancelling auto command");
       m_autonomousCommand.cancel();
     } else {
+      System.out.println("Cancelling all commands");
+      System.out.println(CommandScheduler.getInstance());
       CommandScheduler.getInstance().cancelAll();
     }
     m_robotContainer.setDriveMode();

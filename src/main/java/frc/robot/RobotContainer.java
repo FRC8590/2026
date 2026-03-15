@@ -127,7 +127,7 @@ public class RobotContainer {
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
     SmartDashboard.putData("Auto choices", m_chooser);
-     m_chooser.setDefaultOption("red top", "red top");
+     m_chooser.setDefaultOption("Do Nothing", "nada");
      m_chooser.addOption("Do nothing", "nada");
      m_chooser.addOption("red top", "red top");
      m_chooser.addOption("red mid", "red mid");
@@ -139,7 +139,6 @@ public class RobotContainer {
     // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
-    Constants.drivebase.zeroGyroWithAlliance();
     NamedCommands.registerCommand("Shoot", new ShooterSetSpeed(2000));
     NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
     NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
@@ -151,11 +150,11 @@ public class RobotContainer {
 
   public int getSide() {
 
-    if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
-      return 1;
-    } else {
+    //if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+     // return 1;
+    //} else {
       return -1;
-    }
+    //}
 
   }
 
@@ -180,16 +179,16 @@ public class RobotContainer {
     // Constants.belt.setDefaultCommand(new BeltStop());
     // Constants.intake.setDefaultCommand(new IntakeStop());
     // Constants.intake.setDefaultCommand(new IntakeUp());
-    // driverXbox.leftBumper().whileTrue(new IntakeDown());
+    //driverXbox.leftBumper().whileTrue(new IntakeDown());
     driverXbox.leftTrigger().whileFalse(new IntakeStop());
     driverXbox.leftTrigger().whileTrue(new IntakeRun());
 
     driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
     driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
 
-    // driverXbox.b().whileTrue(Constants.intake.intakeUp());
-    driverXbox.x().whileTrue(Constants.intake.intakeDown());
-
+    //driverXbox.b().whileTrue(Constants.intake.intakeUp());
+    //driverXbox.x().whileTrue(Constants.intake.intakeDown());
+    driverXbox.y().whileTrue(Constants.drivebase.ZeroGryo());
     // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
     // driverXbox.a().whileFalse(Constants.belt.beltStop());
     // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
@@ -197,7 +196,7 @@ public class RobotContainer {
     driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
   
-    driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
+    //driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
   }
 
   /*

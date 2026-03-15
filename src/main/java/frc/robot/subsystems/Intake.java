@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkMax;
@@ -41,8 +42,8 @@ public class Intake extends SubsystemBase {
     private double kcos = 0.45;
     private double kcosratio = 1;
                                     // also kcos messing things up
-    private double goalUpRadians = 0.51;
-    private double goalDownRadians = -0.05;
+    private double goalUpRadians = 0.744873;
+    private double goalDownRadians = 0;
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
 
@@ -105,25 +106,30 @@ public class Intake extends SubsystemBase {
      *                 the way back
      */
     private void setGoal(double pointSet) {
+        System.out.println("Set intake goal: " + pointSet);
         setPoint = pointSet;
     }
 
     private void up() {
         //intakeMotor.set(0);
+        System.out.println("Intake up");
         setGoal(goalUpRadians);
     }
 
 
     private void down() {
         // intakeMotor.set(1);
+        System.out.println("Intake down");
         setGoal(goalDownRadians);
     }
     private void run()
     {
-       intakeMotor.set(1); 
+        System.out.println("Running intake");
+       intakeMotor.set(.75); 
     }
     private void stop()
     {
+        System.out.println("Stopping intake");
        intakeMotor.set(0); 
     }
 
@@ -153,6 +159,7 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Pivot Angle", encoder.getPosition());
         if (Constants.ennableIntakeArm)
             pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
     }

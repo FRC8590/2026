@@ -137,7 +137,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // When vision is enabled we must manually update odometry in SwerveDrive
     if (visionDriveTest) {
       swerveDrive.updateOdometry();
-      Constants.vision.updatePoseEstimation(swerveDrive);
+      //Constants.vision.updatePoseEstimation(swerveDrive);
     }
   }
 
@@ -256,6 +256,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command aimAtTarget() {
     return run(() -> {
+      System.out.println("Aiming at target (requires vision)");
       int primaryId;
       int secondaryId;
 
@@ -478,6 +479,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * facing toward 0.
    */
   public void zeroGyro() {
+    System.out.println("Zeroing gyro");
     swerveDrive.zeroGyro();
   }
 
@@ -488,8 +490,9 @@ public class SwerveSubsystem extends SubsystemBase {
    *         available.
    */
   private boolean isRedAlliance() {
-    var alliance = DriverStation.getAlliance();
-    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
+   // var alliance = DriverStation.getAlliance();
+   // return alliance.isPresent()  ? alliance.get() == DriverStation.Alliance.Red : false;
+   return false;
   }
 
   /**
@@ -610,6 +613,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * Lock the swerve drive to prevent it from moving.
    */
   public void lock() {
+    System.out.println("Swerve locked");
     swerveDrive.lockPose();
   }
 
@@ -620,6 +624,10 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Rotation2d getPitch() {
     return swerveDrive.getPitch();
+  }
+  public Command ZeroGryo()
+  {
+    return run(() -> zeroGyroWithAlliance());
   }
 
   /**
