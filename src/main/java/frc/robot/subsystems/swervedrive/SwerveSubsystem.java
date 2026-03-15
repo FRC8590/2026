@@ -184,6 +184,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
   }
 
+  private void updateSpeed(ChassisSpeeds speeds)
+  {
+    driveSpeedEntry.setDouble(Math.abs(speeds.vxMetersPerSecond));
+  }
+
   /**
    * Setup AutoBuilder for PathPlanner.
    */
@@ -416,7 +421,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param velocity Velocity according to the field.
    */
   public void driveFieldOriented(ChassisSpeeds velocity) {
-    driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
+    updateSpeed(velocity);
     if (Systems.isSystemEnabled(Systems.enableDrive)) {
       swerveDrive.driveFieldOriented(velocity);
     }
@@ -429,8 +434,10 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
     return run(() -> {
+      ChassisSpeeds speeds = velocity.get();
+      updateSpeed(speeds);
       if (Systems.isSystemEnabled(Systems.enableDrive)) {
-        swerveDrive.driveFieldOriented(velocity.get());
+        swerveDrive.driveFieldOriented(speeds);
       }
     });
   }
@@ -441,7 +448,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param velocity Velocity according to the field.
    */
   public void driveRobotRelative(ChassisSpeeds velocity) {
-    driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
+    updateSpeed(velocity);
     if (Systems.isSystemEnabled(Systems.enableDrive)) {
       swerveDrive.drive(velocity);
     }
@@ -455,7 +462,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command driveRobotRelative(Supplier<ChassisSpeeds> velocity) {
     return run(() -> {
       if (Systems.isSystemEnabled(Systems.enableDrive)) {
-        swerveDrive.drive(velocity.get());
+        ChassisSpeeds speeds = velocity.get();
+        updateSpeed(speeds);
+        swerveDrive.drive(speeds);
       }
     });
   }
@@ -466,7 +475,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param velocity Robot oriented {@link ChassisSpeeds}
    */
   public void drive(ChassisSpeeds velocity) {
-    driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
+    updateSpeed(velocity);
     if (Systems.isSystemEnabled(Systems.enableDrive)) {
       swerveDrive.drive(velocity);
     }
@@ -712,7 +721,7 @@ public class SwerveSubsystem extends SubsystemBase {
               robotRelativeChassisSpeed.get(),
               newTime - previousTime.get());
           ChassisSpeeds speeds = newSetpoint.robotRelativeSpeeds();
-          driveSpeedEntry.setDouble(speeds.vxMetersPerSecond);
+          updateSpeed(speeds);
           swerveDrive.drive(speeds,
               newSetpoint.moduleStates(),
               newSetpoint.feedforwards().linearForces());
