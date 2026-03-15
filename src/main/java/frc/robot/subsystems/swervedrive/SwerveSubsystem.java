@@ -32,6 +32,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Constants;
+import frc.robot.Systems;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
@@ -65,11 +67,10 @@ public class SwerveSubsystem extends SubsystemBase {
   private GenericEntry driveSpeedEntry;
   private GenericEntry currentShiftEntry;
 
-  private final void initShuffleboard()
-  {
+  private final void initShuffleboard() {
     driveSpeedEntry = Shuffleboard.getTab("Drive")
-        .add("Speed (meters/s)", 0)
-        .withWidget(BuiltInWidgets.kAccelerometer)
+        .add("Speed", 0)
+        .withWidget(BuiltInWidgets.kDial)
         .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
         .getEntry();
 
@@ -153,16 +154,13 @@ public class SwerveSubsystem extends SubsystemBase {
     initShuffleboard();
     currentSpeed = Constants.DEFAULT_SPEED;
     swerveDrive = new SwerveDrive(driveCfg,
-      controllerCfg,
-      Constants.MAX_SPEED,
-      new Pose2d(
-        new Translation2d(
-          Meter.of(7.566),
-          Meter.of(6.19)
-        ),
-        Rotation2d.fromDegrees(180)
-      )
-    );
+        controllerCfg,
+        Constants.MAX_SPEED,
+        new Pose2d(
+            new Translation2d(
+                Meter.of(7.566),
+                Meter.of(6.19)),
+            Rotation2d.fromDegrees(180)));
   }
 
   @Override
@@ -396,10 +394,12 @@ public class SwerveSubsystem extends SubsystemBase {
    *                      robot-relative.
    */
   public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
-    swerveDrive.drive(translation,
-        rotation,
-        fieldRelative,
-        false); // Open loop is disabled since it shouldn't be used most of the time.
+    if (Systems.isSystemEnabled(Systems.enableDrive)) {
+      swerveDrive.drive(translation,
+          rotation,
+          fieldRelative,
+          false); // Open loop is disabled since it shouldn't be used most of the time.
+    }
   }
 
   /**
@@ -409,7 +409,9 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void driveFieldOriented(ChassisSpeeds velocity) {
     driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
-    swerveDrive.driveFieldOriented(velocity);
+    if (Systems.isSystemEnabled(Systems.enableDrive)) {
+      swerveDrive.driveFieldOriented(velocity);
+    }
   }
 
   /**
@@ -419,7 +421,9 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
     return run(() -> {
-      swerveDrive.driveFieldOriented(velocity.get());
+      if (Systems.isSystemEnabled(Systems.enableDrive)) {
+        swerveDrive.driveFieldOriented(velocity.get());
+      }
     });
   }
 
@@ -430,7 +434,9 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void driveRobotRelative(ChassisSpeeds velocity) {
     driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
-    swerveDrive.drive(velocity);
+    if (Systems.isSystemEnabled(Systems.enableDrive)) {
+      swerveDrive.drive(velocity);
+    }
   }
 
   /**
@@ -440,7 +446,9 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command driveRobotRelative(Supplier<ChassisSpeeds> velocity) {
     return run(() -> {
-      swerveDrive.drive(velocity.get());
+      if (Systems.isSystemEnabled(Systems.enableDrive)) {
+        swerveDrive.drive(velocity.get());
+      }
     });
   }
 
@@ -451,7 +459,9 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void drive(ChassisSpeeds velocity) {
     driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
-    swerveDrive.drive(velocity);
+    if (Systems.isSystemEnabled(Systems.enableDrive)) {
+      swerveDrive.drive(velocity);
+    }
   }
 
   /* Increase the current speed. */

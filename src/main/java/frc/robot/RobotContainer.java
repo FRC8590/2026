@@ -177,7 +177,7 @@ public class RobotContainer {
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     
     driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
-    driverXbox.povDown().whileTrue(Constants.drivebase.shiftDown());
+    driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
     
     // Constants.shooter.setDefaultCommand(new ShooterStop());
     // Constants.belt.setDefaultCommand(new BeltStop());
