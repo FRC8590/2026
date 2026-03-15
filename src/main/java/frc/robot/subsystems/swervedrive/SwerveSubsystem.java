@@ -25,13 +25,16 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Constants;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import edu.wpi.first.units.measure.Force;
@@ -59,6 +62,23 @@ public class SwerveSubsystem extends SubsystemBase {
   private final boolean visionDriveTest = true;
 
   private double currentSpeed;
+  private GenericEntry driveSpeedEntry;
+  private GenericEntry currentShiftEntry;
+
+  private final void initShuffleboard()
+  {
+    driveSpeedEntry = Shuffleboard.getTab("Drive")
+        .add("Speed (meters/s)", 0)
+        .withWidget(BuiltInWidgets.kAccelerometer)
+        .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+        .getEntry();
+
+    currentShiftEntry = Shuffleboard.getTab("Drive")
+        .add("Target Speed", Constants.DEFAULT_SPEED)
+        .withWidget(BuiltInWidgets.kNumberBar)
+        .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+        .getEntry();
+  }
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -66,6 +86,8 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param directory Directory of swerve drive config files.
    */
   public SwerveSubsystem(File directory) {
+    initShuffleboard();
+
     // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
     // In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
     // The encoder resolution per motor revolution is 1 per motor revolution.
@@ -128,12 +150,19 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controllerCfg Swerve Controller.
    */
   public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg) {
+    initShuffleboard();
     currentSpeed = Constants.DEFAULT_SPEED;
     swerveDrive = new SwerveDrive(driveCfg,
-        controllerCfg,
-        Constants.MAX_SPEED,
-        new Pose2d(new Translation2d(Meter.of(7.566), Meter.of(6.19)),
-            Rotation2d.fromDegrees(180)));
+      controllerCfg,
+      Constants.MAX_SPEED,
+      new Pose2d(
+        new Translation2d(
+          Meter.of(7.566),
+          Meter.of(6.19)
+        ),
+        Rotation2d.fromDegrees(180)
+      )
+    );
   }
 
   @Override
@@ -176,8 +205,6 @@ public class SwerveSubsystem extends SubsystemBase {
                   swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
                   moduleFeedForwards.linearForces());
               Force[] forces = moduleFeedForwards.linearForces();
-
-              SmartDashboard.putNumber("forces", forces[0].magnitude());
 
             } else {
               swerveDrive.setChassisSpeeds(speedsRobotRelative);
@@ -327,9 +354,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d startingPose2d = swerveDrive.getPose();
 
-    SmartDashboard.putNumber("starting pose difference",
-        swerveDrive.getPose().getTranslation().getDistance(startingPose2d.getTranslation()));
-
     return run(() -> drive(new ChassisSpeeds(speedInMetersPerSecond, 0, 0)))
         .until(() -> swerveDrive.getPose().getTranslation()
             .getDistance(startingPose2d.getTranslation()) > distanceInMeters)
@@ -384,6 +408,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param velocity Velocity according to the field.
    */
   public void driveFieldOriented(ChassisSpeeds velocity) {
+    driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
     swerveDrive.driveFieldOriented(velocity);
   }
 
@@ -404,6 +429,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param velocity Velocity according to the field.
    */
   public void driveRobotRelative(ChassisSpeeds velocity) {
+    driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
     swerveDrive.drive(velocity);
   }
 
@@ -418,44 +444,37 @@ public class SwerveSubsystem extends SubsystemBase {
     });
   }
 
-  /* Increase the current speed. */
-  public Command shiftUp()
-  {
-    return run(() -> {
-      if (currentSpeed == Constants.MAX_SPEED) {
-        System.err.println("Swerve is already at max speed, cannot accelerate");
-      } else {
-        ++currentSpeed;
-      }
-    });
-  }
-
-  /* Decrease the current speed. */
-  public Command shiftDown()
-  {
-    return run(() -> {
-      assert(currentSpeed > 0);
-      if (currentSpeed == 1) {
-        System.err.println("Cannot make the swerves any slower");
-      } else {
-        --currentSpeed;
-      }
-    });
-  }
-
   /**
    * Drive according to the chassis robot oriented velocity.
    *
    * @param velocity Robot oriented {@link ChassisSpeeds}
    */
   public void drive(ChassisSpeeds velocity) {
+    driveSpeedEntry.setDouble(velocity.vxMetersPerSecond);
     swerveDrive.drive(velocity);
+  }
 
-    Pose2d startingPose2d = swerveDrive.getPose();
+  /* Increase the current speed. */
+  public Command shiftUp() {
+    return run(() -> {
+      if (currentSpeed == Constants.MAX_SPEED) {
+        System.err.println("Swerve is already at max speed, cannot accelerate");
+      } else {
+        currentShiftEntry.setDouble(++currentSpeed);
+      }
+    });
+  }
 
-    SmartDashboard.putNumber("distanceTRAVELEDDD",
-        swerveDrive.getPose().getTranslation().getDistance(startingPose2d.getTranslation()));
-
+  /* Decrease the current speed. */
+  public Command shiftDown() {
+    return run(() -> {
+      assert (currentSpeed > 0);
+      if (currentSpeed == 1) {
+        System.err.println("Cannot make the swerves any slower");
+      } else {
+        currentShiftEntry.setDouble(--currentSpeed);
+      }
+    });
   }
 
   /**
@@ -540,7 +559,6 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.getModules()[1].getDriveMotor().burnFlash();
     swerveDrive.getModules()[2].getDriveMotor().burnFlash();
     swerveDrive.getModules()[3].getDriveMotor().burnFlash();
-
   }
 
   /**
