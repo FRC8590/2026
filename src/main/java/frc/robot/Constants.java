@@ -65,7 +65,8 @@ public final class Constants {
 
     // Control Loop Timing
     public static final double LOOP_TIME = 0.05; // seconds
-    public static final double MAX_SPEED = 6.0; // meters per second
+    public static final double DEFAULT_SPEED = 6.0; // meters per second
+    public static final double MAX_SPEED = 8.0; // meters per second
     public static double visionTimerOffset = 0;
 
     // Subsystem Instances
@@ -88,7 +89,7 @@ public final class Constants {
     public static Shooter shooter = new Shooter(); 
     public static final LaserCan laserCan = new LaserCan(8);
 
-    // As far as I can tell, it's the speed of the robot?
+    // Basically the sensitivity of the swerves
     public static double scaleFactor = 1;
 
     public enum ScoreLocation

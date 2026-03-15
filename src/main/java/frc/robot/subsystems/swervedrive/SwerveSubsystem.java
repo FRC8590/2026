@@ -58,6 +58,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   private final boolean visionDriveTest = true;
 
+  private double currentSpeed;
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -80,6 +82,7 @@ public class SwerveSubsystem extends SubsystemBase {
     System.out.println("\t\"drive\": {\"factor\": " + driveConversionFactor + " }");
     System.out.println("}");
 
+    currentSpeed = Constants.DEFAULT_SPEED;
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
     // objects being created.
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
@@ -125,6 +128,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controllerCfg Swerve Controller.
    */
   public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg) {
+    currentSpeed = Constants.DEFAULT_SPEED;
     swerveDrive = new SwerveDrive(driveCfg,
         controllerCfg,
         Constants.MAX_SPEED,
@@ -415,15 +419,28 @@ public class SwerveSubsystem extends SubsystemBase {
     });
   }
 
-  public Command speedFast() {
+  /* Increase the current speed. */
+  public Command shiftUp()
+  {
     return run(() -> {
-      Constants.scaleFactor = 1;
+      if (currentSpeed == Constants.MAX_SPEED) {
+        System.err.println("Swerve is already at max speed, cannot accelerate");
+      } else {
+        ++currentSpeed;
+      }
     });
   }
 
-  public Command speedSlow() {
+  /* Decrease the current speed. */
+  public Command shiftDown()
+  {
     return run(() -> {
-      Constants.scaleFactor = 0.2;
+      assert(currentSpeed > 0);
+      if (currentSpeed == 1) {
+        System.err.println("Cannot make the swerves any slower");
+      } else {
+        --currentSpeed;
+      }
     });
   }
 
@@ -559,7 +576,7 @@ public class SwerveSubsystem extends SubsystemBase {
         headingX,
         headingY,
         getHeading().getRadians(),
-        Constants.MAX_SPEED);
+        currentSpeed);
   }
 
   /**
@@ -579,7 +596,7 @@ public class SwerveSubsystem extends SubsystemBase {
         scaledInputs.getY(),
         angle.getRadians(),
         getHeading().getRadians(),
-        Constants.MAX_SPEED);
+        currentSpeed);
   }
 
   /**
