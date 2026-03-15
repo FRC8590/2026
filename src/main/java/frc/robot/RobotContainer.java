@@ -176,6 +176,9 @@ public class RobotContainer {
     assert (!RobotBase.isSimulation());
     Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     
+    driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
+    driverXbox.povDown().whileTrue(Constants.drivebase.shiftDown());
+    
     // Constants.shooter.setDefaultCommand(new ShooterStop());
     // Constants.belt.setDefaultCommand(new BeltStop());
     // Constants.intake.setDefaultCommand(new IntakeStop());
