@@ -107,6 +107,31 @@ public class RobotContainer {
   // right stick controls the angular velocity of the robot
   Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
+  SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+      () -> driverXbox.getLeftY() * getSide(), // getSide will invert if on Red side
+      () -> driverXbox.getLeftX() * getSide())
+      .withControllerRotationAxis(() -> -driverXbox.getRightX())
+      .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+      .scaleTranslation(0.8)
+      .allianceRelativeControl(true);
+  // Derive the heading axis with math!
+  SwerveInputStream driveDirectAngleSim = driveAngularVelocitySim.copy()
+      .withControllerHeadingAxis(() -> Math.sin(
+          driverXbox.getRawAxis(
+              2) * Math.PI)
+          * (Math.PI * 2),
+          () -> Math.cos(
+              driverXbox.getRawAxis(
+                  2) * Math.PI)
+              *
+              (Math.PI * 2))
+      .headingWhile(true);
+
+  Command driveFieldOrientedDirectAngleSim = Constants.drivebase.driveFieldOriented(driveDirectAngleSim);
+  Command driveFieldOrientedAngularVelocitySim = Constants.drivebase.driveFieldOriented(driveAngularVelocitySim);
+
+  Command driveSetpointGenSim = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -135,7 +160,7 @@ public class RobotContainer {
      m_chooser.addOption("blue top", "blue top");
      m_chooser.addOption("blue mid", "blue mid");
      m_chooser.addOption("blue bot", "blue bot");
-     
+
     // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
@@ -145,7 +170,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
     NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
     NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
-    
+
   }
 
   public int getSide() {
@@ -172,12 +197,15 @@ public class RobotContainer {
    * Flight joysticks}.
    */
   private void configureBindings() {
-    assert (!RobotBase.isSimulation());
-    Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    
+    Constants.drivebase.setDefaultCommand(
+      RobotBase.isSimulation()
+        ? driveFieldOrientedAngularVelocitySim
+        : driveFieldOrientedAnglularVelocity
+    );
+
     driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
     driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
-    
+
     // Constants.shooter.setDefaultCommand(new ShooterStop());
     // Constants.belt.setDefaultCommand(new BeltStop());
     // Constants.intake.setDefaultCommand(new IntakeStop());
@@ -198,8 +226,8 @@ public class RobotContainer {
     // driverXbox.a().whileFalse(Constants.belt.indexerStop());
     driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
-  
-    //driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
+
+    driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
   }
 
   /*

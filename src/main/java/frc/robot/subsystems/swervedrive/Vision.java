@@ -21,7 +21,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import java.util.ArrayList;
@@ -35,9 +37,11 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import swervelib.SwerveDrive;
+import swervelib.telemetry.SwerveDriveTelemetry;
 
 /**
  * Example PhotonVision class to aid in the pursuit of accurate odometry. Taken
@@ -55,7 +59,7 @@ public class Vision {
    * {@link Vision#filterPose}.
    */
   // Riley: Never used?
-  //private final double maximumAmbiguity = 0.15;
+  // private final double maximumAmbiguity = 0.15;
 
   /**
    * Count of times that the odom thinks we're more than 10meters away from the
@@ -69,6 +73,7 @@ public class Vision {
   private Supplier<Pose2d> currentPose;
 
   public EstimatedRobotPose estimatedVisionPose;
+  private static VisionSystemSim visionSim;
 
   /**
    * Constructor for the Vision class.
@@ -78,6 +83,11 @@ public class Vision {
    */
   public Vision(Supplier<Pose2d> currentPose) {
     this.currentPose = currentPose;
+
+    if (Robot.isSimulation()) {
+      visionSim = new VisionSystemSim("main");
+      visionSim.addAprilTags(fieldLayout);
+    }
   }
 
   /**
@@ -128,6 +138,20 @@ public class Vision {
    * @param swerveDrive {@link SwerveDrive} instance.
    */
   public void updatePoseEstimation(SwerveDrive swerveDrive) {
+    if (SwerveDriveTelemetry.isSimulation && swerveDrive.getSimulationDriveTrainPose().isPresent()) {
+      /*
+       * In the maple-sim, odometry is simulated using encoder values, accounting for
+       * factors like skidding and drifting.
+       * As a result, the odometry may not always be 100% accurate.
+       * However, the vision system should be able to provide a reasonably accurate
+       * pose estimation, even when odometry is incorrect.
+       * (This is why teams implement vision system to correct odometry.)
+       * Therefore, we must ensure that the actual robot pose is provided in the
+       * simulator when updating the vision simulation during the simulation.
+       */
+      visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
+    }
+
     for (Cameras camera : Cameras.values()) {
       Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
 
@@ -160,6 +184,18 @@ public class Vision {
    */
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Cameras camera) {
     Optional<EstimatedRobotPose> poseEst = camera.getEstimatedGlobalPose();
+    // TODO: Peter: Why is an Optional<> null?
+    if (poseEst != null && Robot.isSimulation()) {
+      Field2d debugField = visionSim.getDebugField();
+      // Uncomment to enable outputting of vision targets in sim.
+      poseEst.ifPresentOrElse(
+          est -> debugField
+              .getObject("VisionEstimation")
+              .setPose(est.estimatedPose.toPose2d()),
+          () -> {
+            debugField.getObject("VisionEstimation").setPoses();
+          });
+    }
     return poseEst;
   }
 
@@ -312,6 +348,7 @@ public class Vision {
       latencyAlert = new Alert("'" + name + "' Camera is experiencing high latency.", AlertType.kWarning);
 
       camera = new PhotonCamera(name);
+      // Shuffleboard.getTab("Vision").addCamera(name, name, "https://")
 
       // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
       robotToCamTransform = new Transform3d(robotToCamTranslation, robotToCamRotation);
@@ -327,16 +364,19 @@ public class Vision {
       if (Robot.isSimulation()) {
         // TODO: Peter: Get this to match our actual robot
         SimCameraProperties cameraProp = new SimCameraProperties();
-          // A 640 x 480 camera with a 100 degree diagonal FOV.
+        // A 640 x 480 camera with a 100 degree diagonal FOV.
         cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));
-        // Approximate detection noise with average and standard deviation error in pixels.
+        // Approximate detection noise with average and standard deviation error in
+        // pixels.
         cameraProp.setCalibError(0.25, 0.08);
-        // Set the camera image capture framerate (Note: this is limited by robot loop rate).
+        // Set the camera image capture framerate (Note: this is limited by robot loop
+        // rate).
         cameraProp.setFPS(20);
         // The average and standard deviation in milliseconds of image data latency.
         cameraProp.setAvgLatencyMs(35);
         cameraProp.setLatencyStdDevMs(5);
         this.cameraSim = new PhotonCameraSim(camera, cameraProp);
+        visionSim.addCamera(cameraSim, new Transform3d(robotToCamTranslation, robotToCamRotation));
       }
     }
 
