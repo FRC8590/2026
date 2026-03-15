@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-
+import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -101,8 +101,10 @@ public class Shooter extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
-        backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
+        if (Systems.isSystemEnabled(Systems.enableShooter)) {
+            frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
+            backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
+        }
 
         goalRPM = SmartDashboard.getNumber("Shooter Speed", goalRPM);
         SmartDashboard.putNumber("Set Shooter Speed ", goalRPM);

@@ -56,9 +56,9 @@ public class Robot extends TimedRobot {
     // Constants.visionTimerOffset =
     // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
 
-    if (isSimulation()) {
-      throw new RuntimeException("We don't support simulations right now");
-    }
+    //if (isSimulation()) {
+    //  throw new RuntimeException("We don't support simulations right now");
+    //}
 
     m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
     System.out.println("gyro start");
@@ -165,10 +165,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    /*
     SmartDashboard.putNumberArray("front left motor temps", Constants.drivebase.getMotorTemperatures()[0]);
     SmartDashboard.putNumberArray("front right motor temps", Constants.drivebase.getMotorTemperatures()[1]);
     SmartDashboard.putNumberArray("back left motor temps", Constants.drivebase.getMotorTemperatures()[2]);
-    SmartDashboard.putNumberArray("back right motor temps", Constants.drivebase.getMotorTemperatures()[3]);
+    SmartDashboard.putNumberArray("back right motor temps", Constants.drivebase.getMotorTemperatures()[3]);*/
   }
 
   /**

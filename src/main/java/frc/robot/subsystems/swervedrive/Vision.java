@@ -34,6 +34,7 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
 import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import swervelib.SwerveDrive;
@@ -310,12 +311,7 @@ public class Vision {
         Matrix<N3, N1> singleTagStdDevs, Matrix<N3, N1> multiTagStdDevsMatrix) {
       latencyAlert = new Alert("'" + name + "' Camera is experiencing high latency.", AlertType.kWarning);
 
-      camera = null;
-      try {
-        camera = new PhotonCamera(name);
-      } catch (Exception e) {
-        System.out.println(e);
-      }
+      camera = new PhotonCamera(name);
 
       // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
       robotToCamTransform = new Transform3d(robotToCamTranslation, robotToCamRotation);
@@ -327,6 +323,21 @@ public class Vision {
 
       this.singleTagStdDevs = singleTagStdDevs;
       this.multiTagStdDevs = multiTagStdDevsMatrix;
+
+      if (Robot.isSimulation()) {
+        // TODO: Peter: Get this to match our actual robot
+        SimCameraProperties cameraProp = new SimCameraProperties();
+          // A 640 x 480 camera with a 100 degree diagonal FOV.
+        cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));
+        // Approximate detection noise with average and standard deviation error in pixels.
+        cameraProp.setCalibError(0.25, 0.08);
+        // Set the camera image capture framerate (Note: this is limited by robot loop rate).
+        cameraProp.setFPS(20);
+        // The average and standard deviation in milliseconds of image data latency.
+        cameraProp.setAvgLatencyMs(35);
+        cameraProp.setLatencyStdDevMs(5);
+        this.cameraSim = new PhotonCameraSim(camera, cameraProp);
+      }
     }
 
     /**
