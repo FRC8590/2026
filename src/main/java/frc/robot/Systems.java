@@ -9,19 +9,19 @@ import edu.wpi.first.networktables.GenericEntry;
 public final class Systems {
     private static ShuffleboardTab tab = Shuffleboard.getTab("Systems");
     public static final GenericEntry enableDrive = tab
-        .add("Drive", true)
+        .add("Enable Drive", true)
         .withWidget(BuiltInWidgets.kToggleButton)
         .getEntry();
     public static final GenericEntry enableIntakeWheels = tab
-        .add("Intake Wheels", true)
+        .add("Enable Intake Wheels", true)
         .withWidget(BuiltInWidgets.kToggleButton)
         .getEntry();
     public static final GenericEntry enableIntakeArm = tab
-        .add("Intake Arm", true)
+        .add("Enable Intake Arm", true)
         .withWidget(BuiltInWidgets.kToggleButton)
         .getEntry();
     public static final GenericEntry enableShooter = tab
-        .add("Shooter", true)
+        .add("Enable Shooter", true)
         .withWidget(BuiltInWidgets.kToggleButton)
         .getEntry();
 
