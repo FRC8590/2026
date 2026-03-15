@@ -6,6 +6,7 @@ import frc.robot.Constants;
 public class ShooterSetSpeed extends ParallelCommandGroup {
     /**
      * Set the shooter to a specific motor speed between -1 and 1; runs the belt
+     * 
      * @param speed to set the motors at.
      */
     public ShooterSetSpeed(double speed) {

@@ -28,7 +28,13 @@ public class Belt extends SubsystemBase {
     }
 
     private void runMotor() {
-        beltMotor.set(1);
+        if (Constants.shooter.atRPM())
+            beltMotor.set(1);
+    }
+
+    private void runMotorReversed ()
+    {
+        beltMotor.set(-.8);
     }
 
     private void stopMotor() {
@@ -51,5 +57,10 @@ public class Belt extends SubsystemBase {
      */
     public Command stopBelt() {
         return run(() -> stopMotor());
+    }
+
+    public Command runBeltReversed ()
+    {
+        return run(()-> runMotorReversed());
     }
 }
