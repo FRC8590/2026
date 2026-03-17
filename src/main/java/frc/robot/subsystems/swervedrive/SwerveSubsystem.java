@@ -184,8 +184,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
   }
 
-  private void updateSpeed(ChassisSpeeds speeds)
-  {
+  private void updateSpeed(ChassisSpeeds speeds) {
     driveSpeedEntry.setDouble(Math.abs(speeds.vxMetersPerSecond));
   }
 
@@ -291,14 +290,16 @@ public class SwerveSubsystem extends SubsystemBase {
     return new double[] { angleMotor.getMotorTemperature(), driveMotor.getMotorTemperature() };
   }
 
+  private Rotation2d filteredAngle = new Rotation2d();
+  private Optional<Rotation2d> lastAngle = Optional.empty();
+
   /**
    * Aim the robot at the target returned by PhotonVision.
    *
    * @return A {@link Command} which will run the alignment.
    */
   public Command aimAtTarget() {
-    return runOnce(() -> {
-      System.out.println("Aiming at target (requires vision)");
+    return run(() -> {
       int primaryId;
       int secondaryId;
 
@@ -310,18 +311,35 @@ public class SwerveSubsystem extends SubsystemBase {
         secondaryId = 26;
       }
 
-      System.out.println("Attempting to align to " + primaryId + " and " + secondaryId);
-
       Optional<Pose2d> result = Constants.vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
-      if (result.isEmpty()) {
-        System.out.println("Nothing found");
+      if (result.isPresent()) {
+        // Peter: This is primarily a bunch of math stuff that I stole and
+        // don't understand.
+        Pose2d targetPose = result.get();
+
+        // Vector from robot to target
+        Translation2d delta = targetPose.getTranslation().minus(getPose().getTranslation());
+        Rotation2d angleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
+
+        // Smoothen vision
+        filteredAngle = filteredAngle.interpolate(angleToTarget, 0.1);
+        lastAngle = Optional.of(filteredAngle);
+      }
+
+      if (!lastAngle.isPresent()) {
         return;
       }
 
-      System.out.println("Found result: " + result.get());
+      // Peter: TODO: We should invalidate the last angle after some time
+      double error = getHeading().minus(lastAngle.get()).getRadians();
 
-      var unwrapped = result.get();
-      drive(unwrapped.getTranslation(), unwrapped.getRotation().getRadians(), true);
+      // Stop if within ~3 degrees
+      if (Math.abs(error) < 0.05) {
+          drive(new ChassisSpeeds(0, 0, 0));
+          return;
+      }
+
+      drive(getTargetSpeeds(0, 0, lastAngle.get()));
     });
   }
 
@@ -560,8 +578,8 @@ public class SwerveSubsystem extends SubsystemBase {
    *         available.
    */
   private boolean isRedAlliance() {
-   var alliance = DriverStation.getAlliance();
-   return alliance.isPresent()  ? alliance.get() == DriverStation.Alliance.Red : false;
+    var alliance = DriverStation.getAlliance();
+    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }
 
   /**
@@ -693,8 +711,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public Rotation2d getPitch() {
     return swerveDrive.getPitch();
   }
-  public Command ZeroGryo()
-  {
+
+  public Command ZeroGryo() {
     return run(() -> zeroGyroWithAlliance());
   }
 
@@ -741,8 +759,7 @@ public class SwerveSubsystem extends SubsystemBase {
               newSetpoint.feedforwards().linearForces());
           prevSetpoint.set(newSetpoint);
           previousTime.set(newTime);
-        }
-    );
+        });
   }
 
   /**
