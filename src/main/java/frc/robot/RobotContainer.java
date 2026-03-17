@@ -157,8 +157,6 @@ public class RobotContainer {
      m_chooser.addOption("blue mid", "blue mid");
      m_chooser.addOption("blue bot", "blue bot");
 
-    // new IntakeDown().schedule();
-
     // Initialize with proper alliance orientation
     NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
     NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
