@@ -24,6 +24,7 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -304,9 +305,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command aimAtTarget() {
     // P=3.0 is a starting point; increase if it's too slow, decrease if it
     // oscillates.
-    PIDController headingController = new PIDController(3.0, 0, 0);
+    PIDController headingController = new PIDController(2.5, 0.3, 0);
     headingController.enableContinuousInput(-Math.PI, Math.PI);
-    headingController.setTolerance(Units.degreesToRadians(2.0)); // 2 degree tolerance
+    headingController.setTolerance(Units.degreesToRadians(4.0)); // 2 degree tolerance
 
     return run(() -> {
       int primaryId = isRedAlliance() ? 9 : 25;
@@ -334,6 +335,11 @@ public class SwerveSubsystem extends SubsystemBase {
       double rotationSpeed = headingController.calculate(
           getHeading().getRadians(),
           lastAngle.get().getRadians());
+
+      // If we are within range, send 0 speed to prevent shaking
+      if (headingController.atSetpoint()) {
+          rotationSpeed = 0;
+      }
 
       drive(new ChassisSpeeds(0, 0, rotationSpeed));
 
