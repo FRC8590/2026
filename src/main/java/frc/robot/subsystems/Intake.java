@@ -146,11 +146,11 @@ public class Intake extends SubsystemBase {
     }
 
     public Command intakeRun() {
-        return run(() -> run());
+        return runOnce(() -> run());
     }
 
     public Command intakeStop() {
-        return run(() -> stop());
+        return runOnce(() -> stop());
     }
 
     /**
@@ -159,7 +159,7 @@ public class Intake extends SubsystemBase {
      * @return runnable Command
      */
     public Command intakeUp() {
-        return run(() -> up());
+        return runOnce(() -> up());
     }
 
     /**
@@ -168,7 +168,7 @@ public class Intake extends SubsystemBase {
      * @return runnable Command
      */
     public Command intakeDown() {
-        return run(() -> down());
+        return runOnce(() -> down());
     }
 
     @Override

@@ -83,7 +83,7 @@ public class Shooter extends SubsystemBase {
     public Command shooterSetGoalRPM (double rpm)
     {
         if (rpm > 6784) return run(()->setGoalRPM(goalRPM));
-        return run(()->setGoalRPM (rpm));
+        return runOnce(()->setGoalRPM (rpm));
     }
 
     /**
@@ -92,7 +92,7 @@ public class Shooter extends SubsystemBase {
      */
     public Command shooterStop ()
     {
-        return run(()->setGoalRPM(0));
+        return runOnce(()->setGoalRPM(0));
     }
 
     /**

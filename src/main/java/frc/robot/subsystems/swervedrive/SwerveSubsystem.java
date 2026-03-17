@@ -297,7 +297,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return A {@link Command} which will run the alignment.
    */
   public Command aimAtTarget() {
-    return run(() -> {
+    return runOnce(() -> {
       System.out.println("Aiming at target (requires vision)");
       int primaryId;
       int secondaryId;

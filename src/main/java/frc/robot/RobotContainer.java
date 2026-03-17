@@ -9,19 +9,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
-import frc.robot.commands.*;
 import swervelib.SwerveInputStream;
 
 /**
@@ -164,7 +160,7 @@ public class RobotContainer {
     // new IntakeDown().schedule();
 
     // Initialize with proper alliance orientation
-    NamedCommands.registerCommand("Shoot", new ShooterSetSpeed(2000));
+    NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
     NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
     NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
     NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
@@ -205,20 +201,14 @@ public class RobotContainer {
 
     driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
     driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
-
-    // Constants.shooter.setDefaultCommand(new ShooterStop());
-    // Constants.belt.setDefaultCommand(new BeltStop());
-    // Constants.intake.setDefaultCommand(new IntakeStop());
-    // Constants.intake.setDefaultCommand(new IntakeUp());
-    //driverXbox.leftBumper().whileTrue(new IntakeDown());
-    driverXbox.leftTrigger().whileFalse(new IntakeStop());
-    driverXbox.leftTrigger().whileTrue(new IntakeRun());
+  
+    driverXbox.x().whileTrue(Constants.intake.intakeDown());
+    driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
+    driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
 
     driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
     driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
 
-    //driverXbox.b().whileTrue(Constants.intake.intakeUp());
-    //driverXbox.x().whileTrue(Constants.intake.intakeDown());
     driverXbox.y().whileTrue(Constants.drivebase.ZeroGryo());
     // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
     // driverXbox.a().whileFalse(Constants.belt.beltStop());
