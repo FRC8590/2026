@@ -310,13 +310,18 @@ public class SwerveSubsystem extends SubsystemBase {
         secondaryId = 26;
       }
 
+      System.out.println("Attempting to align to " + primaryId + " and " + secondaryId);
+
       Optional<Pose2d> result = Constants.vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
       if (result.isEmpty()) {
-        // Nothing was found :(
+        System.out.println("Nothing found");
         return;
       }
 
-      drive(getTargetSpeeds(0, 0, result.get().getRotation()));
+      System.out.println("Found result: " + result.get());
+
+      var unwrapped = result.get();
+      drive(unwrapped.getTranslation(), unwrapped.getRotation().getRadians(), true);
     });
   }
 
@@ -555,9 +560,8 @@ public class SwerveSubsystem extends SubsystemBase {
    *         available.
    */
   private boolean isRedAlliance() {
-   // var alliance = DriverStation.getAlliance();
-   // return alliance.isPresent()  ? alliance.get() == DriverStation.Alliance.Red : false;
-   return false;
+   var alliance = DriverStation.getAlliance();
+   return alliance.isPresent()  ? alliance.get() == DriverStation.Alliance.Red : false;
   }
 
   /**

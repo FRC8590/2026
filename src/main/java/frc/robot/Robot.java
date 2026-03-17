@@ -103,13 +103,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {
-
+  public void disabledPeriodic()
+  {
     if (disabledTimer.hasElapsed(Constants.DRIVE_CONSTANTS.wheelLockTime())) {
       disabledTimer.stop();
     }
     m_robotContainer.resetAndStop();
-
   }
 
   /**

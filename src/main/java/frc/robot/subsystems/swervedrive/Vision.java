@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSource;
@@ -382,6 +383,13 @@ public class Vision {
         cameraProp.setLatencyStdDevMs(5);
         this.cameraSim = new PhotonCameraSim(camera, cameraProp);
         visionSim.addCamera(cameraSim, new Transform3d(robotToCamTranslation, robotToCamRotation));
+      } else {
+          String url = "http://photonvision.local:1182/?action=stream&cameraName=" + name;
+
+          Shuffleboard.getTab("Drive")
+              .add(name, url)
+              .withSize(6, 4)
+              .withWidget(BuiltInWidgets.kCameraStream);
       }
     }
 
