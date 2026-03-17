@@ -3,6 +3,13 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -12,6 +19,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.ResetMode;
+
+import java.util.Map;
+
 import com.revrobotics.PersistMode;
 
 public class Shooter extends SubsystemBase {
@@ -23,6 +33,12 @@ public class Shooter extends SubsystemBase {
 
     /**cV: cruiseVelocity. mA: maxAcceleration */
     private double goalRPM = 0, p, i, d, kA, kV, cV, mA;
+
+    private GenericEntry targRPMEntry;
+    private GenericEntry currRPMFrontEntry;
+    private GenericEntry currRPMBackEntry;
+
+
 
     public Shooter() {
         p = 0.0001;
@@ -53,6 +69,20 @@ public class Shooter extends SubsystemBase {
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         SmartDashboard.putNumber("Shooter Speed", goalRPM);
+
+        // Shuffleboard setup
+        ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
+
+        ShuffleboardLayout shooterLayout = shooterTab.getLayout("Shooter", BuiltInLayouts.kGrid).withSize(2, 2).withPosition(4, 0);
+        SimpleWidget currRPMFrontWidget =  shooterLayout.add("Front motor RPM", 0).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 1);
+        SimpleWidget currRPMBackWidget =   shooterLayout.add("Back motor RPM", 0).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(1, 1);
+        SimpleWidget targRPMWidget =       shooterLayout.add("Target RPM", 0).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("min", 0, "max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 0);
+       
+        currRPMFrontEntry = currRPMFrontWidget.getEntry();
+        currRPMBackEntry = currRPMBackWidget.getEntry();
+
+        targRPMEntry = targRPMWidget.getEntry();
+
     }
 
     private void setGoalRPM (double rpm) {
@@ -82,7 +112,7 @@ public class Shooter extends SubsystemBase {
      */
     public Command shooterSetGoalRPM (double rpm)
     {
-        if (rpm > 6784) return run(()->setGoalRPM(goalRPM));
+        if (rpm > Constants.SHOOTER_MAX_RPM) return run(()->setGoalRPM(goalRPM));
         return runOnce(()->setGoalRPM (rpm));
     }
 
@@ -110,5 +140,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Set Shooter Speed ", goalRPM);
         SmartDashboard.putNumber("Front Motor RPM ", frontMotor.getEncoder().getVelocity());
         SmartDashboard.putNumber("Back Motor RPM ", backMotor.getEncoder().getVelocity());
+        targRPMEntry.setDouble(goalRPM);
+        currRPMBackEntry.setDouble(backMotor.getEncoder().getVelocity());
+        currRPMFrontEntry.setDouble(frontMotor.getEncoder().getVelocity());
     }
 }
