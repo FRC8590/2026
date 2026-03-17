@@ -382,28 +382,6 @@ public class Vision {
         cameraProp.setLatencyStdDevMs(5);
         this.cameraSim = new PhotonCameraSim(camera, cameraProp);
         visionSim.addCamera(cameraSim, new Transform3d(robotToCamTranslation, robotToCamRotation));
-
-        cameraSource = CameraServer.putVideo(name, 640, 480);
-        // For simulations, we need a background thread to manually publish each
-        // frame.
-        new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                var frame = cameraSim.getVideoSimFrameRaw();
-
-                if (frame != null) {
-                  cameraSource.putFrame(frame);
-                }
-
-                try {
-                    Thread.sleep(20); // ~50 FPS
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }).start();
-        Shuffleboard
-            .getTab("Drive")
-            .add(cameraSource);
       }
     }
 

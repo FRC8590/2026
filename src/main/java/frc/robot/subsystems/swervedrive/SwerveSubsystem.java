@@ -88,6 +88,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Shuffleboard.getTab("Drive")
         .add("Current Pose", field)
+        .withSize(4, 2)
         .withWidget(BuiltInWidgets.kField);
   }
 
