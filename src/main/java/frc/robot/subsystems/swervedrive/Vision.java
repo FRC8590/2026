@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSource;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import java.util.ArrayList;
@@ -328,6 +330,8 @@ public class Vision {
 
     private double timerOffset = 0;
 
+    private CvSource cameraSource;
+
     /**
      * Construct a Photon Camera class with help. Standard deviations are fake
      * values, experiment and determine
@@ -348,6 +352,7 @@ public class Vision {
       latencyAlert = new Alert("'" + name + "' Camera is experiencing high latency.", AlertType.kWarning);
 
       camera = new PhotonCamera(name);
+      System.out.println("Added camera " + name);
       // Shuffleboard.getTab("Vision").addCamera(name, name, "https://")
 
       // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
@@ -377,6 +382,28 @@ public class Vision {
         cameraProp.setLatencyStdDevMs(5);
         this.cameraSim = new PhotonCameraSim(camera, cameraProp);
         visionSim.addCamera(cameraSim, new Transform3d(robotToCamTranslation, robotToCamRotation));
+
+        cameraSource = CameraServer.putVideo(name, 640, 480);
+        // For simulations, we need a background thread to manually publish each
+        // frame.
+        new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                var frame = cameraSim.getVideoSimFrameRaw();
+
+                if (frame != null) {
+                  cameraSource.putFrame(frame);
+                }
+
+                try {
+                    Thread.sleep(20); // ~50 FPS
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }).start();
+        Shuffleboard
+            .getTab("Drive")
+            .add(cameraSource);
       }
     }
 
