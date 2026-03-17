@@ -21,6 +21,7 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -66,14 +67,11 @@ public class SwerveSubsystem extends SubsystemBase {
    * AprilTag field layout.
    */
   public final AprilTagFieldLayout aprilTagFieldLayout = Constants.layout;
-  /**
-   * Enable vision odometry updates while driving.
-   */
-  private final boolean visionDriveTest = true;
 
   private double currentSpeed;
   private GenericEntry driveSpeedEntry;
   private GenericEntry currentShiftEntry;
+  private Field2d field = new Field2d();
 
   private final void initShuffleboard() {
     driveSpeedEntry = Shuffleboard.getTab("Drive")
@@ -87,6 +85,10 @@ public class SwerveSubsystem extends SubsystemBase {
         .withWidget(BuiltInWidgets.kNumberBar)
         .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
         .getEntry();
+
+    Shuffleboard.getTab("Drive")
+        .add("Current Pose", field)
+        .withWidget(BuiltInWidgets.kField);
   }
 
   /**
@@ -144,11 +146,9 @@ public class SwerveSubsystem extends SubsystemBase {
     // swerveDrive.pushOffsetsToEncoders(); // DEPRECATED, but might break things if
     // suggested replacement doesn't work
     swerveDrive.useExternalFeedbackSensor(); // we will see if this destroys things
-    if (visionDriveTest) {
-      // Stop the odometry thread if we are using vision that way we can synchronize
-      // updates better.
-      swerveDrive.stopOdometryThread();
-    }
+    // Stop the odometry thread if we are using vision that way we can synchronize
+    // updates better.
+    swerveDrive.stopOdometryThread();
     setupPathPlanner();
   }
 
@@ -174,10 +174,9 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // When vision is enabled we must manually update odometry in SwerveDrive
-    if (visionDriveTest) {
-      swerveDrive.updateOdometry();
-      //Constants.vision.updatePoseEstimation(swerveDrive);
-    }
+    swerveDrive.updateOdometry();
+    Constants.vision.updatePoseEstimation(swerveDrive);
+    field.setRobotPose(getPose());
   }
 
   @Override
