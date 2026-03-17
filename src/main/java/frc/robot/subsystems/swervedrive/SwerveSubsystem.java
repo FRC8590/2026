@@ -484,23 +484,25 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /* Increase the current speed. */
   public Command shiftUp() {
-    return run(() -> {
+    return runOnce(() -> {
       if (currentSpeed == Constants.MAX_SPEED) {
         System.err.println("Swerve is already at max speed, cannot accelerate");
       } else {
         currentShiftEntry.setDouble(++currentSpeed);
+        swerveDrive.setMaximumAllowableSpeeds(currentSpeed, swerveDrive.getMaximumChassisAngularVelocity());
       }
     });
   }
 
   /* Decrease the current speed. */
   public Command shiftDown() {
-    return run(() -> {
+    return runOnce(() -> {
       assert (currentSpeed > 0);
       if (currentSpeed == 1) {
         System.err.println("Cannot make the swerves any slower");
       } else {
         currentShiftEntry.setDouble(--currentSpeed);
+        swerveDrive.setMaximumAllowableSpeeds(currentSpeed, swerveDrive.getMaximumChassisAngularVelocity());
       }
     });
   }
