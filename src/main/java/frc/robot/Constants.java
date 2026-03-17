@@ -61,6 +61,8 @@ public final class Constants {
             new Translation3d(0, 0, Units.inchesToMeters(14)),
             ROBOT_MASS);
 
+    public static final double SHOOTER_MAX_RPM = 6784;
+
     // Control Loop Timing
     public static final double LOOP_TIME = 0.05; // seconds
     public static final double DEFAULT_SPEED = 6.0; // meters per second
