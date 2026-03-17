@@ -56,7 +56,6 @@ public class Shooter extends SubsystemBase {
     }
 
     private void setGoalRPM (double rpm) {
-        System.out.println("Set shooter goal RPM to " + rpm);
         goalRPM = rpm;
     }
 
@@ -104,7 +103,7 @@ public class Shooter extends SubsystemBase {
         frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
         backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
 
-        goalRPM = SmartDashboard.getNumber("Shooter Speed", goalRPM);
+        //goalRPM = SmartDashboard.getNumber("Shooter Speed", goalRPM);
         SmartDashboard.putNumber("Set Shooter Speed ", goalRPM);
         SmartDashboard.putNumber("Front Motor RPM ", frontMotor.getEncoder().getVelocity());
         SmartDashboard.putNumber("Back Motor RPM ", backMotor.getEncoder().getVelocity());

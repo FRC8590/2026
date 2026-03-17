@@ -42,8 +42,8 @@ public class Intake extends SubsystemBase {
     private double kcos = 0.45;
     private double kcosratio = 1;
                                     // also kcos messing things up
-    private double goalUpRadians = 0.744873;
-    private double goalDownRadians = 0;
+    private double goalUpRadians = 0.72;
+    private double goalDownRadians = -0.1;
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
 
