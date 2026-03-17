@@ -6,6 +6,8 @@ package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import edu.wpi.first.math.controller.PIDController;
+
 import swervelib.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -298,49 +300,48 @@ public class SwerveSubsystem extends SubsystemBase {
    *
    * @return A {@link Command} which will run the alignment.
    */
-  public Command aimAtTarget() {
-    return run(() -> {
-      int primaryId;
-      int secondaryId;
 
-      if (isRedAlliance()) {
-        primaryId = 9;
-        secondaryId = 10;
-      } else {
-        primaryId = 25;
-        secondaryId = 26;
-      }
+  public Command aimAtTarget() {
+    // P=3.0 is a starting point; increase if it's too slow, decrease if it
+    // oscillates.
+    PIDController headingController = new PIDController(3.0, 0, 0);
+    headingController.enableContinuousInput(-Math.PI, Math.PI);
+    headingController.setTolerance(Units.degreesToRadians(2.0)); // 2 degree tolerance
+
+    return run(() -> {
+      int primaryId = isRedAlliance() ? 9 : 25;
+      int secondaryId = isRedAlliance() ? 10 : 26;
 
       Optional<Pose2d> result = Constants.vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
-      if (result.isPresent()) {
-        // Peter: This is primarily a bunch of math stuff that I stole and
-        // don't understand.
-        Pose2d targetPose = result.get();
 
-        // Vector from robot to target
+      if (result.isPresent()) {
+        Pose2d targetPose = result.get();
         Translation2d delta = targetPose.getTranslation().minus(getPose().getTranslation());
         Rotation2d angleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
 
-        // Smoothen vision
-        filteredAngle = filteredAngle.interpolate(angleToTarget, 0.1);
+        filteredAngle = angleToTarget;
+        // TODO: Peter: We should invalidate the angle after some time
         lastAngle = Optional.of(filteredAngle);
       }
 
-      if (!lastAngle.isPresent()) {
+      if (lastAngle.isEmpty()) {
+        // Stop if we can't see anything
+        drive(new ChassisSpeeds(0, 0, 0));
         return;
       }
 
-      // Peter: TODO: We should invalidate the last angle after some time
-      double error = getHeading().minus(lastAngle.get()).getRadians();
+      // This returns a radians-per-second value based on the error
+      double rotationSpeed = headingController.calculate(
+          getHeading().getRadians(),
+          lastAngle.get().getRadians());
 
-      // Stop if within ~3 degrees
-      if (Math.abs(error) < 0.05) {
-          drive(new ChassisSpeeds(0, 0, 0));
-          return;
-      }
+      drive(new ChassisSpeeds(0, 0, rotationSpeed));
 
-      drive(getTargetSpeeds(0, 0, lastAngle.get()));
-    });
+    })
+        // Ensure robot stops when command ends
+        .finallyDo(() -> drive(new ChassisSpeeds(0, 0, 0)))
+        // Automatically end when aligned
+        .until(headingController::atSetpoint);
   }
 
   /**
