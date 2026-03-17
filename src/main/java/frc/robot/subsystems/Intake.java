@@ -99,7 +99,6 @@ public class Intake extends SubsystemBase {
 
         intakeEntry = Shuffleboard.getTab("Intake").add("Position", 0).getEntry();
         pivotAngleEntry = Shuffleboard.getTab("Intake").add("Pivot Angle", 0).getEntry();
-
     }
 
     /**
@@ -121,8 +120,8 @@ public class Intake extends SubsystemBase {
     }
 
     private void up() {
-        //intakeMotor.set(0);
         System.out.println("Intake up");
+        // intakeMotor.set(0);
         setGoal(goalUpRadians);
     }
 
@@ -131,7 +130,6 @@ public class Intake extends SubsystemBase {
         System.out.println("Intake down");
         setGoal(goalDownRadians);
     }
-
 
     private void run() {
         if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
