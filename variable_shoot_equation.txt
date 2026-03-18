@@ -1,0 +1,1 @@
+rpm = 7.02381 * dist in inches + 1237.14286
