@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
@@ -31,14 +32,12 @@ public class Shooter extends SubsystemBase {
 
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
 
-    /**cV: cruiseVelocity. mA: maxAcceleration */
+    /** cV: cruiseVelocity. mA: maxAcceleration */
     private double goalRPM = 0, p, i, d, kA, kV, cV, mA;
 
     private GenericEntry targRPMEntry;
     private GenericEntry currRPMFrontEntry;
     private GenericEntry currRPMBackEntry;
-
-
 
     public Shooter() {
         p = 0.0001;
@@ -47,21 +46,21 @@ public class Shooter extends SubsystemBase {
         kA = 0;
         kV = 0.0019;
         cV = 6700;
-        mA = 4000; //todo increase
+        mA = 4000; // todo increase
 
         shooterConfig // configure motors
-            .inverted(false)
-            .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(60)
-            .closedLoopRampRate(0.001); //todo look at this
+                .inverted(false)
+                .idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(60)
+                .closedLoopRampRate(0.001); // todo look at this
         shooterConfig.closedLoop // configure PID
-            .pid(p,i,d);
+                .pid(p, i, d);
         shooterConfig.closedLoop.feedForward
-            .kA(kA)
-            .kV(kV);
+                .kA(kA)
+                .kV(kV);
         shooterConfig.closedLoop.maxMotion // configure maxMotion
-            .cruiseVelocity(cV)
-            .maxAcceleration(mA);
+                .cruiseVelocity(cV)
+                .maxAcceleration(mA);
 
         frontMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -73,11 +72,15 @@ public class Shooter extends SubsystemBase {
         // Shuffleboard setup
         ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
 
-        ShuffleboardLayout shooterLayout = shooterTab.getLayout("Shooter", BuiltInLayouts.kGrid).withSize(2, 2).withPosition(4, 0);
-        SimpleWidget currRPMFrontWidget =  shooterLayout.add("Front motor RPM", 0).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 1);
-        SimpleWidget currRPMBackWidget =   shooterLayout.add("Back motor RPM", 0).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(1, 1);
-        SimpleWidget targRPMWidget =       shooterLayout.add("Target RPM", 0).withWidget(BuiltInWidgets.kDial).withProperties(Map.of("min", 0, "max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 0);
-       
+        ShuffleboardLayout shooterLayout = shooterTab.getLayout("Shooter", BuiltInLayouts.kGrid).withSize(2, 2)
+                .withPosition(4, 0);
+        SimpleWidget currRPMFrontWidget = shooterLayout.add("Front motor RPM", 0).withWidget(BuiltInWidgets.kDial)
+                .withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 1);
+        SimpleWidget currRPMBackWidget = shooterLayout.add("Back motor RPM", 0).withWidget(BuiltInWidgets.kDial)
+                .withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(1, 1);
+        SimpleWidget targRPMWidget = shooterLayout.add("Target RPM", 0).withWidget(BuiltInWidgets.kDial)
+                .withProperties(Map.of("min", 0, "max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 0);
+
         currRPMFrontEntry = currRPMFrontWidget.getEntry();
         currRPMBackEntry = currRPMBackWidget.getEntry();
 
@@ -85,44 +88,52 @@ public class Shooter extends SubsystemBase {
 
     }
 
-    private void setGoalRPM (double rpm) {
+    private void setGoalRPM(double rpm) {
         System.out.println("Set shooter goal RPM to " + rpm);
         goalRPM = rpm;
     }
 
-    public double distanceToRPM ()
-    {
+    public double distanceToRPM() {
         return 0;
     }
 
     /**
-     * If the average RPM of the front and back shooter motors is at or above the goal RPM
+     * If the average RPM of the front and back shooter motors is at or above the
+     * goal RPM
+     * 
      * @return true if average RPM is at or above goal RPM
      */
-    public boolean atRPM ()
-    {
+    public boolean atRPM() {
         System.out.println("DEBUG " + goalRPM);
         return (frontMotor.getEncoder().getVelocity() + backMotor.getEncoder().getVelocity()) / 2 >= goalRPM;
     }
 
     /**
-     * Change the goal RPM of the shooter. If rpm is greater than 6784, goal RPM is not changed.
+     * Change the goal RPM of the shooter. If rpm is greater than 6784, goal RPM is
+     * not changed.
+     * 
      * @param rpm rotations per minute you want the shooter to run at
      * @return command that sets the goal RPM
      */
-    public Command shooterSetGoalRPM (double rpm)
-    {
-        if (rpm > Constants.SHOOTER_MAX_RPM) return run(()->setGoalRPM(goalRPM));
-        return runOnce(()->setGoalRPM (rpm));
+    public Command shooterSetGoalRPM(double rpm) {
+        if (rpm > Constants.SHOOTER_MAX_RPM)
+            return run(() -> setGoalRPM(goalRPM));
+        return runOnce(() -> {
+            if (Robot.isSimulation()) {
+                // TODO: Peter: Tune this based on the regression model
+                Constants.vision.simulateShoot(4, 60);
+            }
+            setGoalRPM(rpm);
+        });
     }
 
     /**
      * Sets the goal RPM to zero
+     * 
      * @return command that sets the goal RPM to 0
      */
-    public Command shooterStop ()
-    {
-        return runOnce(()->setGoalRPM(0));
+    public Command shooterStop() {
+        return runOnce(() -> setGoalRPM(0));
     }
 
     /**
