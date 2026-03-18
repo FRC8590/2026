@@ -149,8 +149,7 @@ public class RobotContainer {
         .getEntry();
     SmartDashboard.putData("Auto choices", m_chooser);
     m_chooser.setDefaultOption("Do Nothing", "nada");
-    // Riley TODO: This puts the option twice i think
-    // m_chooser.addOption("Do nothing", "nada");
+    m_chooser.addOption("Sample Auto", "Sample Auto");
     m_chooser.addOption("red top", "red top");
     m_chooser.addOption("red mid", "red mid");
     m_chooser.addOption("red bot", "red bot");
