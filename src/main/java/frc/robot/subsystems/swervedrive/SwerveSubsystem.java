@@ -29,8 +29,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -41,6 +44,7 @@ import frc.robot.Systems;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Format;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -75,18 +79,50 @@ public class SwerveSubsystem extends SubsystemBase {
   private GenericEntry driveSpeedEntry;
   private GenericEntry currentShiftEntry;
 
+  private SwerveModule[]   swerveModules;
+  private GenericEntry[][] swerveEntries;
+
   private final void initShuffleboard() {
-    driveSpeedEntry = Shuffleboard.getTab("Drive")
-        .add("Speed", 0)
-        .withWidget(BuiltInWidgets.kDial)
-        .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+    swerveModules = swerveDrive.getModules();
+    swerveEntries = new GenericEntry[swerveModules.length][2];
+
+    ShuffleboardTab driveTab = Shuffleboard.getTab("Drive");
+
+    ShuffleboardLayout moduleLayout = driveTab
+      .getLayout("Modules", BuiltInLayouts.kGrid)
+      .withPosition(1,0).withSize(6, 3)
+      .withProperties(Map.of("numberofcolumns",4,"numberofrows",1));
+    for(int i = 0; i < swerveModules.length; i++){
+      
+      ShuffleboardLayout currentLayout = moduleLayout.getLayout(String.format("Module %1d", i), BuiltInLayouts.kGrid).withProperties(Map.of("numberofcolumns",1,"numberofrows",2));
+
+      swerveEntries[i][1] = currentLayout
+        .add("Angle motor RPM", 0)
+        .withPosition(0, 1)
         .getEntry();
 
-    currentShiftEntry = Shuffleboard.getTab("Drive")
-        .add("Target Speed", Constants.DEFAULT_SPEED)
-        .withWidget(BuiltInWidgets.kNumberBar)
-        .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+      swerveEntries[i][0] = currentLayout
+        .add("Drive motor RPM", 0)
+        .withPosition(0, 0)
         .getEntry();
+      
+    }
+
+    driveSpeedEntry = Shuffleboard.getTab("Drive")
+      .add("Speed", 0)
+      .withWidget(BuiltInWidgets.kDial)
+      .withSize(1, 1)
+      .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+      .withPosition(0, 0)
+      .getEntry();
+
+    currentShiftEntry = Shuffleboard.getTab("Drive")
+      .add("Target Speed", Constants.DEFAULT_SPEED)
+      .withWidget(BuiltInWidgets.kNumberBar)
+      .withSize(1, 1)
+      .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+      .withPosition(0, 1)
+      .getEntry();
   }
 
   /**
@@ -95,7 +131,6 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param directory Directory of swerve drive config files.
    */
   public SwerveSubsystem(File directory) {
-    initShuffleboard();
 
     // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
     // In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
@@ -150,6 +185,9 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.stopOdometryThread();
     }
     setupPathPlanner();
+
+    initShuffleboard();
+
   }
 
   /**
@@ -177,6 +215,12 @@ public class SwerveSubsystem extends SubsystemBase {
     if (visionDriveTest) {
       swerveDrive.updateOdometry();
       //Constants.vision.updatePoseEstimation(swerveDrive);
+    }
+
+    for(int i = 0; i < swerveModules.length; i++){
+      swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity());
+      swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity());
+
     }
   }
 
