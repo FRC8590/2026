@@ -105,7 +105,7 @@ public class Shooter extends SubsystemBase {
      */
     public boolean atRPM() {
         System.out.println("DEBUG " + goalRPM);
-        return (frontMotor.getEncoder().getVelocity() + backMotor.getEncoder().getVelocity()) / 2 >= goalRPM;
+        return (frontMotor.getEncoder().getVelocity() + backMotor.getEncoder().getVelocity()) / 2 >= goalRPM - 100;
     }
 
     /**

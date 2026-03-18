@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import frc.robot.commands.Shoot;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import swervelib.SwerveInputStream;
 
@@ -216,7 +218,7 @@ public class RobotContainer {
     // driverXbox.a().whileFalse(Constants.belt.beltStop());
     // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
     // driverXbox.a().whileFalse(Constants.belt.indexerStop());
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
+    driverXbox.rightTrigger().whileTrue(new Shoot());
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
 
     driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
