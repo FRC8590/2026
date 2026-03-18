@@ -6,7 +6,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -148,9 +147,9 @@ public class Robot extends TimedRobot {
       System.out.println("Cancelling auto command");
       m_autonomousCommand.cancel();
     } else {
-      System.out.println("Cancelling all commands");
-      System.out.println(CommandScheduler.getInstance());
-      CommandScheduler.getInstance().cancelAll();
+      //System.out.println("Cancelling all commands");
+      //System.out.println(CommandScheduler.getInstance());
+      //CommandScheduler.getInstance().cancelAll();
     }
     m_robotContainer.setDriveMode();
   }

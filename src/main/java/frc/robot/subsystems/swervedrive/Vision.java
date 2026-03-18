@@ -235,7 +235,6 @@ public class Vision {
         swerveDrive.addVisionMeasurement(pose.estimatedPose.toPose2d(),
             pose.timestampSeconds,
             camera.curStdDevs);
-        // System.out.println("vision estimation added");
         SmartDashboard.putNumber("poseX", pose.estimatedPose.toPose2d().getX());
         SmartDashboard.putNumber("poseY", pose.estimatedPose.toPose2d().getY());
 
@@ -336,22 +335,25 @@ public class Vision {
 
     // This is where the cameras are created, with their name and and position
     // relative to the robot's center
-    /** Last updated on [3/18/2026] by [Riley W.].
+    /**
+     * Last updated on [3/18/2026] by [Riley W.].
      * CAD positions(in.) and rotations(degrees):
      * X: -7.491
      * Y: 8.427
      * Z: -17.923
      * A: 29
      */
-    RIGHT_CAM("right", // 29 degrees is aplied to yaw instead of pitch because of the 90* rotation of the camera
-        new Rotation3d(Units.degreesToRadians(90),0,-Units.degreesToRadians(29)),
+    RIGHT_CAM("right", // 29 degrees is aplied to yaw instead of pitch because of the 90* rotation of
+                       // the camera
+        new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0),
         new Translation3d(
-            Units.inchesToMeters(-7.491),
+            Units.inchesToMeters(7.491),
             Units.inchesToMeters(8.427),
             Units.inchesToMeters(17.923)),
         VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
 
-    /** Last updated on [3/18/2026] by [Riley W.].
+    /**
+     * Last updated on [3/18/2026] by [Riley W.].
      * CAD positions(in.) and rotations(degrees):
      * X: -7.491
      * Y: -8.427
@@ -359,7 +361,7 @@ public class Vision {
      * A: 29
      */
     LEFT_CAM("left",
-        new Rotation3d(0,-Units.degreesToRadians(29),0),
+        new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0),
         new Translation3d(
             Units.inchesToMeters(-7.491),
             Units.inchesToMeters(-8.427),
@@ -468,13 +470,6 @@ public class Vision {
         this.cameraSim = new PhotonCameraSim(camera, cameraProp);
         this.cameraSim.enableDrawWireframe(true);
         visionSim.addCamera(cameraSim, new Transform3d(robotToCamTranslation, robotToCamRotation));
-      } else {
-        String url = "http://photonvision.local:1182/?action=stream&cameraName=" + name;
-
-        Shuffleboard.getTab("Drive")
-            .add(name, url)
-            .withSize(6, 4)
-            .withWidget(BuiltInWidgets.kCameraStream);
       }
     }
 

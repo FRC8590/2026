@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Constants;
 import frc.robot.Systems;
+import frc.robot.subsystems.swervedrive.Vision.Cameras;
 
 import java.io.File;
 import java.io.IOException;
@@ -180,7 +181,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // When vision is enabled we must manually update odometry in SwerveDrive
     swerveDrive.updateOdometry();
     Constants.vision.updatePoseEstimation(swerveDrive);
-    field.setRobotPose(getPose());
+    field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
   }
 
   @Override
@@ -293,9 +294,6 @@ public class SwerveSubsystem extends SubsystemBase {
     return new double[] { angleMotor.getMotorTemperature(), driveMotor.getMotorTemperature() };
   }
 
-  private Rotation2d filteredAngle = new Rotation2d();
-  private Optional<Rotation2d> lastAngle = Optional.empty();
-
   /**
    * Aim the robot at the target returned by PhotonVision.
    *
@@ -303,9 +301,9 @@ public class SwerveSubsystem extends SubsystemBase {
    */
 
   public Command aimAtTarget() {
-    PIDController headingController = new PIDController(4, 0, 0);
+    PIDController headingController = new PIDController(5, 0, 0);
     headingController.enableContinuousInput(-Math.PI, Math.PI);
-    headingController.setTolerance(Units.degreesToRadians(2.0)); // 2 degree tolerance
+    headingController.setTolerance(Units.degreesToRadians(0.5));
 
     return run(() -> {
       int primaryId = isRedAlliance() ? 10 : 26;
@@ -313,32 +311,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
       if (result.isPresent()) {
         Pose2d targetPose = result.get();
-        Translation2d delta = targetPose.getTranslation().minus(getPose().getTranslation());
-        Rotation2d angleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
-
-        filteredAngle = angleToTarget;
-        // TODO: Peter: We should invalidate the angle after some time
-        lastAngle = Optional.of(filteredAngle);
+        double rotationSpeed = headingController.calculate(targetPose.getRotation().getRadians(), 0);
+        System.out.println("Aiming at pose: " + targetPose + ". Rotation speed: " + rotationSpeed);
+        drive(new ChassisSpeeds(0, 0, rotationSpeed));
       }
-
-      if (lastAngle.isEmpty()) {
-        // Stop if we can't see anything
-        drive(new ChassisSpeeds(0, 0, 0));
-        return;
-      }
-
-      // This returns a radians-per-second value based on the error
-      double rotationSpeed = headingController.calculate(
-          getHeading().getRadians(),
-          lastAngle.get().getRadians());
-
-      // If we are within range, send 0 speed to prevent shaking
-      if (headingController.atSetpoint()) {
-          rotationSpeed = 0;
-      }
-
-      drive(new ChassisSpeeds(0, 0, rotationSpeed));
-
     })
         // Ensure robot stops when command ends
         .finallyDo(() -> drive(new ChassisSpeeds(0, 0, 0)))
