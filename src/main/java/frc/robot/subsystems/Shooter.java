@@ -121,7 +121,7 @@ public class Shooter extends SubsystemBase {
         return runOnce(() -> {
             if (Robot.isSimulation()) {
                 // TODO: Peter: Tune this based on the regression model
-                Constants.vision.simulateShoot(4, 60);
+                Constants.vision.simulateShoot(8, 29);
             }
             setGoalRPM(rpm);
         });
