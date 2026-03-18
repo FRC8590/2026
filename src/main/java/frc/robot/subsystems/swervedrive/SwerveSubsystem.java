@@ -303,15 +303,12 @@ public class SwerveSubsystem extends SubsystemBase {
    */
 
   public Command aimAtTarget() {
-    // P=3.0 is a starting point; increase if it's too slow, decrease if it
-    // oscillates.
-    PIDController headingController = new PIDController(1.5, 0.3, 0);
+    PIDController headingController = new PIDController(4, 0, 0);
     headingController.enableContinuousInput(-Math.PI, Math.PI);
-    headingController.setTolerance(Units.degreesToRadians(4.0)); // 2 degree tolerance
+    headingController.setTolerance(Units.degreesToRadians(2.0)); // 2 degree tolerance
 
     return run(() -> {
-      int primaryId = isRedAlliance() ? 9 : 25;
-
+      int primaryId = isRedAlliance() ? 10 : 26;
       Optional<Pose2d> result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
 
       if (result.isPresent()) {
