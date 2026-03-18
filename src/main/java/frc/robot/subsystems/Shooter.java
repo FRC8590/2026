@@ -89,7 +89,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private void setGoalRPM(double rpm) {
-        System.out.println("Set shooter goal RPM to " + rpm);
+        targRPMEntry.setDouble(rpm);
         goalRPM = rpm;
     }
 
@@ -118,7 +118,7 @@ public class Shooter extends SubsystemBase {
     public Command shooterSetGoalRPM(double rpm) {
         if (rpm > Constants.SHOOTER_MAX_RPM)
             return run(() -> setGoalRPM(goalRPM));
-        return runOnce(() -> {
+        return run(() -> {
             if (Robot.isSimulation()) {
                 // TODO: Peter: Tune this based on the regression model
                 Constants.vision.simulateShoot(8, 29);
@@ -133,7 +133,7 @@ public class Shooter extends SubsystemBase {
      * @return command that sets the goal RPM to 0
      */
     public Command shooterStop() {
-        return runOnce(() -> setGoalRPM(0));
+        return run(() -> setGoalRPM(0));
     }
 
     /**

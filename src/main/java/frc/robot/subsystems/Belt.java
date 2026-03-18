@@ -114,7 +114,7 @@ public class Belt extends SubsystemBase {
      * @return Command that sets the belt motor to max speed
      */
     public Command beltRun() {
-        return runOnce(() -> runBelt());
+        return run(() -> runBelt());
     }
 
     /**
@@ -123,37 +123,37 @@ public class Belt extends SubsystemBase {
      * @return Command that stops the belt motor
      */
     public Command beltStop () {
-        return runOnce(() -> stopBelt());
+        return run(() -> stopBelt());
     }
 
     public Command beltRunReversed ()
     {
-        return runOnce(()-> runBeltReversed());
+        return run(()-> runBeltReversed());
     }
 
     public Command indexerRun ()
     {
-        return runOnce(()-> runIndexer());
+        return run(()-> runIndexer());
     }
 
     public Command indexerStop ()
     {
-        return runOnce(()->stopIndexer());
+        return run(()->stopIndexer());
     }
 
     public Command indexerRunReversed ()
     {
-        return runOnce(()->runIndexerReversed());
+        return run(()->runIndexerReversed());
     }
 
     public Command beltAndIndexerRun ()
     {
-        return runOnce(()->runBeltAndIndexer());
+        return run(()->runBeltAndIndexer());
     }
 
     public Command beltAndIndexerStop ()
     {
-        return runOnce(()->stopBeltAndIndexer());
+        return run(()->stopBeltAndIndexer());
     }
 
     @Override
