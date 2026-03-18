@@ -357,6 +357,8 @@ public class SwerveSubsystem extends SubsystemBase {
         double rotationSpeed = headingController.calculate(targetPose.getRotation().getRadians(), 0);
         System.out.println("Aiming at pose: " + targetPose + ". Rotation speed: " + rotationSpeed);
         drive(new ChassisSpeeds(0, 0, rotationSpeed));
+      } else {
+        drive(new ChassisSpeeds(0, 0, 0));
       }
     })
         // Ensure robot stops when command ends
