@@ -267,17 +267,34 @@ public class Vision {
 
     // This is where the cameras are created, with their name and and position
     // relative to the robot's center
-    RIGHT_CAM("right",
-        new Rotation3d(Units.degreesToRadians(90), 0, Units.degreesToRadians(0)),
-        new Translation3d(Units.inchesToMeters(5),
-            Units.inchesToMeters(-1.5),
-            Units.inchesToMeters(12.5)),
+    /** Last updated on [3/18/2026] by [Riley W.].
+     * CAD positions(in.) and rotations(degrees):
+     * X: -7.491
+     * Y: 8.427
+     * Z: -17.923
+     * A: 29
+     */
+    RIGHT_CAM("right", // 29 degrees is aplied to yaw instead of pitch because of the 90* rotation of the camera
+        new Rotation3d(Units.degreesToRadians(90),0,Units.degreesToRadians(29)),
+        new Translation3d(
+            Units.inchesToMeters(-7.491),
+            Units.inchesToMeters(8.427),
+            Units.inchesToMeters(-17.923)),
         VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+
+    /** Last updated on [3/18/2026] by [Riley W.].
+     * CAD positions(in.) and rotations(degrees):
+     * X: -7.491
+     * Y: -8.427
+     * Z: -17.923
+     * A: 29
+     */
     LEFT_CAM("left",
-        new Rotation3d(0, 0, Units.degreesToRadians(0)),
-        new Translation3d(Units.inchesToMeters(5.5),
-            Units.inchesToMeters(11),
-            Units.inchesToMeters(12.5)),
+        new Rotation3d(0,Units.degreesToRadians(29),0),
+        new Translation3d(
+            Units.inchesToMeters(-7.491),
+            Units.inchesToMeters(-8.427),
+            Units.inchesToMeters(-17.923)),
         VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
 
     /**
