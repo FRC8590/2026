@@ -148,16 +148,15 @@ public class RobotContainer {
         .withWidget(BuiltInWidgets.kBooleanBox)
         .getEntry();
     SmartDashboard.putData("Auto choices", m_chooser);
-     m_chooser.setDefaultOption("Do Nothing", "nada");
-     m_chooser.addOption("Do nothing", "nada");
-     m_chooser.addOption("red top", "red top");
-     m_chooser.addOption("red mid", "red mid");
-     m_chooser.addOption("red bot", "red bot");
-     m_chooser.addOption("blue top", "blue top");
-     m_chooser.addOption("blue mid", "blue mid");
-     m_chooser.addOption("blue bot", "blue bot");
-
-    // new IntakeDown().schedule();
+    m_chooser.setDefaultOption("Do Nothing", "nada");
+    // Riley TODO: This puts the option twice i think
+    // m_chooser.addOption("Do nothing", "nada");
+    m_chooser.addOption("red top", "red top");
+    m_chooser.addOption("red mid", "red mid");
+    m_chooser.addOption("red bot", "red bot");
+    m_chooser.addOption("blue top", "blue top");
+    m_chooser.addOption("blue mid", "blue mid");
+    m_chooser.addOption("blue bot", "blue bot");
 
     // Initialize with proper alliance orientation
     NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
@@ -169,14 +168,19 @@ public class RobotContainer {
 
   }
 
+  /**
+   * Riley: Looks like another Joseff special over here. Appears to return 1 or -1
+   * to invert controlls for red vs blue alliance
+   * 
+   * @return 1 if red side, -1 if blue side
+   */
   public int getSide() {
-
-    //if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
-     // return 1;
-    //} else {
+    if (DriverStation.getAlliance().isPresent() &&
+        DriverStation.getAlliance().get() == Alliance.Red) {
+      return 1;
+    } else {
       return -1;
-    //}
-
+    }
   }
 
   /**
@@ -194,18 +198,16 @@ public class RobotContainer {
    */
   private void configureBindings() {
     Constants.drivebase.setDefaultCommand(
-      RobotBase.isSimulation()
-        ? driveFieldOrientedAngularVelocitySim
-        : driveFieldOrientedAnglularVelocity
-    );
+        RobotBase.isSimulation()
+            ? driveFieldOrientedAngularVelocitySim
+            : driveFieldOrientedAnglularVelocity);
 
     driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
     driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
-  
+
     driverXbox.x().whileTrue(Constants.intake.intakeDown());
     driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
     driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
-
 
     driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
     driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
@@ -221,14 +223,12 @@ public class RobotContainer {
     driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
   }
 
-  /*
+  /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
-   * @ret
-   * urn the command to run in autonomous
+   * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
     String selectedAuto = m_chooser.getSelected();
     return Constants.drivebase.getAutonomousCommand(selectedAuto);
 

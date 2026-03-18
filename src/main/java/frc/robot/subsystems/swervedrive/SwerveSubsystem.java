@@ -6,6 +6,8 @@ package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import edu.wpi.first.math.controller.PIDController;
+
 import swervelib.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -21,6 +23,8 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -70,10 +74,6 @@ public class SwerveSubsystem extends SubsystemBase {
    * AprilTag field layout.
    */
   public final AprilTagFieldLayout aprilTagFieldLayout = Constants.layout;
-  /**
-   * Enable vision odometry updates while driving.
-   */
-  private final boolean visionDriveTest = true;
 
   private double currentSpeed;
   private GenericEntry driveSpeedEntry;
@@ -81,6 +81,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private SwerveModule[]   swerveModules;
   private GenericEntry[][] swerveEntries;
+  private Field2d field = new Field2d();
 
   private final void initShuffleboard() {
     swerveModules = swerveDrive.getModules();
@@ -123,6 +124,11 @@ public class SwerveSubsystem extends SubsystemBase {
       .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
       .withPosition(0, 1)
       .getEntry();
+
+    Shuffleboard.getTab("Drive")
+        .add("Current Pose", field)
+        .withSize(4, 2)
+        .withWidget(BuiltInWidgets.kField);
   }
 
   /**
@@ -179,11 +185,9 @@ public class SwerveSubsystem extends SubsystemBase {
     // swerveDrive.pushOffsetsToEncoders(); // DEPRECATED, but might break things if
     // suggested replacement doesn't work
     swerveDrive.useExternalFeedbackSensor(); // we will see if this destroys things
-    if (visionDriveTest) {
-      // Stop the odometry thread if we are using vision that way we can synchronize
-      // updates better.
-      swerveDrive.stopOdometryThread();
-    }
+    // Stop the odometry thread if we are using vision that way we can synchronize
+    // updates better.
+    swerveDrive.stopOdometryThread();
     setupPathPlanner();
 
     initShuffleboard();
@@ -212,10 +216,9 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // When vision is enabled we must manually update odometry in SwerveDrive
-    if (visionDriveTest) {
-      swerveDrive.updateOdometry();
-      //Constants.vision.updatePoseEstimation(swerveDrive);
-    }
+    swerveDrive.updateOdometry();
+    Constants.vision.updatePoseEstimation(swerveDrive);
+    field.setRobotPose(getPose());
 
     for(int i = 0; i < swerveModules.length; i++){
       swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity());
@@ -228,8 +231,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
   }
 
-  private void updateSpeed(ChassisSpeeds speeds)
-  {
+  private void updateSpeed(ChassisSpeeds speeds) {
     driveSpeedEntry.setDouble(Math.abs(speeds.vxMetersPerSecond));
   }
 
@@ -335,33 +337,61 @@ public class SwerveSubsystem extends SubsystemBase {
     return new double[] { angleMotor.getMotorTemperature(), driveMotor.getMotorTemperature() };
   }
 
+  private Rotation2d filteredAngle = new Rotation2d();
+  private Optional<Rotation2d> lastAngle = Optional.empty();
+
   /**
    * Aim the robot at the target returned by PhotonVision.
    *
    * @return A {@link Command} which will run the alignment.
    */
-  public Command aimAtTarget() {
-    return runOnce(() -> {
-      System.out.println("Aiming at target (requires vision)");
-      int primaryId;
-      int secondaryId;
 
-      if (isRedAlliance()) {
-        primaryId = 9;
-        secondaryId = 10;
-      } else {
-        primaryId = 25;
-        secondaryId = 26;
-      }
+  public Command aimAtTarget() {
+    // P=3.0 is a starting point; increase if it's too slow, decrease if it
+    // oscillates.
+    PIDController headingController = new PIDController(2.5, 0.3, 0);
+    headingController.enableContinuousInput(-Math.PI, Math.PI);
+    headingController.setTolerance(Units.degreesToRadians(4.0)); // 2 degree tolerance
+
+    return run(() -> {
+      int primaryId = isRedAlliance() ? 9 : 25;
+      int secondaryId = isRedAlliance() ? 10 : 26;
 
       Optional<Pose2d> result = Constants.vision.getBestDoubleTagPoseEstimate(primaryId, secondaryId);
-      if (result.isEmpty()) {
-        // Nothing was found :(
+
+      if (result.isPresent()) {
+        Pose2d targetPose = result.get();
+        Translation2d delta = targetPose.getTranslation().minus(getPose().getTranslation());
+        Rotation2d angleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
+
+        filteredAngle = angleToTarget;
+        // TODO: Peter: We should invalidate the angle after some time
+        lastAngle = Optional.of(filteredAngle);
+      }
+
+      if (lastAngle.isEmpty()) {
+        // Stop if we can't see anything
+        drive(new ChassisSpeeds(0, 0, 0));
         return;
       }
 
-      drive(getTargetSpeeds(0, 0, result.get().getRotation()));
-    });
+      // This returns a radians-per-second value based on the error
+      double rotationSpeed = headingController.calculate(
+          getHeading().getRadians(),
+          lastAngle.get().getRadians());
+
+      // If we are within range, send 0 speed to prevent shaking
+      if (headingController.atSetpoint()) {
+          rotationSpeed = 0;
+      }
+
+      drive(new ChassisSpeeds(0, 0, rotationSpeed));
+
+    })
+        // Ensure robot stops when command ends
+        .finallyDo(() -> drive(new ChassisSpeeds(0, 0, 0)))
+        // Automatically end when aligned
+        .until(headingController::atSetpoint);
   }
 
   /**
@@ -599,9 +629,8 @@ public class SwerveSubsystem extends SubsystemBase {
    *         available.
    */
   private boolean isRedAlliance() {
-   // var alliance = DriverStation.getAlliance();
-   // return alliance.isPresent()  ? alliance.get() == DriverStation.Alliance.Red : false;
-   return false;
+    var alliance = DriverStation.getAlliance();
+    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }
 
   /**
@@ -733,8 +762,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public Rotation2d getPitch() {
     return swerveDrive.getPitch();
   }
-  public Command ZeroGryo()
-  {
+
+  public Command ZeroGryo() {
     return run(() -> zeroGyroWithAlliance());
   }
 
@@ -781,8 +810,7 @@ public class SwerveSubsystem extends SubsystemBase {
               newSetpoint.feedforwards().linearForces());
           prevSetpoint.set(newSetpoint);
           previousTime.set(newTime);
-        }
-    );
+        });
   }
 
   /**

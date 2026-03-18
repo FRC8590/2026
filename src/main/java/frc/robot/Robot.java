@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     instance = this;
-
+    //Riley TODO: Is this needed?
     //CameraServer.startAutomaticCapture();
   }
 
@@ -103,13 +103,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {
-
+  public void disabledPeriodic()
+  {
     if (disabledTimer.hasElapsed(Constants.DRIVE_CONSTANTS.wheelLockTime())) {
       disabledTimer.stop();
     }
     m_robotContainer.resetAndStop();
-
   }
 
   /**
@@ -119,17 +118,13 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     System.out.println("Robot in auto");
-    //Constants.drivebase.zeroGyroWithAlliance();
-
-    /*
-    Peter: FIXME: This breaks the comp it seems
+    
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-    */
 
   }
 

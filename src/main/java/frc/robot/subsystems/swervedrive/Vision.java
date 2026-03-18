@@ -20,10 +20,14 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSource;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import java.util.ArrayList;
@@ -35,9 +39,11 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import swervelib.SwerveDrive;
@@ -75,6 +81,16 @@ public class Vision {
   public EstimatedRobotPose estimatedVisionPose;
   private static VisionSystemSim visionSim;
 
+  private static VisionTargetSim ballSim;
+  private static VisionTargetSim hubSim;
+
+  // Physics state
+  private double ballVelocityX = 0;
+  private double ballVelocityZ = 0;
+  private Pose3d ballPose = new Pose3d(0, 0, 0, new Rotation3d());
+  private boolean isBallInFlight = false;
+  private double lastSimTime = 0;
+
   /**
    * Constructor for the Vision class.
    *
@@ -87,6 +103,61 @@ public class Vision {
     if (Robot.isSimulation()) {
       visionSim = new VisionSystemSim("main");
       visionSim.addAprilTags(fieldLayout);
+
+      // These measurements come directly from the game manual
+      TargetModel hubModel = new TargetModel(
+          Units.inchesToMeters(47),
+          Units.inchesToMeters(47),
+          Units.inchesToMeters(72));
+      hubSim = new VisionTargetSim(
+          new Pose3d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), 0, new Rotation3d()),
+          hubModel);
+      visionSim.addVisionTargets(hubSim);
+
+      TargetModel ballModel = new TargetModel(Units.inchesToMeters(5.91));
+      ballSim = new VisionTargetSim(new Pose3d(), ballModel);
+      visionSim.addVisionTargets(ballSim);
+    }
+  }
+
+  /** Simulate launching a ball from the current robot position */
+  public void simulateShoot(double velocityMPS, double angleDegrees) {
+    Pose2d robotPose = currentPose.get();
+    ballPose = new Pose3d(robotPose.getX(), robotPose.getY(), 0.5, new Rotation3d());
+
+    double angleRad = Math.toRadians(angleDegrees);
+    ballVelocityX = velocityMPS * Math.cos(angleRad);
+    ballVelocityZ = velocityMPS * Math.sin(angleRad);
+
+    isBallInFlight = true;
+    lastSimTime = Timer.getFPGATimestamp();
+  }
+
+  private void updateBallSim() {
+    if (!isBallInFlight)
+      return;
+
+    double now = Timer.getFPGATimestamp();
+    double dt = now - lastSimTime;
+    lastSimTime = now;
+
+    // Kinematics: x = x0 + vt | z = z0 + vt - 1/2gt^2
+    double nextX = ballPose.getX() + (ballVelocityX * dt * currentPose.get().getRotation().getCos());
+    double nextY = ballPose.getY() + (ballVelocityX * dt * currentPose.get().getRotation().getSin());
+    ballVelocityZ -= 9.81 * dt; // Gravity
+    double nextZ = ballPose.getZ() + (ballVelocityZ * dt);
+
+    ballPose = new Pose3d(nextX, nextY, nextZ, new Rotation3d());
+    ballSim.setPose(ballPose);
+
+    double distToHub = ballPose.getTranslation().getDistance(hubSim.getPose().getTranslation());
+    if (distToHub < Units.inchesToMeters(20) && Math.abs(nextZ - Units.inchesToMeters(72)) < 0.2) {
+      System.out.println("--- GOAL SCORED! ---");
+      isBallInFlight = false;
+    }
+
+    if (nextZ <= 0) {
+      isBallInFlight = false;
     }
   }
 
@@ -149,6 +220,7 @@ public class Vision {
        * Therefore, we must ensure that the actual robot pose is provided in the
        * simulator when updating the vision simulation during the simulation.
        */
+      updateBallSim();
       visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
     }
 
@@ -264,17 +336,34 @@ public class Vision {
 
     // This is where the cameras are created, with their name and and position
     // relative to the robot's center
-    RIGHT_CAM("right",
-        new Rotation3d(Units.degreesToRadians(90), 0, Units.degreesToRadians(0)),
-        new Translation3d(Units.inchesToMeters(5),
-            Units.inchesToMeters(-1.5),
-            Units.inchesToMeters(12.5)),
+    /** Last updated on [3/18/2026] by [Riley W.].
+     * CAD positions(in.) and rotations(degrees):
+     * X: -7.491
+     * Y: 8.427
+     * Z: -17.923
+     * A: 29
+     */
+    RIGHT_CAM("right", // 29 degrees is aplied to yaw instead of pitch because of the 90* rotation of the camera
+        new Rotation3d(Units.degreesToRadians(90),0,-Units.degreesToRadians(29)),
+        new Translation3d(
+            Units.inchesToMeters(-7.491),
+            Units.inchesToMeters(8.427),
+            Units.inchesToMeters(17.923)),
         VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+
+    /** Last updated on [3/18/2026] by [Riley W.].
+     * CAD positions(in.) and rotations(degrees):
+     * X: -7.491
+     * Y: -8.427
+     * Z: -17.923
+     * A: 29
+     */
     LEFT_CAM("left",
-        new Rotation3d(0, 0, Units.degreesToRadians(0)),
-        new Translation3d(Units.inchesToMeters(5.5),
-            Units.inchesToMeters(11),
-            Units.inchesToMeters(12.5)),
+        new Rotation3d(0,-Units.degreesToRadians(29),0),
+        new Translation3d(
+            Units.inchesToMeters(-7.491),
+            Units.inchesToMeters(-8.427),
+            Units.inchesToMeters(17.923)),
         VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
 
     /**
@@ -348,6 +437,7 @@ public class Vision {
       latencyAlert = new Alert("'" + name + "' Camera is experiencing high latency.", AlertType.kWarning);
 
       camera = new PhotonCamera(name);
+      System.out.println("Added camera " + name);
       // Shuffleboard.getTab("Vision").addCamera(name, name, "https://")
 
       // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
@@ -376,7 +466,15 @@ public class Vision {
         cameraProp.setAvgLatencyMs(35);
         cameraProp.setLatencyStdDevMs(5);
         this.cameraSim = new PhotonCameraSim(camera, cameraProp);
+        this.cameraSim.enableDrawWireframe(true);
         visionSim.addCamera(cameraSim, new Transform3d(robotToCamTranslation, robotToCamRotation));
+      } else {
+        String url = "http://photonvision.local:1182/?action=stream&cameraName=" + name;
+
+        Shuffleboard.getTab("Drive")
+            .add(name, url)
+            .withSize(6, 4)
+            .withWidget(BuiltInWidgets.kCameraStream);
       }
     }
 
