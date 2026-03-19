@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 12.947060240963856,
-        "y": 7.280530120481927
+        "x": 13.0,
+        "y": 7.35
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.129774622207895,
-        "y": 7.0717783724579615
+        "x": 13.653858974358975,
+        "y": 6.930423076923078
       },
       "isLocked": false,
-      "linkedName": "RT"
+      "linkedName": "red - top trench"
     },
     {
       "anchor": {
-        "x": 13.296746987951808,
-        "y": 4.821795180722892
+        "x": 13.13628,
+        "y": 5.74774
       },
       "prevControl": {
-        "x": 13.186372135219198,
-        "y": 5.0461105655814755
+        "x": 13.467807692307693,
+        "y": 6.25598717948718
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RHUB 7FT"
+      "linkedName": "red - hub 7ft away top"
     }
   ],
   "rotationTargets": [],
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -147.71113256552948
+    "rotation": -126.49013295072956
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Red",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

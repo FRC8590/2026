@@ -145,6 +145,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
     NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
     NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+    NamedCommands.registerCommand("BeltAndIndexerStop", Constants.belt.beltAndIndexerStop());
 
   }
 

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.15,
-        "y": 6.0
+        "x": 3.6,
+        "y": 7.4
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.862351367800871,
-        "y": 6.02546303149555
+        "x": 2.5885192286904806,
+        "y": 6.784792713316918
       },
       "isLocked": false,
-      "linkedName": "BDEPOT"
+      "linkedName": "blue - top trench"
     },
     {
       "anchor": {
-        "x": 0.6,
+        "x": 1.25,
         "y": 6.0
       },
       "prevControl": {
-        "x": 1.1414704473807453,
-        "y": 5.948131141145053
+        "x": 1.8108414490166824,
+        "y": 6.316529378725568
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BDEPOT - inside"
+      "linkedName": "blue - depot"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
+    "maxVelocity": 4.5,
     "maxAcceleration": 3.3,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "BLUE PATHS",
+  "folder": "Blue",
   "idealStartingState": {
-    "velocity": 0.5,
+    "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

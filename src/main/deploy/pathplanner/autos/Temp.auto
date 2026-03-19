@@ -5,19 +5,25 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": null
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "blue top-7ft"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.5
                 }
               }
             ]
@@ -26,7 +32,7 @@
         {
           "type": "named",
           "data": {
-            "name": "BeltAndIndexerRun"
+            "name": "BeltAndIndexerStop"
           }
         }
       ]
