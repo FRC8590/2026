@@ -158,7 +158,7 @@ public class Belt extends SubsystemBase {
 
     @Override
     public void periodic() {
-        beltEntry.setDouble(beltMotor.getEncoder().getVelocity());
-        indexerEntry.setDouble(indexMotor.getEncoder().getVelocity());
+        beltEntry.setDouble(beltMotor.getEncoder().getVelocity()/6);
+        indexerEntry.setDouble(indexMotor.getEncoder().getVelocity()/6);
     }
 }

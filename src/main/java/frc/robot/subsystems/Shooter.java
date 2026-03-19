@@ -5,6 +5,7 @@ import frc.robot.Robot;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -171,7 +172,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Front Motor RPM ", frontMotor.getEncoder().getVelocity());
         SmartDashboard.putNumber("Back Motor RPM ", backMotor.getEncoder().getVelocity());
         targRPMEntry.setDouble(goalRPM);
-        currRPMBackEntry.setDouble(backMotor.getEncoder().getVelocity());
-        currRPMFrontEntry.setDouble(frontMotor.getEncoder().getVelocity());
+        currRPMBackEntry.setDouble(backMotor.getEncoder().getVelocity()/6);
+        currRPMFrontEntry.setDouble(frontMotor.getEncoder().getVelocity()/6);
     }
 }

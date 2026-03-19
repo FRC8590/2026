@@ -221,9 +221,8 @@ public class SwerveSubsystem extends SubsystemBase {
     field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
     for(int i = 0; i < swerveModules.length; i++){
-      swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity());
-      swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity());
-
+      swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity()/6);
+      swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity()/6);
     }
   }
 
