@@ -125,7 +125,7 @@ public class SwerveSubsystem extends SubsystemBase {
       .withPosition(0, 1)
       .getEntry();
 
-    Shuffleboard.getTab("Drive")
+    Shuffleboard.getTab("Console")
         .add("Current Pose", field)
         .withSize(4, 2)
         .withWidget(BuiltInWidgets.kField);
@@ -601,7 +601,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return true if the red alliance, false if blue. Defaults to false if none is
    *         available.
    */
-  private boolean isRedAlliance() {
+  public boolean isRedAlliance() {
     var alliance = DriverStation.getAlliance();
     return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }

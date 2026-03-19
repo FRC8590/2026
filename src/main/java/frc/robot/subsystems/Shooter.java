@@ -5,6 +5,7 @@ import frc.robot.Robot;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -20,6 +21,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.ResetMode;
+
+import static edu.wpi.first.units.Units.Inches;
 
 import java.util.Map;
 
@@ -104,7 +107,6 @@ public class Shooter extends SubsystemBase {
      * @return true if average RPM is at or above goal RPM
      */
     public boolean atRPM() {
-        System.out.println("DEBUG " + goalRPM);
         return (frontMotor.getEncoder().getVelocity() + backMotor.getEncoder().getVelocity()) / 2 >= goalRPM - 100;
     }
 
@@ -123,6 +125,23 @@ public class Shooter extends SubsystemBase {
                 // TODO: Peter: Tune this based on the regression model
                 Constants.vision.simulateShoot(8, 29);
             }
+            setGoalRPM(rpm);
+        });
+    }
+
+    public Command shooterSetRPMFromVision() {
+        return run(() -> {
+            int primaryId = Constants.drivebase.isRedAlliance() ? 10 : 26;
+            var result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
+            if (!result.isPresent()) {
+                // Nothing seen -- hope for the best!
+                setGoalRPM(2000);
+                return;
+            }
+
+            var distance = result.get().getMeasureX();
+            // This is based off our regression model
+            var rpm = 7.02381 * (distance.in(Inches)) + 1237.14286;
             setGoalRPM(rpm);
         });
     }

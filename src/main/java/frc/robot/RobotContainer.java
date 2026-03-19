@@ -220,6 +220,7 @@ public class RobotContainer {
     // driverXbox.a().whileFalse(Constants.belt.indexerStop());
     driverXbox.rightTrigger().whileTrue(new Shoot());
     driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
+    driverXbox.rightTrigger().whileFalse(Constants.belt.beltAndIndexerStop());
 
     driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
   }
