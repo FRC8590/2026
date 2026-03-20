@@ -350,7 +350,7 @@ public class Vision {
             Units.inchesToMeters(7.491),
             Units.inchesToMeters(8.427),
             Units.inchesToMeters(17.923)),
-        VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+        VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
 
     /**
      * Last updated on [3/18/2026] by [Riley W.].
@@ -360,13 +360,13 @@ public class Vision {
      * Z: -17.923
      * A: 29
      */
-    LEFT_CAM("left",
+    /*LEFT_CAM("left",
         new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0),
         new Translation3d(
             Units.inchesToMeters(-7.491),
             Units.inchesToMeters(-8.427),
             Units.inchesToMeters(17.923)),
-        VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
+        VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));*/
 
     /**
      * Latency alert to use when high latency is detected.
