@@ -159,13 +159,14 @@ public class RobotContainer {
         m_chooser.addOption("Red","Red-TrMd-7Md");
         m_chooser.addOption("Red","Red-TrBo-7Bo");       
 
-        // Initialize with proper alliance orientation
-        NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
-        NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
-        NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
-        NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
-        NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
-        NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+    // Initialize with proper alliance orientation
+    NamedCommands.registerCommand("Shoot", new Shoot());
+    NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
+    NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
+    NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
+    NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+    NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+
 
     }
 
