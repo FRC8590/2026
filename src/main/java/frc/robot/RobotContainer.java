@@ -152,12 +152,14 @@ public class RobotContainer {
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
         m_chooser.addOption("Sample Auto", "Sample Auto");
-        m_chooser.addOption("Blue","Blue-TrTo-7To");
-        m_chooser.addOption("Blue","Blue-TrMd-7Md");
-        m_chooser.addOption("Blue","Blue-TrBo-7Bo");
-        m_chooser.addOption("Red","Red-TrTo-7To");
-        m_chooser.addOption("Red","Red-TrMd-7Md");
-        m_chooser.addOption("Red","Red-TrBo-7Bo");       
+        m_chooser.addOption("Blue Top FI","Blue-TrTo-7To");
+        m_chooser.addOption("Blue Mid FI","Blue-TrMd-7Md");
+        m_chooser.addOption("Blue Bot FI","Blue-TrBo-7Bo");
+        m_chooser.addOption("Red Top FI","Red-TrTo-7To");
+        m_chooser.addOption("Red Mid FI","Red-TrMd-7Md");
+        m_chooser.addOption("Red Bot FI","Red-TrBo-7Bo");
+        m_chooser.addOption("Red Outpost","Red-TrTo-Op-7To");
+        m_chooser.addOption("Blue Outpost","Blue-TrBo-Op-7Bo");
 
         // Initialize with proper alliance orientation
         NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
@@ -166,6 +168,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
         NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
         NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+        NamedCommands.registerCommand("IntakeDown", Constants.intake.intakeDown());
 
     }
 
