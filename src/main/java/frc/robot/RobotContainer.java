@@ -162,12 +162,13 @@ public class RobotContainer {
         m_chooser.addOption("Blue Outpost","Blue-TrBo-Op-7Bo");
 
     // Initialize with proper alliance orientation
-    NamedCommands.registerCommand("Shoot", new Shoot());
+    NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
     NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
     NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
     NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
     NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
     NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+    NamedCommands.registerCommand("IntakeDown", Constants.intake.intakeDown());
 
 
     }
