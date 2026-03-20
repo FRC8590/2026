@@ -22,8 +22,8 @@ import frc.robot.constants.ClimbConstants;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import frc.robot.subsystems.swervedrive.Vision;
+import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.Vision;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
