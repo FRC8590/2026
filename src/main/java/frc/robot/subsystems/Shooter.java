@@ -135,8 +135,6 @@ public class Shooter extends SubsystemBase {
             var result = Constants.vision.getBestSingleTagPoseEstimate(26);
             if (!result.isPresent()) {
                 // Nothing seen -- hope for the best!
-                System.out.println("NOPE");
-                setGoalRPM(2000);
                 return;
             }
 
