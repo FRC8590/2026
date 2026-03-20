@@ -79,7 +79,7 @@ public class Swerve extends SubsystemBase {
   private GenericEntry driveSpeedEntry;
   private GenericEntry currentShiftEntry;
 
-  private SwerveModule[]   swerveModules;
+  private SwerveModule[] swerveModules;
   private GenericEntry[][] swerveEntries;
   private Field2d field = new Field2d();
 
@@ -90,40 +90,41 @@ public class Swerve extends SubsystemBase {
     ShuffleboardTab driveTab = Shuffleboard.getTab("Drive");
 
     ShuffleboardLayout moduleLayout = driveTab
-      .getLayout("Modules", BuiltInLayouts.kGrid)
-      .withPosition(1,0).withSize(6, 3)
-      .withProperties(Map.of("numberofcolumns",4,"numberofrows",1));
-    for(int i = 0; i < swerveModules.length; i++){
-      
-      ShuffleboardLayout currentLayout = moduleLayout.getLayout(String.format("Module %1d", i), BuiltInLayouts.kGrid).withProperties(Map.of("numberofcolumns",1,"numberofrows",2));
+        .getLayout("Modules", BuiltInLayouts.kGrid)
+        .withPosition(1, 0).withSize(6, 3)
+        .withProperties(Map.of("numberofcolumns", 4, "numberofrows", 1));
+    for (int i = 0; i < swerveModules.length; i++) {
+
+      ShuffleboardLayout currentLayout = moduleLayout.getLayout(String.format("Module %1d", i), BuiltInLayouts.kGrid)
+          .withProperties(Map.of("numberofcolumns", 1, "numberofrows", 2));
 
       swerveEntries[i][1] = currentLayout
-        .add("Angle motor RPM", 0)
-        .withPosition(0, 1)
-        .getEntry();
+          .add("Angle motor RPM", 0)
+          .withPosition(0, 1)
+          .getEntry();
 
       swerveEntries[i][0] = currentLayout
-        .add("Drive motor RPM", 0)
-        .withPosition(0, 0)
-        .getEntry();
-      
+          .add("Drive motor RPM", 0)
+          .withPosition(0, 0)
+          .getEntry();
+
     }
 
     driveSpeedEntry = Shuffleboard.getTab("Drive")
-      .add("Speed", 0)
-      .withWidget(BuiltInWidgets.kDial)
-      .withSize(1, 1)
-      .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
-      .withPosition(0, 0)
-      .getEntry();
+        .add("Speed", 0)
+        .withWidget(BuiltInWidgets.kDial)
+        .withSize(1, 1)
+        .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+        .withPosition(0, 0)
+        .getEntry();
 
     currentShiftEntry = Shuffleboard.getTab("Drive")
-      .add("Target Speed", Constants.DEFAULT_SPEED)
-      .withWidget(BuiltInWidgets.kNumberBar)
-      .withSize(1, 1)
-      .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
-      .withPosition(0, 1)
-      .getEntry();
+        .add("Target Speed", Constants.DEFAULT_SPEED)
+        .withWidget(BuiltInWidgets.kNumberBar)
+        .withSize(1, 1)
+        .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+        .withPosition(0, 1)
+        .getEntry();
 
     Shuffleboard.getTab("Console")
         .add("Current Pose", field)
@@ -220,9 +221,9 @@ public class Swerve extends SubsystemBase {
     Constants.vision.updatePoseEstimation(swerveDrive);
     field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
-    for(int i = 0; i < swerveModules.length; i++){
-      swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity()/6);
-      swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity()/6);
+    for (int i = 0; i < swerveModules.length; i++) {
+      swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
+      swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
     }
   }
 
