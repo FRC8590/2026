@@ -1,10 +1,18 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-
+import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
+import edu.wpi.first.networktables.GenericEntry;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.FeedbackSensor;
@@ -46,6 +54,8 @@ public class Intake extends SubsystemBase {
     private double goalDownRadians = -0.1;
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
+    private GenericEntry intakeEntry;
+    private GenericEntry pivotAngleEntry;
 
     public Intake() {
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -90,6 +100,16 @@ public class Intake extends SubsystemBase {
 
         encoder = pivotMotor.getAlternateEncoder();
         encoder.setPosition(0.744); // zero encoder, such that the down position is 0 and the up position is 0.7
+        ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
+
+        ShuffleboardLayout intakeLayout = shooterTab.getLayout("Intake", BuiltInLayouts.kList).withSize(2, 2)
+                .withPosition(0, 0);
+        SimpleWidget intakeWidget = intakeLayout.add("Position", 0);
+        SimpleWidget pivotAngleWidget = intakeLayout.add("Pivot Angle", 0);
+
+        intakeEntry = intakeWidget.getEntry();
+        pivotAngleEntry = pivotAngleWidget.getEntry();
+
     }
 
     /**
@@ -111,41 +131,44 @@ public class Intake extends SubsystemBase {
     }
 
     private void up() {
-        //intakeMotor.set(0);
         System.out.println("Intake up");
+        // intakeMotor.set(0);
         setGoal(goalUpRadians);
     }
-
 
     private void down() {
         // intakeMotor.set(1);
         System.out.println("Intake down");
         setGoal(goalDownRadians);
     }
-    private void run()
-    {
-        System.out.println("Running intake");
-       intakeMotor.set(.75); 
+
+    private void run() {
+        if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
+            intakeMotor.set(1);
+        }
     }
-    private void stop()
-    {
-        System.out.println("Stopping intake");
-       intakeMotor.set(0); 
+
+    private void stop() {
+        if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
+            intakeMotor.set(0);
+        }
     }
 
     public Command intakeRun() {
-        return run(() -> run());
+        return runOnce(() -> run());
     }
+
     public Command intakeStop() {
-        return run(() -> stop());
+        return runOnce(() -> stop());
     }
+
     /**
      * pivot up the and stop the intake
      * 
      * @return runnable Command
      */
     public Command intakeUp() {
-        return run(() -> up());
+        return runOnce(() -> up());
     }
 
     /**
@@ -154,13 +177,15 @@ public class Intake extends SubsystemBase {
      * @return runnable Command
      */
     public Command intakeDown() {
-        return run(() -> down());
+        return runOnce(() -> down());
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Pivot Angle", encoder.getPosition());
-        if (Constants.ennableIntakeArm)
+        pivotAngleEntry.setDouble(encoder.getPosition());
+        if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
+            intakeEntry.setDouble(setPoint);
             pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+        }
     }
 }

@@ -9,19 +9,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import frc.robot.commands.Shoot;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
-import frc.robot.commands.*;
 import swervelib.SwerveInputStream;
 
 /**
@@ -34,216 +32,237 @@ import swervelib.SwerveInputStream;
  */
 public class RobotContainer {
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  public final CommandXboxController driverXbox = new CommandXboxController(0);
-  public final CommandXboxController operatorController = new CommandXboxController(1);
+    // Replace with CommandPS4Controller or CommandJoystick if needed
+    public final CommandXboxController driverXbox = new CommandXboxController(0);
+    public final CommandXboxController operatorController = new CommandXboxController(1);
 
-  // auto list object
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+    // auto list object
+    private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  // The robot's subsystems and commands are defined here...
-  // Applies deadbands and inverts controls because joysticks
-  // are back-right positive while robot
-  // controls are front-left positive
-  // left stick controls translation
-  // right stick controls the rotational velocity
-  // buttons are quick rotation positions to different ways to face
-  // WARNING: default buttons are on the same buttons as the ones defined in
-  // configureBindings
-  AbsoluteDriveAdv closedAbsoluteDriveAdv = new AbsoluteDriveAdv(Constants.drivebase,
-      () -> -MathUtil.applyDeadband(driverXbox.getLeftY(),
-          Constants.OPERATOR_CONSTANTS.leftYDeadband()),
-      () -> -MathUtil.applyDeadband(driverXbox.getLeftX(),
-          Constants.OPERATOR_CONSTANTS.leftYDeadband()),
-      () -> -MathUtil.applyDeadband(driverXbox.getRightX(),
-          Constants.OPERATOR_CONSTANTS.leftYDeadband()),
-      driverXbox.getHID()::getYButtonPressed,
-      driverXbox.getHID()::getAButtonPressed,
-      driverXbox.getHID()::getXButtonPressed,
-      driverXbox.getHID()::getBButtonPressed);
-
-  /**
-   * Converts driver input into a field-relative ChassisSpeeds that is controlled
-   * by angular velocity.
-   */
-
-  SwerveInputStream driveAngularVelocity = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-      () -> driverXbox.getLeftY() * getSide() * Constants.scaleFactor,
-      () -> driverXbox.getLeftX() * getSide() * Constants.scaleFactor)
-      .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * Constants.scaleFactor)
-      .deadband(Constants.OPERATOR_CONSTANTS.deadband())
-      .robotRelative(false)
-      .allianceRelativeControl(false);
-
-  SwerveInputStream driveRobotOriented = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-      () -> -driverXbox.getLeftY() * Constants.scaleFactor,
-      () -> -driverXbox.getLeftX() * Constants.scaleFactor)
-      .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.6 * Constants.scaleFactor)
-      .deadband(Constants.OPERATOR_CONSTANTS.deadband())
-      .robotRelative(true)
-      .scaleTranslation(Constants.scaleFactor);
-
-  /**
-   * Clone's the angular velocity input stream and converts it to a fieldRelative
-   * input stream.
-   */
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
-      .withControllerHeadingAxis(() -> -driverXbox.getRightX(),
-          () -> -driverXbox.getRightY())
-      .headingWhile(true);
-
-  // Applies deadbands and inverts controls because joysticks
-  // are back-right positive while robot
-  // controls are front-left positive
-  // left stick controls translation
-  // right stick controls the desired angle NOT angular rotation
-  Command driveFieldOrientedDirectAngle = Constants.drivebase.driveFieldOriented(driveDirectAngle);
-  Command driveRobotOrientedAngular = Constants.drivebase.driveRobotRelative(driveRobotOriented);
-
-  // Applies deadbands and inverts controls because joysticks
-  // are back-right positive while robot
-  // controls are front-left positive
-  // left stick controls translation
-  // right stick controls the angular velocity of the robot
-  Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
-
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
-  public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
-    DriverStation.silenceJoystickConnectionWarning(true);
-
-    // set up the shuffleboard tab
-    Shuffleboard.getTab("Autonomous")
-        .add("Auto Selector", m_chooser)
-        .withWidget(BuiltInWidgets.kComboBoxChooser)
-        .withPosition(0, 0)
-        .withSize(2, 1);
-
-    Shuffleboard.getTab("Autonomous")
-        .add("On Red Side?", true)
-        .withWidget(BuiltInWidgets.kBooleanBox)
-        .getEntry();
-    SmartDashboard.putData("Auto choices", m_chooser);
-    m_chooser.setDefaultOption("Do Nothing", "nada");
-    m_chooser.addOption("Do nothing", "nada");
-    m_chooser.addOption("red top", "red top");
-    m_chooser.addOption("red mid", "red mid");
-    m_chooser.addOption("red bot", "red bot");
-    m_chooser.addOption("blue top", "blue top");
-    m_chooser.addOption("blue mid", "blue mid");
-    m_chooser.addOption("blue bot", "blue bot");
-
-    // new IntakeDown().schedule();
-
-    // Initialize with proper alliance orientation
-    NamedCommands.registerCommand("Shoot", new ShooterSetSpeed(2000));
-    NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
-    NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
-    NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
-    NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
-    NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
-    NamedCommands.registerCommand("BeltAndIndexerStop", Constants.belt.beltAndIndexerStop());
-
-  }
-
-  public int getSide() {
-
-    // if (DriverStation.getAlliance().isPresent() &&
-    // DriverStation.getAlliance().get() == Alliance.Red) {
-    // return 1;
-    // } else {
-    return -1;
-    // }
-
-  }
-
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary predicate, or via the
-   * named factories in
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses
-   * for
-   * {@link CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
-   * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick
-   * Flight joysticks}.
-   */
-  private void configureBindings() {
-    assert (!RobotBase.isSimulation());
-    Constants.drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    // The robot's subsystems and commands are defined here...
+    // Applies deadbands and inverts controls because joysticks
+    // are back-right positive while robot
+    // controls are front-left positive
+    // left stick controls translation
+    // right stick controls the rotational velocity
+    // buttons are quick rotation positions to different ways to face
+    // WARNING: default buttons are on the same buttons as the ones defined in
+    // configureBindings
+    AbsoluteDriveAdv closedAbsoluteDriveAdv = new AbsoluteDriveAdv(Constants.drivebase,
+            () -> -MathUtil.applyDeadband(driverXbox.getLeftY(),
+                    Constants.OPERATOR_CONSTANTS.leftYDeadband()),
+            () -> -MathUtil.applyDeadband(driverXbox.getLeftX(),
+                    Constants.OPERATOR_CONSTANTS.leftYDeadband()),
+            () -> -MathUtil.applyDeadband(driverXbox.getRightX(),
+                    Constants.OPERATOR_CONSTANTS.leftYDeadband()),
+            driverXbox.getHID()::getYButtonPressed,
+            driverXbox.getHID()::getAButtonPressed,
+            driverXbox.getHID()::getXButtonPressed,
+            driverXbox.getHID()::getBButtonPressed);
 
     /**
-     * BELT & FEEDER
+     * Converts driver input into a field-relative ChassisSpeeds that is controlled
+     * by angular velocity.
      */
-    driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
-    driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
-    // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
-    // driverXbox.a().whileFalse(Constants.belt.beltStop());
-    // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
-    // driverXbox.a().whileFalse(Constants.belt.indexerStop());
+
+    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+            () -> driverXbox.getLeftY() * getSide() * Constants.scaleFactor,
+            () -> driverXbox.getLeftX() * getSide() * Constants.scaleFactor)
+            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * Constants.scaleFactor)
+            .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+            .robotRelative(false)
+            .allianceRelativeControl(false);
+
+    SwerveInputStream driveRobotOriented = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+            () -> -driverXbox.getLeftY() * Constants.scaleFactor,
+            () -> -driverXbox.getLeftX() * Constants.scaleFactor)
+            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.6 * Constants.scaleFactor)
+            .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+            .robotRelative(true)
+            .scaleTranslation(Constants.scaleFactor);
 
     /**
-     * INTAKE
+     * Clone's the angular velocity input stream and converts it to a fieldRelative
+     * input stream.
      */
-    driverXbox.b().whileTrue(Constants.intake.intakeUp());
-    driverXbox.x().whileTrue(Constants.intake.intakeDown());
-    driverXbox.leftTrigger().whileFalse(new IntakeStop());
-    driverXbox.leftTrigger().whileTrue(new IntakeRun());
-    
+    SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
+            .withControllerHeadingAxis(() -> -driverXbox.getRightX(),
+                    () -> -driverXbox.getRightY())
+            .headingWhile(true);
 
-    driverXbox.y().whileTrue(Constants.drivebase.ZeroGryo());
+    // Applies deadbands and inverts controls because joysticks
+    // are back-right positive while robot
+    // controls are front-left positive
+    // left stick controls translation
+    // right stick controls the desired angle NOT angular rotation
+    Command driveFieldOrientedDirectAngle = Constants.drivebase.driveFieldOriented(driveDirectAngle);
+    Command driveRobotOrientedAngular = Constants.drivebase.driveRobotRelative(driveRobotOriented);
 
-    driverXbox.rightTrigger().whileTrue(Constants.shooter.shooterSetGoalRPM(500));
-    driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
+    // Applies deadbands and inverts controls because joysticks
+    // are back-right positive while robot
+    // controls are front-left positive
+    // left stick controls translation
+    // right stick controls the angular velocity of the robot
+    Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
-    // driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
-  }
+    SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+            () -> driverXbox.getLeftY() * getSide(), // getSide will invert if on Red side
+            () -> driverXbox.getLeftX() * getSide())
+            .withControllerRotationAxis(() -> -driverXbox.getRightX())
+            .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+            .scaleTranslation(0.8)
+            .allianceRelativeControl(true);
+    // Derive the heading axis with math!
+    SwerveInputStream driveDirectAngleSim = driveAngularVelocitySim.copy()
+            .withControllerHeadingAxis(() -> Math.sin(
+                    driverXbox.getRawAxis(
+                            2) * Math.PI)
+                    * (Math.PI * 2),
+                    () -> Math.cos(
+                            driverXbox.getRawAxis(
+                                    2) * Math.PI)
+                            *
+                            (Math.PI * 2))
+            .headingWhile(true);
 
-  /*
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @ret
-   * urn the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    String selectedAuto = m_chooser.getSelected();
-    return Constants.drivebase.getAutonomousCommand(selectedAuto);
+    Command driveFieldOrientedDirectAngleSim = Constants.drivebase.driveFieldOriented(driveDirectAngleSim);
+    Command driveFieldOrientedAngularVelocitySim = Constants.drivebase.driveFieldOriented(driveAngularVelocitySim);
 
-  }
+    Command driveSetpointGenSim = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
 
-  public void setDriveMode() {
-    configureBindings();
-  }
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
+    public RobotContainer() {
+        // Configure the trigger bindings
+        configureBindings();
+        DriverStation.silenceJoystickConnectionWarning(true);
 
-  public void setMotorBrake(boolean brake) {
-    Constants.drivebase.setMotorBrake(false);
-  }
+        // set up the shuffleboard tab
+        Shuffleboard.getTab("Autonomous")
+                .add("Auto Selector", m_chooser)
+                .withWidget(BuiltInWidgets.kComboBoxChooser)
+                .withPosition(0, 0)
+                .withSize(2, 1);
 
-  public void zeroEverything() {
-    Constants.drivebase.zeroGyro();
-  }
+        Shuffleboard.getTab("Autonomous")
+                .add("On Red Side?", true)
+                .withWidget(BuiltInWidgets.kBooleanBox)
+                .getEntry();
+        SmartDashboard.putData("Auto choices", m_chooser);
+        m_chooser.setDefaultOption("Do Nothing", "nada");
+        m_chooser.addOption("Sample Auto", "Sample Auto");
+        m_chooser.addOption("red top", "red top");
+        m_chooser.addOption("red mid", "red mid");
+        m_chooser.addOption("red bot", "red bot");
+        m_chooser.addOption("blue top", "blue top");
+        m_chooser.addOption("blue mid", "blue mid");
+        m_chooser.addOption("blue bot", "blue bot");
 
-  /**
-   * Replaces the swerve module feedforward with a new SimpleMotorFeedforward
-   * object.
-   *
-   * @param kS the static gain of the feedforward
-   * @param kV the velocity gain of the feedforward
-   * @param kA the acceleration gain of the feedforward
-   */
+        // Initialize with proper alliance orientation
+        NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
+        NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
+        NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
+        NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
+        NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+        NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
 
-  public void setDriveFeedForward(double kS, double kV, double kA) {
-    Constants.drivebase.replaceSwerveModuleFeedforward(kS, kV, kA);
-  }
+    }
 
-  public void resetAndStop() {
-    Constants.drivebase.drive(new Translation2d(), 0, false);
-  }
+    /**
+     * Riley: Looks like another Joseff special over here. Appears to return 1 or -1
+     * to invert controlls for red vs blue alliance
+     * 
+     * @return 1 if red side, -1 if blue side
+     */
+    public int getSide() {
+        if (DriverStation.getAlliance().isPresent() &&
+                DriverStation.getAlliance().get() == Alliance.Red) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Use this method to define your trigger->command mappings. Triggers can be
+     * created via the
+     * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+     * an arbitrary predicate, or via the
+     * named factories in
+     * {@link edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses
+     * for
+     * {@link CommandXboxController
+     * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
+     * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick
+     * Flight joysticks}.
+     */
+    private void configureBindings() {
+        Constants.drivebase.setDefaultCommand(
+                RobotBase.isSimulation()
+                        ? driveFieldOrientedAngularVelocitySim
+                        : driveFieldOrientedAnglularVelocity);
+
+        driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
+        driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
+
+        driverXbox.x().whileTrue(Constants.intake.intakeDown());
+        driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
+        driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
+
+        driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
+        driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
+
+        driverXbox.y().whileTrue(Constants.drivebase.ZeroGryo());
+        // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
+        // driverXbox.a().whileFalse(Constants.belt.beltStop());
+        // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
+        // driverXbox.a().whileFalse(Constants.belt.indexerStop());
+        driverXbox.rightTrigger().whileTrue(new Shoot());
+        driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
+        driverXbox.rightTrigger().whileFalse(Constants.belt.beltAndIndexerStop());
+
+        driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
+    }
+
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        String selectedAuto = m_chooser.getSelected();
+        return Constants.drivebase.getAutonomousCommand(selectedAuto);
+
+    }
+
+    public void setDriveMode() {
+        configureBindings();
+    }
+
+    public void setMotorBrake(boolean brake) {
+        Constants.drivebase.setMotorBrake(false);
+    }
+
+    public void zeroEverything() {
+        Constants.drivebase.zeroGyro();
+    }
+
+    /**
+     * Replaces the swerve module feedforward with a new SimpleMotorFeedforward
+     * object.
+     *
+     * @param kS the static gain of the feedforward
+     * @param kV the velocity gain of the feedforward
+     * @param kA the acceleration gain of the feedforward
+     */
+
+    public void setDriveFeedForward(double kS, double kV, double kA) {
+        Constants.drivebase.replaceSwerveModuleFeedforward(kS, kV, kA);
+    }
+
+    public void resetAndStop() {
+        Constants.drivebase.drive(new Translation2d(), 0, false);
+    }
 
 }

@@ -22,8 +22,8 @@ import frc.robot.constants.ClimbConstants;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import frc.robot.subsystems.swervedrive.Vision;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Vision;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -52,24 +52,25 @@ public final class Constants {
     // 7.62, // Field length (meters)
     // 3.6068 // Field width (meters)
     // );
-    public static final boolean ennableIntakeArm = true;
-
 
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     // Robot Physical Properties
-    public static final double ROBOT_MASS = Units.lbsToKilograms(135); //TODO: record 2026 mass
+    public static final double ROBOT_MASS = Units.lbsToKilograms(135); // TODO: record 2026 mass
     public static final Matter CHASSIS = new Matter(
             new Translation3d(0, 0, Units.inchesToMeters(14)),
             ROBOT_MASS);
 
+    public static final double SHOOTER_MAX_RPM = 6784;
+
     // Control Loop Timing
     public static final double LOOP_TIME = 0.05; // seconds
-    public static final double MAX_SPEED = 6.0; // meters per second
+    public static final double DEFAULT_SPEED = 6.0; // meters per second
+    public static final double MAX_SPEED = 8.0; // meters per second
     public static double visionTimerOffset = 0;
 
     // Subsystem Instances
-    public static final SwerveSubsystem drivebase = new SwerveSubsystem(
+    public static final Swerve drivebase = new Swerve(
             new File(Filesystem.getDeployDirectory(), "swerve/neo"));
 
     // Constants Records
@@ -80,19 +81,17 @@ public final class Constants {
     public static final ShooterConstants SHOOTER_CONSTANTS = ShooterConstants.DEFAULT;
     public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
 
-
     // Subsystem Instances
     public static Vision vision = new Vision(() -> drivebase.getPose());
     public static Belt belt = new Belt();
     public static Intake intake = new Intake();
-    public static Shooter shooter = new Shooter(); 
+    public static Shooter shooter = new Shooter();
     public static final LaserCan laserCan = new LaserCan(8);
 
-    // As far as I can tell, it's the speed of the robot?
+    // Basically the sensitivity of the swerves
     public static double scaleFactor = 1;
 
-    public enum ScoreLocation
-    {
+    public enum ScoreLocation {
         LEFT2,
         LEFT3,
         RIGHT2,

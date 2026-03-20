@@ -4,9 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -19,169 +20,208 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
 
-  private static Robot instance;
-  private Command m_autonomousCommand;
+    private static Robot instance;
+    private Command m_autonomousCommand;
 
-  public RobotContainer m_robotContainer;
+    public RobotContainer m_robotContainer;
 
-  private Timer disabledTimer;
+    private Timer disabledTimer;
 
-  public Robot() {
-    instance = this;
+    private class Countdown {
+        private Timer timer;
+        private double waitTime = -1;
+        private GenericEntry shuffleboardEntry;
 
-    //CameraServer.startAutomaticCapture();
-  }
+        public Countdown(String name) {
+            timer = new Timer();
+            shuffleboardEntry = Shuffleboard
+                    .getTab("Console").add(name, 0).getEntry();
+        }
 
-  public static Robot getInstance() {
-    return instance;
-  }
+        public void start(double waitTime) {
+            this.waitTime = waitTime;
+            timer.reset();
+            timer.start();
+            shuffleboardEntry.setDouble(waitTime);
+        }
 
-  /**
-   * This function is run when the robot is first started up and should be used
-   * for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    // Instantiate our RobotContainer. This will perform all our button bindings,
-    // and put our
-    // autonomous chooser on the dashboard.
+        public void stop() {
+            timer.stop();
+        }
 
-    m_robotContainer = new RobotContainer();
-
-    // Create a timer to disable motor brake a few seconds after disable. This will
-    // let the robot stop
-    // immediately when disabled, but then also let it be pushed more
-    disabledTimer = new Timer();
-
-    // Constants.visionTimerOffset =
-    // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
-
-    if (isSimulation()) {
-      throw new RuntimeException("We don't support simulations right now");
+        public double remaining() {
+            double remainingTime = waitTime - timer.get();
+            if (remainingTime <= 0) {
+                stop();
+                shuffleboardEntry.setInteger(0);
+            } else {
+                shuffleboardEntry.setDouble(Math.round(remainingTime));
+            }
+            return remainingTime;
+        }
     }
 
-    m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
-    System.out.println("gyro start");
-    Constants.drivebase.zeroGyroWithAlliance();
-    System.out.println("gyro calibrated");
+    // Rebuilt-specific; time until the hub switches
+    private Countdown allianceShiftCountdown;
+    private Countdown timeUntilEnd;
 
-  }
+    public Robot() {
+        instance = this;
+        allianceShiftCountdown = new Countdown("Time until shift");
+        timeUntilEnd = new Countdown("Time until end");
 
-  /**
-   * This function is called every 20 ms, no matter the mode. Use this for items
-   * like diagnostics that you want ran
-   * during disabled, autonomous, teleoperated and test.
-   * 
-   * <p>
-   * This runs after the mode specific periodic functions, but before LiveWindow
-   * and
-   * SmartDashboard integrated updating.
-   */
-  @Override
-  public void robotPeriodic() {
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled
-    // commands, running already-scheduled commands, removing finished or
-    // interrupted commands,
-    // and running subsystem periodic() methods. This must be called from the
-    // robot's periodic
-    // block in order for anything in the Command-based framework to work.
-    CommandScheduler.getInstance().run();
-    // SmartDashboard.putBoolean("right camrea status",
-    // Constants.vision.getEnabled(1));
-  }
-
-  /**
-   * This function is called once each time the robot enters Disabled mode.
-   */
-  @Override
-  public void disabledInit() {
-    System.out.println("Robot disabled");
-    disabledTimer.reset();
-    disabledTimer.start();
-
-  }
-
-  @Override
-  public void disabledPeriodic() {
-
-    if (disabledTimer.hasElapsed(Constants.DRIVE_CONSTANTS.wheelLockTime())) {
-      disabledTimer.stop();
     }
-    m_robotContainer.resetAndStop();
 
-  }
-
-  /**
-   * This autonomous runs the autonomous command selected by your
-   * {@link RobotContainer} class.
-   */
-  @Override
-  public void autonomousInit() {
-    System.out.println("Robot in auto");
-    //Constants.drivebase.zeroGyroWithAlliance();
-
-    /*
-    Peter: FIXME: This breaks the comp it seems
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+    public static Robot getInstance() {
+        return instance;
     }
-    */
 
-  }
+    /**
+     * This function is run when the robot is first started up and should be used
+     * for any initialization code.
+     */
+    @Override
+    public void robotInit() {
+        // Instantiate our RobotContainer. This will perform all our button bindings,
+        // and put our
+        // autonomous chooser on the dashboard.
 
-  /**
-   * This function is called periodically during autonomous.
-   */
-  @Override
-  public void autonomousPeriodic() {
-    // Constants.SHOOTER.processIntakeCoralAuto();
-  }
+        m_robotContainer = new RobotContainer();
 
-  @Override
-  public void teleopInit() {
-    System.out.println("Robot in teleop");
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    System.out.println(m_autonomousCommand);
-    if (m_autonomousCommand != null) {
-      System.out.println("Cancelling auto command");
-      m_autonomousCommand.cancel();
-    } else {
-      System.out.println("Cancelling all commands");
-      System.out.println(CommandScheduler.getInstance());
-      CommandScheduler.getInstance().cancelAll();
+        // Create a timer to disable motor brake a few seconds after disable. This will
+        // let the robot stop
+        // immediately when disabled, but then also let it be pushed more
+        disabledTimer = new Timer();
+
+        // Constants.visionTimerOffset =
+        // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
+
+        m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
+        System.out.println("gyro start");
+        Constants.drivebase.zeroGyroWithAlliance();
+        System.out.println("gyro calibrated");
+
     }
-    m_robotContainer.setDriveMode();
-  }
 
-  /**
-   * This function is called periodically during operator control.
-   */
-  @Override
-  public void teleopPeriodic() {
-    SmartDashboard.putNumberArray("front left motor temps", Constants.drivebase.getMotorTemperatures()[0]);
-    SmartDashboard.putNumberArray("front right motor temps", Constants.drivebase.getMotorTemperatures()[1]);
-    SmartDashboard.putNumberArray("back left motor temps", Constants.drivebase.getMotorTemperatures()[2]);
-    SmartDashboard.putNumberArray("back right motor temps", Constants.drivebase.getMotorTemperatures()[3]);
-  }
+    /**
+     * This function is called every 20 ms, no matter the mode. Use this for items
+     * like diagnostics that you want ran
+     * during disabled, autonomous, teleoperated and test.
+     * 
+     * <p>
+     * This runs after the mode specific periodic functions, but before LiveWindow
+     * and
+     * SmartDashboard integrated updating.
+     */
+    @Override
+    public void robotPeriodic() {
+        // Runs the Scheduler. This is responsible for polling buttons, adding
+        // newly-scheduled
+        // commands, running already-scheduled commands, removing finished or
+        // interrupted commands,
+        // and running subsystem periodic() methods. This must be called from the
+        // robot's periodic
+        // block in order for anything in the Command-based framework to work.
+        CommandScheduler.getInstance().run();
+        // SmartDashboard.putBoolean("right camrea status",
+        // Constants.vision.getEnabled(1));
+        if (timeUntilEnd.remaining() <= 0) {
+            // If timeUntilEnd() is ever 0, we're either going into teleop
+            // or the game is ending. For simplicity, we always assume that
+            // we're going into teleop, because the timer will disable if
+            // we're disabling anyway.
+            timeUntilEnd.start(140 /* 2:20 minutes */);
+        }
+    }
 
-  /**
-   * This function is called once when the robot is first started up.
-   */
-  @Override
-  public void simulationInit() {
-  }
+    /**
+     * This function is called once each time the robot enters Disabled mode.
+     */
+    @Override
+    public void disabledInit() {
+        System.out.println("Robot disabled");
+        disabledTimer.reset();
+        disabledTimer.start();
 
-  /**
-   * This function is called periodically whilst in simulation.
-   */
-  @Override
-  public void simulationPeriodic() {
-  }
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        if (disabledTimer.hasElapsed(Constants.DRIVE_CONSTANTS.wheelLockTime())) {
+            disabledTimer.stop();
+        }
+        m_robotContainer.resetAndStop();
+    }
+
+    /**
+     * This autonomous runs the autonomous command selected by your
+     * {@link RobotContainer} class.
+     */
+    @Override
+    public void autonomousInit() {
+        System.out.println("Robot in auto");
+
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+        // schedule the autonomous command (example)
+        if (m_autonomousCommand != null) {
+            CommandScheduler.getInstance().schedule(m_autonomousCommand);
+        }
+
+        timeUntilEnd.start(20);
+    }
+
+    /**
+     * This function is called periodically during autonomous.
+     */
+    @Override
+    public void autonomousPeriodic() {
+        // Constants.SHOOTER.processIntakeCoralAuto();
+    }
+
+    @Override
+    public void teleopInit() {
+        System.out.println("Robot in teleop");
+        // This makes sure that the autonomous stops running when
+        // teleop starts running. If you want the autonomous to
+        // continue until interrupted by another command, remove
+        // this line or comment it out.
+        System.out.println(m_autonomousCommand);
+        if (m_autonomousCommand != null) {
+            System.out.println("Cancelling auto command");
+            m_autonomousCommand.cancel();
+        } else {
+            // System.out.println("Cancelling all commands");
+            // System.out.println(CommandScheduler.getInstance());
+            // CommandScheduler.getInstance().cancelAll();
+        }
+        m_robotContainer.setDriveMode();
+
+        allianceShiftCountdown.start(10);
+    }
+
+    /**
+     * This function is called periodically during operator control.
+     */
+    @Override
+    public void teleopPeriodic() {
+        double remainingTime = allianceShiftCountdown.remaining();
+        if (remainingTime <= 0) {
+            allianceShiftCountdown.start(25);
+        }
+    }
+
+    /**
+     * This function is called once when the robot is first started up.
+     */
+    @Override
+    public void simulationInit() {
+    }
+
+    /**
+     * This function is called periodically whilst in simulation.
+     */
+    @Override
+    public void simulationPeriodic() {
+    }
 }
