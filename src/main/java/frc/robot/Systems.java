@@ -32,7 +32,6 @@ public final class Systems {
      */
     public static boolean isSystemEnabled(GenericEntry system)
     {
-        boolean isInCompOrSim = DriverStation.isFMSAttached() || Robot.isSimulation();
-        return system.getBoolean(isInCompOrSim);
+        return system.getBoolean(true);
     }
 }
