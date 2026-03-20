@@ -49,7 +49,7 @@ public class Intake extends SubsystemBase {
     private double kv = 0.1;
     private double kcos = 0.45;
     private double kcosratio = 1;
-                                    // also kcos messing things up
+    // also kcos messing things up
     private double goalUpRadians = 0.744873;
     private double goalDownRadians = 0;
 
@@ -102,11 +102,11 @@ public class Intake extends SubsystemBase {
         encoder = pivotMotor.getAlternateEncoder();
         encoder.setPosition(0.744); // zero encoder, such that the down position is 0 and the up position is 0.7
         ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-        
-        ShuffleboardLayout intakeLayout = shooterTab.getLayout("Intake", BuiltInLayouts.kList).withSize(2, 2).withPosition(0, 0);
-        SimpleWidget intakeWidget =       intakeLayout.add("Position", 0);
-        SimpleWidget pivotAngleWidget =   intakeLayout.add("Pivot Angle", 0);
 
+        ShuffleboardLayout intakeLayout = shooterTab.getLayout("Intake", BuiltInLayouts.kList).withSize(2, 2)
+                .withPosition(0, 0);
+        SimpleWidget intakeWidget = intakeLayout.add("Position", 0);
+        SimpleWidget pivotAngleWidget = intakeLayout.add("Pivot Angle", 0);
 
         intakeEntry = intakeWidget.getEntry();
         pivotAngleEntry = pivotAngleWidget.getEntry();

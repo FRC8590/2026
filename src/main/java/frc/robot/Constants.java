@@ -56,7 +56,7 @@ public final class Constants {
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     // Robot Physical Properties
-    public static final double ROBOT_MASS = Units.lbsToKilograms(135); //TODO: record 2026 mass
+    public static final double ROBOT_MASS = Units.lbsToKilograms(135); // TODO: record 2026 mass
     public static final Matter CHASSIS = new Matter(
             new Translation3d(0, 0, Units.inchesToMeters(14)),
             ROBOT_MASS);
@@ -81,19 +81,17 @@ public final class Constants {
     public static final ShooterConstants SHOOTER_CONSTANTS = ShooterConstants.DEFAULT;
     public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
 
-
     // Subsystem Instances
     public static Vision vision = new Vision(() -> drivebase.getPose());
     public static Belt belt = new Belt();
     public static Intake intake = new Intake();
-    public static Shooter shooter = new Shooter(); 
+    public static Shooter shooter = new Shooter();
     public static final LaserCan laserCan = new LaserCan(8);
 
     // Basically the sensitivity of the swerves
     public static double scaleFactor = 1;
 
-    public enum ScoreLocation
-    {
+    public enum ScoreLocation {
         LEFT2,
         LEFT3,
         RIGHT2,
