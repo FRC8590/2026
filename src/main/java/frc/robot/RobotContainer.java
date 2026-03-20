@@ -177,8 +177,7 @@ public class RobotContainer {
      * @return 1 if red side, -1 if blue side
      */
     public int getSide() {
-        if (DriverStation.getAlliance().isPresent() &&
-                DriverStation.getAlliance().get() == Alliance.Red) {
+        if (Systems.isRedAlliance()) {
             return 1;
         } else {
             return -1;
