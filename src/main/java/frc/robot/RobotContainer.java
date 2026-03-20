@@ -152,12 +152,12 @@ public class RobotContainer {
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
         m_chooser.addOption("Sample Auto", "Sample Auto");
-        m_chooser.addOption("red top", "red top");
-        m_chooser.addOption("red mid", "red mid");
-        m_chooser.addOption("red bot", "red bot");
-        m_chooser.addOption("blue top", "blue top");
-        m_chooser.addOption("blue mid", "blue mid");
-        m_chooser.addOption("blue bot", "blue bot");
+        m_chooser.addOption("Blue","Blue-TrTo-7To");
+        m_chooser.addOption("Blue","Blue-TrMd-7Md");
+        m_chooser.addOption("Blue","Blue-TrBo-7Bo");
+        m_chooser.addOption("Red","Red-TrTo-7To");
+        m_chooser.addOption("Red","Red-TrMd-7Md");
+        m_chooser.addOption("Red","Red-TrBo-7Bo");       
 
         // Initialize with proper alliance orientation
         NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
