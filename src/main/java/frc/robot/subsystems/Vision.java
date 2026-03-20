@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
@@ -26,10 +27,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.CvSource;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.Systems;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -84,6 +85,8 @@ public class Vision {
     private static VisionTargetSim ballSim;
     private static VisionTargetSim hubSim;
 
+    private static GenericEntry seesAprilTagEntry;
+
     // Physics state
     private double ballVelocityX = 0;
     private double ballVelocityZ = 0;
@@ -118,6 +121,11 @@ public class Vision {
             ballSim = new VisionTargetSim(new Pose3d(), ballModel);
             visionSim.addVisionTargets(ballSim);
         }
+
+        seesAprilTagEntry = Shuffleboard
+                .getTab("Vision")
+                .add("Sees AprilTag?", false)
+                .getEntry();
     }
 
     /** Simulate launching a ball from the current robot position */
@@ -316,12 +324,29 @@ public class Vision {
         }
 
         List<Pose2d> poses = new ArrayList<>();
+        boolean seesTag = false;
         for (PhotonTrackedTarget target : targets) {
-            if (fieldLayout.getTagPose(target.getFiducialId()).isPresent()) {
+            int tagId = target.getFiducialId();
+            if (tagId == getHubAprilTag()) {
+                seesTag = true;
+            }
+
+            if (fieldLayout.getTagPose(tagId).isPresent()) {
                 Pose2d targetPose = fieldLayout.getTagPose(target.getFiducialId()).get().toPose2d();
                 poses.add(targetPose);
             }
         }
+
+        seesAprilTagEntry.setBoolean(seesTag);
+    }
+
+    /*
+     * Specific to Rebuilt (2026).
+     * This is the ID of the AprilTag that we want to fire at.
+     */
+    public static int getHubAprilTag() {
+        int primaryId = Systems.isRedAlliance() ? 10 : 26;
+        return primaryId;
     }
 
     /**

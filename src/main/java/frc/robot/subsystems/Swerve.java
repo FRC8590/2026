@@ -352,7 +352,7 @@ public class Swerve extends SubsystemBase {
         headingController.setTolerance(Units.degreesToRadians(0.5));
 
         return run(() -> {
-            int primaryId = isRedAlliance() ? 10 : 26;
+            int primaryId = Vision.getHubAprilTag();
             Optional<Pose2d> result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
 
             if (result.isPresent()) {
@@ -599,17 +599,6 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * Checks if the alliance is red, defaults to false if alliance isn't available.
-     *
-     * @return true if the red alliance, false if blue. Defaults to false if none is
-     *         available.
-     */
-    public boolean isRedAlliance() {
-        var alliance = DriverStation.getAlliance();
-        return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
-    }
-
-    /**
      * Zero the gyro and properly initialize field-relative orientation based on
      * alliance.
      * This ensures compatibility with PathPlanner's coordinate system.
@@ -620,7 +609,7 @@ public class Swerve extends SubsystemBase {
 
         // Get the current alliance
         var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent() && isRedAlliance()) {
+        if (alliance.isPresent() && Systems.isRedAlliance()) {
             // When on red alliance, we need to rotate the field coordinate system 180
             // degrees
             // This matches PathPlanner's coordinate system where the origin stays on blue
