@@ -4,7 +4,7 @@ import frc.robot.Constants;
 public class Shoot extends ParallelCommandGroup {
     public Shoot() {
         addCommands(
-            Constants.shooter.shooterSetGoalRPM(2000),
+            Constants.shooter.shooterSetRPMFromVision(),
             Constants.belt.beltAndIndexerRun()
         );
         addRequirements(getRequirements());

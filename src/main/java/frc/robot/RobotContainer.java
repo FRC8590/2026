@@ -152,20 +152,21 @@ public class RobotContainer {
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
         m_chooser.addOption("Sample Auto", "Sample Auto");
-        m_chooser.addOption("red top", "red top");
-        m_chooser.addOption("red mid", "red mid");
-        m_chooser.addOption("red bot", "red bot");
-        m_chooser.addOption("blue top", "blue top");
-        m_chooser.addOption("blue mid", "blue mid");
-        m_chooser.addOption("blue bot", "blue bot");
+        m_chooser.addOption("Blue","Blue-TrTo-7To");
+        m_chooser.addOption("Blue","Blue-TrMd-7Md");
+        m_chooser.addOption("Blue","Blue-TrBo-7Bo");
+        m_chooser.addOption("Red","Red-TrTo-7To");
+        m_chooser.addOption("Red","Red-TrMd-7Md");
+        m_chooser.addOption("Red","Red-TrBo-7Bo");       
 
-        // Initialize with proper alliance orientation
-        NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
-        NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
-        NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
-        NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
-        NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
-        NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+    // Initialize with proper alliance orientation
+    NamedCommands.registerCommand("Shoot", new Shoot());
+    NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
+    NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
+    NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
+    NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+    NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+
 
     }
 
@@ -218,6 +219,9 @@ public class RobotContainer {
         // driverXbox.a().whileFalse(Constants.belt.beltStop());
         // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
         // driverXbox.a().whileFalse(Constants.belt.indexerStop());
+        driverXbox.rightBumper().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
+        driverXbox.rightBumper().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
+        driverXbox.rightBumper().whileFalse(Constants.belt.beltAndIndexerStop());
         driverXbox.rightTrigger().whileTrue(new Shoot());
         driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
         driverXbox.rightTrigger().whileFalse(Constants.belt.beltAndIndexerStop());
