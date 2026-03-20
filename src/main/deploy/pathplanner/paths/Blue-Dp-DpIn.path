@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.57,
-        "y": 0.6628205128205127
+        "x": 1.25,
+        "y": 6.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1548398544188663,
-        "y": 1.9020915621635226
+        "x": 0.7083410569807569,
+        "y": 5.9920134220850985
       },
       "isLocked": false,
-      "linkedName": "BB"
+      "linkedName": "blue - depot"
     },
     {
       "anchor": {
-        "x": 2.46639999,
-        "y": 4.04
+        "x": 0.8,
+        "y": 6.0
       },
       "prevControl": {
-        "x": 2.680729218201722,
-        "y": 3.2588272648392778
+        "x": 1.319123411616338,
+        "y": 6.004444801616608
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BHUB 7FT"
+      "linkedName": "blue - depot in"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.5,
+    "maxVelocity": 0.5,
     "maxAcceleration": 3.3,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Blue",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

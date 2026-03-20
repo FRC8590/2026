@@ -5,19 +5,25 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Red-TrTo-7To"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "blue bottom-7ft"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.5
                 }
               }
             ]
@@ -26,13 +32,13 @@
         {
           "type": "named",
           "data": {
-            "name": "BeltAndIndexerRun"
+            "name": "BeltAndIndexerStop"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Red",
   "choreoAuto": false
 }
