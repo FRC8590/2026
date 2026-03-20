@@ -64,7 +64,7 @@ import org.json.simple.parser.ParseException;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
-public class SwerveSubsystem extends SubsystemBase {
+public class Swerve extends SubsystemBase {
 
   /**
    * Swerve drive object.
@@ -136,7 +136,7 @@ public class SwerveSubsystem extends SubsystemBase {
    *
    * @param directory Directory of swerve drive config files.
    */
-  public SwerveSubsystem(File directory) {
+  public Swerve(File directory) {
 
     // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
     // In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
@@ -200,7 +200,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param driveCfg      SwerveDriveConfiguration for the swerve.
    * @param controllerCfg Swerve Controller.
    */
-  public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg) {
+  public Swerve(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg) {
     initShuffleboard();
     currentSpeed = Constants.DEFAULT_SPEED;
     swerveDrive = new SwerveDrive(driveCfg,

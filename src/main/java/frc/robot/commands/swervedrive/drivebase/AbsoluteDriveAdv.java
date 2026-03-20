@@ -10,7 +10,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.Swerve;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -24,7 +24,7 @@ import swervelib.math.SwerveMath;
  */
 public class AbsoluteDriveAdv extends Command {
 
-  private final SwerveSubsystem swerve;
+  private final Swerve swerve;
   private final DoubleSupplier vX, vY;
   private final DoubleSupplier headingAdjust;
   private final BooleanSupplier lookAway, lookTowards, lookLeft, lookRight;
@@ -61,7 +61,7 @@ public class AbsoluteDriveAdv extends Command {
    * @param lookLeft      Face the robot left
    * @param lookRight     Face the robot right
    */
-  public AbsoluteDriveAdv(SwerveSubsystem swerve, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier headingAdjust,
+  public AbsoluteDriveAdv(Swerve swerve, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier headingAdjust,
       BooleanSupplier lookAway, BooleanSupplier lookTowards, BooleanSupplier lookLeft,
       BooleanSupplier lookRight) {
     this.swerve = swerve;

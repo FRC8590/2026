@@ -22,7 +22,7 @@ import frc.robot.constants.ClimbConstants;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 
 /**
@@ -70,7 +70,7 @@ public final class Constants {
     public static double visionTimerOffset = 0;
 
     // Subsystem Instances
-    public static final SwerveSubsystem drivebase = new SwerveSubsystem(
+    public static final Swerve drivebase = new Swerve(
             new File(Filesystem.getDeployDirectory(), "swerve/neo"));
 
     // Constants Records
