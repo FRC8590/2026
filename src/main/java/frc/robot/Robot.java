@@ -4,8 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -25,10 +27,49 @@ public class Robot extends TimedRobot {
 
     private Timer disabledTimer;
 
+    private class Countdown {
+        private Timer timer;
+        private double waitTime = -1;
+        private GenericEntry shuffleboardEntry;
+
+        public Countdown(String name) {
+            timer = new Timer();
+            shuffleboardEntry = Shuffleboard
+                    .getTab("Console").add(name, 0).getEntry();
+        }
+
+        public void start(double waitTime) {
+            this.waitTime = waitTime;
+            timer.reset();
+            timer.start();
+            shuffleboardEntry.setDouble(waitTime);
+        }
+
+        public void stop() {
+            timer.stop();
+        }
+
+        public double remaining() {
+            double remainingTime = waitTime - timer.get();
+            if (remainingTime <= 0) {
+                stop();
+                shuffleboardEntry.setInteger(0);
+            } else {
+                shuffleboardEntry.setDouble(Math.round(remainingTime));
+            }
+            return remainingTime;
+        }
+    }
+
+    // Rebuilt-specific; time until the hub switches
+    private Countdown allianceShiftCountdown;
+    private Countdown timeUntilEnd;
+
     public Robot() {
         instance = this;
-        // Riley TODO: Is this needed?
-        // CameraServer.startAutomaticCapture();
+        allianceShiftCountdown = new Countdown("Time until shift");
+        timeUntilEnd = new Countdown("Time until end");
+
     }
 
     public static Robot getInstance() {
@@ -54,10 +95,6 @@ public class Robot extends TimedRobot {
 
         // Constants.visionTimerOffset =
         // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
-
-        // if (isSimulation()) {
-        // throw new RuntimeException("We don't support simulations right now");
-        // }
 
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
         System.out.println("gyro start");
@@ -88,6 +125,13 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         // SmartDashboard.putBoolean("right camrea status",
         // Constants.vision.getEnabled(1));
+        if (timeUntilEnd.remaining() <= 0) {
+            // If timeUntilEnd() is ever 0, we're either going into teleop
+            // or the game is ending. For simplicity, we always assume that
+            // we're going into teleop, because the timer will disable if
+            // we're disabling anyway.
+            timeUntilEnd.start(140 /* 2:20 minutes */);
+        }
     }
 
     /**
@@ -124,6 +168,7 @@ public class Robot extends TimedRobot {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
 
+        timeUntilEnd.start(20);
     }
 
     /**
@@ -151,6 +196,8 @@ public class Robot extends TimedRobot {
             // CommandScheduler.getInstance().cancelAll();
         }
         m_robotContainer.setDriveMode();
+
+        allianceShiftCountdown.start(10);
     }
 
     /**
@@ -158,16 +205,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        /*
-         * SmartDashboard.putNumberArray("front left motor temps",
-         * Constants.drivebase.getMotorTemperatures()[0]);
-         * SmartDashboard.putNumberArray("front right motor temps",
-         * Constants.drivebase.getMotorTemperatures()[1]);
-         * SmartDashboard.putNumberArray("back left motor temps",
-         * Constants.drivebase.getMotorTemperatures()[2]);
-         * SmartDashboard.putNumberArray("back right motor temps",
-         * Constants.drivebase.getMotorTemperatures()[3]);
-         */
+        double remainingTime = allianceShiftCountdown.remaining();
+        if (remainingTime <= 0) {
+            allianceShiftCountdown.start(25);
+        }
     }
 
     /**
