@@ -123,6 +123,8 @@ public class Robot extends TimedRobot {
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
+        Constants.vision.updateVisionField();
+
         // SmartDashboard.putBoolean("right camrea status",
         // Constants.vision.getEnabled(1));
         if (timeUntilEnd.remaining() <= 0) {

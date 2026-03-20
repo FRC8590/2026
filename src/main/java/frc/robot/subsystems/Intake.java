@@ -144,7 +144,7 @@ public class Intake extends SubsystemBase {
 
     private void run() {
         if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
-            intakeMotor.set(1);
+            intakeMotor.set(.5);
         }
     }
 

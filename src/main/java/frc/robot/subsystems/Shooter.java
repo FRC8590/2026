@@ -132,17 +132,18 @@ public class Shooter extends SubsystemBase {
 
     public Command shooterSetRPMFromVision() {
         return run(() -> {
-            int primaryId = Constants.drivebase.isRedAlliance() ? 10 : 26;
+            int primaryId = Vision.getHubAprilTag();
             var result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
             if (!result.isPresent()) {
                 // Nothing seen -- hope for the best!
-                setGoalRPM(2000);
                 return;
             }
 
             var distance = result.get().getMeasureX();
             // This is based off our regression model
+            System.out.println(distance);
             var rpm = 7.02381 * (distance.in(Inches)) + 1237.14286;
+            System.out.println(rpm);
             setGoalRPM(rpm);
         });
     }
