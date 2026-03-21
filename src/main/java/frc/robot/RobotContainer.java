@@ -212,6 +212,7 @@ public class RobotContainer {
 
         driverXbox.x().whileTrue(Constants.intake.intakeDown());
         driverXbox.b().whileTrue(Constants.intake.intakeUp());
+        driverXbox.leftTrigger().whileTrue(Constants.intake.intakeDown());
         driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
         driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
 
