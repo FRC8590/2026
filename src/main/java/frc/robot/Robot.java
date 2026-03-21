@@ -22,6 +22,11 @@ public class Robot extends TimedRobot {
 
     private static Robot instance;
     private Command m_autonomousCommand;
+    private GenericEntry isRedAllianceEntry = Shuffleboard
+            .getTab("Console")
+            .add("On red alliance?", false)
+            .getEntry();
+
 
     public RobotContainer m_robotContainer;
 
@@ -160,6 +165,10 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         System.out.println("Robot in auto");
 
+        isRedAllianceEntry.setBoolean(Systems.isRedAlliance());
+        System.out.println("gyro start");
+        Constants.drivebase.zeroGyroWithAlliance();
+        System.out.println("gyro calibrated");
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
@@ -168,10 +177,6 @@ public class Robot extends TimedRobot {
         }
 
         timeUntilEnd.start(20);
-        System.out.println("gyro start");
-        Constants.drivebase.zeroGyroWithAlliance();
-        System.out.println("gyro calibrated");
-        Shuffleboard.getTab("Console").add("On red alliance?", Systems.isRedAlliance());
     }
 
     /**
