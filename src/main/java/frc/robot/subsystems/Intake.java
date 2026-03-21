@@ -60,7 +60,7 @@ public class Intake extends SubsystemBase {
     private GenericEntry pivotMotorRPMEntry;
 
     // Riley TODO: Delete this after testing
-    private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0.5).getEntry();
+    private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0.8).getEntry();
 
     public Intake() {
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

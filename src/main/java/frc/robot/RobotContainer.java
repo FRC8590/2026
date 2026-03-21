@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.Shoot;
+import frc.robot.commands.StableShoot;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import swervelib.SwerveInputStream;
 
@@ -145,10 +146,6 @@ public class RobotContainer {
                 .withPosition(0, 0)
                 .withSize(2, 1);
 
-        Shuffleboard.getTab("Autonomous")
-                .add("On Red Side?", true)
-                .withWidget(BuiltInWidgets.kBooleanBox)
-                .getEntry();
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
         m_chooser.addOption("Sample Auto", "Sample Auto");
@@ -224,7 +221,7 @@ public class RobotContainer {
         driverXbox.a().whileFalse(Constants.belt.beltStop());
         driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
         driverXbox.a().whileFalse(Constants.belt.indexerStop());
-        driverXbox.rightBumper().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
+        driverXbox.rightBumper().whileTrue(new StableShoot());
         driverXbox.rightBumper().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
         driverXbox.rightBumper().whileFalse(Constants.belt.beltAndIndexerStop());
         driverXbox.rightTrigger().whileTrue(new Shoot());
