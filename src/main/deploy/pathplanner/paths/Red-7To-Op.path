@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.13628,
-        "y": 5.74774
+        "x": 14.03443,
+        "y": 5.42145
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.700277448749551,
-        "y": 6.367457353182316
+        "x": 14.598427448749552,
+        "y": 6.041167353182316
       },
       "isLocked": false,
       "linkedName": "red - hub 7ft away top"
@@ -48,7 +48,7 @@
   "folder": "Red",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -126.49013295072956
+    "rotation": -140.0
   },
   "useDefaultConstraints": true
 }

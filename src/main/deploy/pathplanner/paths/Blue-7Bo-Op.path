@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.39822,
-        "y": 2.25226
+        "x": 2.36557,
+        "y": 2.67855
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7453751560031185,
-        "y": 1.5332669590536758
+        "x": 1.7127251560031187,
+        "y": 1.9595569590536752
       },
       "isLocked": false,
       "linkedName": "blue - hub 7ft away bottom"
@@ -48,7 +48,7 @@
   "folder": "Blue",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 55.85837738434957
+    "rotation": 40.0
   },
   "useDefaultConstraints": true
 }
