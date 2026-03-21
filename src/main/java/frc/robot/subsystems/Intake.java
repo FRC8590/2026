@@ -42,16 +42,16 @@ public class Intake extends SubsystemBase {
     /** Relative Encoder */
     private final RelativeEncoder encoder;
     /** PID */
-    private double p = 0.4;
+    private double p = 0.55;
     private double i = 0;
     private double d = 0;
     /** FeedForward */
     private double kv = 0.1;
-    private double kcos = 0.45;
+    private double kcos = 0.5;
     private double kcosratio = 1;
     // also kcos messing things up
     private double goalUpRadians = 0.72;
-    private double goalDownRadians = -0.1;
+    private double goalDownRadians = -0.2;
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
