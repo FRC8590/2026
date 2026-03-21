@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
             timer.stop();
         }
 
-        public double remaining() {
+        public double step() {
             double remainingTime = waitTime - timer.get();
             if (remainingTime <= 0) {
                 stop();
@@ -129,13 +129,6 @@ public class Robot extends TimedRobot {
 
         // SmartDashboard.putBoolean("right camrea status",
         // Constants.vision.getEnabled(1));
-        if (timeUntilEnd.remaining() <= 0) {
-            // If timeUntilEnd() is ever 0, we're either going into teleop
-            // or the game is ending. For simplicity, we always assume that
-            // we're going into teleop, because the timer will disable if
-            // we're disabling anyway.
-            timeUntilEnd.start(140 /* 2:20 minutes */);
-        }
     }
 
     /**
@@ -185,6 +178,7 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousPeriodic() {
         // Constants.SHOOTER.processIntakeCoralAuto();
+        timeUntilEnd.step();
     }
 
     @Override
@@ -206,6 +200,7 @@ public class Robot extends TimedRobot {
         m_robotContainer.setDriveMode();
 
         allianceShiftCountdown.start(10);
+        timeUntilEnd.start(140 /* 2:20 minutes */);
     }
 
     /**
@@ -213,10 +208,12 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        double remainingTime = allianceShiftCountdown.remaining();
+        double remainingTime = allianceShiftCountdown.step();
         if (remainingTime <= 0) {
             allianceShiftCountdown.start(25);
         }
+
+        timeUntilEnd.step();
     }
 
     /**

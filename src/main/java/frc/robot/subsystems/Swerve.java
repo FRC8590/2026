@@ -535,6 +535,7 @@ public class Swerve extends SubsystemBase {
     /* Increase the current speed. */
     public Command shiftUp() {
         return runOnce(() -> {
+            System.out.println("Shifting up speed");
             if (currentSpeed == Constants.MAX_SPEED) {
                 System.err.println("Swerve is already at max speed, cannot accelerate");
             } else {
@@ -548,6 +549,7 @@ public class Swerve extends SubsystemBase {
     public Command shiftDown() {
         return runOnce(() -> {
             assert (currentSpeed > 0);
+            System.out.println("Shifting down speed");
             if (currentSpeed == 1) {
                 System.err.println("Cannot make the swerves any slower");
             } else {
