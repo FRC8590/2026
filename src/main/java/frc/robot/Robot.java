@@ -197,7 +197,6 @@ public class Robot extends TimedRobot {
             // System.out.println(CommandScheduler.getInstance());
             // CommandScheduler.getInstance().cancelAll();
         }
-        m_robotContainer.setDriveMode();
 
         allianceShiftCountdown.start(10);
         timeUntilEnd.start(140 /* 2:20 minutes */);

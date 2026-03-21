@@ -200,8 +200,8 @@ public class RobotContainer {
                         ? driveFieldOrientedAngularVelocitySim
                         : driveFieldOrientedAnglularVelocity);
 
-        driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
-        driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
+        driverXbox.povUp().onTrue(Constants.drivebase.shiftUp());
+        driverXbox.povDown().onTrue(Constants.drivebase.shiftDown());
 
         driverXbox.x().whileTrue(Constants.intake.intakeDown());
         driverXbox.b().whileTrue(Constants.intake.intakeUp());
@@ -236,10 +236,6 @@ public class RobotContainer {
         String selectedAuto = m_chooser.getSelected();
         return Constants.drivebase.getAutonomousCommand(selectedAuto);
 
-    }
-
-    public void setDriveMode() {
-        configureBindings();
     }
 
     public void setMotorBrake(boolean brake) {
