@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as
@@ -26,6 +29,8 @@ public class Robot extends TimedRobot {
     public RobotContainer m_robotContainer;
 
     private Timer disabledTimer;
+
+    private Lock commandLock;
 
     private class Countdown {
         private Timer timer;
@@ -70,6 +75,12 @@ public class Robot extends TimedRobot {
         allianceShiftCountdown = new Countdown("Time until shift");
         timeUntilEnd = new Countdown("Time until end");
 
+        // XXX: Peter: We don't need a reentrant lock, but for
+        // some reason, Java doesn't provide one. It might be
+        // worth rolling our own locking implementation if this
+        // gets bad.
+        commandLock = new ReentrantLock();
+
     }
 
     public static Robot getInstance() {
@@ -101,6 +112,40 @@ public class Robot extends TimedRobot {
         Constants.drivebase.zeroGyroWithAlliance();
         System.out.println("gyro calibrated");
 
+        new Thread(() -> {
+            while (true) {
+                // We do locking twice to give robotPeriodic() a chance
+                // to execute, because these might be expensive operations
+                // and we don't want to starve the command loop.
+                commandLock.lock();
+                try {
+                    Constants.vision.updateVisionField();
+                } finally {
+                    commandLock.unlock();
+                }
+
+                commandLock.lock();
+                try {
+                    Constants.drivebase.updateOdometry();
+                } finally {
+                    commandLock.unlock();
+                }
+
+                if (timeUntilEnd.remaining() <= 0) {
+                    // If timeUntilEnd() is ever 0, we're either going into teleop
+                    // or the game is ending. For simplicity, we always assume that
+                    // we're going into teleop, because the timer will disable if
+                    // we're disabling anyway.
+                    timeUntilEnd.start(140 /* 2:20 minutes */);
+                }
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    System.err.println("Thread sleep interrupted");
+                }
+            }
+        }).start();
     }
 
     /**
@@ -122,17 +167,11 @@ public class Robot extends TimedRobot {
         // and running subsystem periodic() methods. This must be called from the
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
-        CommandScheduler.getInstance().run();
-        Constants.vision.updateVisionField();
-
-        // SmartDashboard.putBoolean("right camrea status",
-        // Constants.vision.getEnabled(1));
-        if (timeUntilEnd.remaining() <= 0) {
-            // If timeUntilEnd() is ever 0, we're either going into teleop
-            // or the game is ending. For simplicity, we always assume that
-            // we're going into teleop, because the timer will disable if
-            // we're disabling anyway.
-            timeUntilEnd.start(140 /* 2:20 minutes */);
+        commandLock.lock();
+        try {
+            CommandScheduler.getInstance().run();
+        } finally {
+            commandLock.unlock();
         }
     }
 

@@ -217,8 +217,7 @@ public class Swerve extends SubsystemBase {
                         Rotation2d.fromDegrees(180)));
     }
 
-    @Override
-    public void periodic() {
+    public void updateOdometry() {
         // When vision is enabled we must manually update odometry in SwerveDrive
         swerveDrive.updateOdometry();
         Constants.vision.updatePoseEstimation(swerveDrive);
