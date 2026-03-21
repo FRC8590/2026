@@ -171,6 +171,7 @@ public class Robot extends TimedRobot {
         System.out.println("gyro start");
         Constants.drivebase.zeroGyroWithAlliance();
         System.out.println("gyro calibrated");
+        Shuffleboard.getTab("Console").add("On red alliance?", Systems.isRedAlliance());
     }
 
     /**
