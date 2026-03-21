@@ -57,8 +57,10 @@ public class Intake extends SubsystemBase {
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
     private GenericEntry intakeEntry;
     private GenericEntry pivotAngleEntry;
+    private GenericEntry pivotMotorRPMEntry;
+
     // Riley TODO: Delete this after testing
-    private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0).getEntry();
+    private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0.5).getEntry();
 
     public Intake() {
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -111,6 +113,11 @@ public class Intake extends SubsystemBase {
         SimpleWidget pivotAngleWidget = intakeLayout.add("Pivot Angle", 0);
         intakeEntry = intakeWidget.getEntry();
         pivotAngleEntry = pivotAngleWidget.getEntry();
+
+        pivotMotorRPMEntry = Shuffleboard
+                .getTab("Intake")
+                .add("Pivot Motor RPM", 0)
+                .getEntry();
     }
 
     /**
@@ -188,6 +195,7 @@ public class Intake extends SubsystemBase {
         if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
             intakeEntry.setDouble(setPoint);
             pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+            pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
         }
     }
 }
