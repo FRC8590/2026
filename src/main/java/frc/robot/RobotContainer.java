@@ -145,15 +145,15 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
-        m_chooser.addOption("Sample Auto", "Sample Auto");
-        m_chooser.addOption("Blue Top FI", "Blue-TrTo-7To");
-        m_chooser.addOption("Blue Mid FI", "Blue-TrMd-7Md");
-        m_chooser.addOption("Blue Bot FI", "Blue-TrBo-7Bo");
-        m_chooser.addOption("Red Top FI", "Red-TrTo-7To");
-        m_chooser.addOption("Red Mid FI", "Red-TrMd-7Md");
-        m_chooser.addOption("Red Bot FI", "Red-TrBo-7Bo");
-        m_chooser.addOption("Red Outpost", "Red-TrTo-Op-7To");
-        m_chooser.addOption("Blue Outpost", "Blue-TrBo-Op-7Bo");
+        // m_chooser.addOption("Sample Auto", "Sample Auto");
+        m_chooser.addOption("Blue Left F.I.", "Blue-TrTo-7To");
+        m_chooser.addOption("Blue Mid F.I.", "Blue-TrMd-7Md");
+        m_chooser.addOption("Blue Right F.I.", "Blue-TrBo-7Bo");
+        m_chooser.addOption("Red Right F.I.", "Red-TrTo-7To");
+        m_chooser.addOption("Red Mid F.I.", "Red-TrMd-7Md");
+        m_chooser.addOption("Red Left F.I.", "Red-TrBo-7Bo");
+        m_chooser.addOption("Red Right Outpost", "Red-TrTo-Op-7To");
+        m_chooser.addOption("Blue Left Outpost", "Blue-TrBo-Op-7Bo");
 
         // Initialize with proper alliance orientation
         NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
