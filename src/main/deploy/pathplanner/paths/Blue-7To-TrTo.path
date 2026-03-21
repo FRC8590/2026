@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.39822,
+        "y": 5.74774
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.9093974358974375,
+        "y": 6.825769230769231
+      },
+      "isLocked": false,
+      "linkedName": "blue - hub 7ft away top"
+    },
+    {
+      "anchor": {
+        "x": 4.6,
+        "y": 7.4
+      },
+      "prevControl": {
+        "x": 3.421038461538463,
+        "y": 7.430435897435898
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "blue - top trench inside"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.3,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 2.0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "Blue",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -54.52577157502294
+  },
+  "useDefaultConstraints": true
+}
