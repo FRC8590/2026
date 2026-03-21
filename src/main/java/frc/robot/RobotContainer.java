@@ -211,17 +211,18 @@ public class RobotContainer {
         driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
 
         driverXbox.x().whileTrue(Constants.intake.intakeDown());
+        driverXbox.b().whileTrue(Constants.intake.intakeUp());
         driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
         driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
 
         driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
         driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
 
-        driverXbox.y().whileTrue(Constants.drivebase.ZeroGryo());
-        // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
-        // driverXbox.a().whileFalse(Constants.belt.beltStop());
-        // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
-        // driverXbox.a().whileFalse(Constants.belt.indexerStop());
+        driverXbox.leftStick().whileTrue(Constants.drivebase.ZeroGryo());
+        driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
+        driverXbox.a().whileFalse(Constants.belt.beltStop());
+        driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
+        driverXbox.a().whileFalse(Constants.belt.indexerStop());
         driverXbox.rightBumper().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
         driverXbox.rightBumper().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
         driverXbox.rightBumper().whileFalse(Constants.belt.beltAndIndexerStop());
@@ -229,7 +230,7 @@ public class RobotContainer {
         driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
         driverXbox.rightTrigger().whileFalse(Constants.belt.beltAndIndexerStop());
 
-        driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
+        driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
     }
     
 
