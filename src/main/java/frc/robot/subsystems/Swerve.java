@@ -159,7 +159,7 @@ public class Swerve extends SubsystemBase {
         currentSpeed = Constants.DEFAULT_SPEED;
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
         // objects being created.
-        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.LOW;
         try {
             swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED,
                     new Pose2d(new Translation2d(Meter.of(7.566),
@@ -192,7 +192,6 @@ public class Swerve extends SubsystemBase {
         // Stop the odometry thread if we are using vision that way we can synchronize
         // updates better.
         swerveDrive.stopOdometryThread();
-        setupPathPlanner();
 
         initShuffleboard();
 
@@ -217,6 +216,8 @@ public class Swerve extends SubsystemBase {
                         Rotation2d.fromDegrees(180)));
     }
 
+    private int telemetryCounter = 0;
+
     @Override
     public void periodic() {
         // When vision is enabled we must manually update odometry in SwerveDrive
@@ -224,9 +225,13 @@ public class Swerve extends SubsystemBase {
         Constants.vision.updatePoseEstimation(swerveDrive);
         field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
-        for (int i = 0; i < swerveModules.length; i++) {
-            swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
-            swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
+        // Only update expensive UI entries every 10 loops (200ms)
+        if (telemetryCounter++ >= 10) {
+            for (int i = 0; i < swerveModules.length; i++) {
+                swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
+                swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
+            }
+            telemetryCounter = 0;
         }
     }
 

@@ -103,6 +103,7 @@ public class Robot extends TimedRobot {
 
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
 
+        Constants.drivebase.setupPathPlanner();
     }
 
     /**
