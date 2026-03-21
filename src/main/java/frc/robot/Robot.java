@@ -97,9 +97,6 @@ public class Robot extends TimedRobot {
         // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
 
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
-        System.out.println("gyro start");
-        Constants.drivebase.zeroGyroWithAlliance();
-        System.out.println("gyro calibrated");
 
     }
 
@@ -171,6 +168,9 @@ public class Robot extends TimedRobot {
         }
 
         timeUntilEnd.start(20);
+        System.out.println("gyro start");
+        Constants.drivebase.zeroGyroWithAlliance();
+        System.out.println("gyro calibrated");
     }
 
     /**

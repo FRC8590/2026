@@ -608,8 +608,7 @@ public class Swerve extends SubsystemBase {
         zeroGyro();
 
         // Get the current alliance
-        var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent() && Systems.isRedAlliance()) {
+        if (Systems.isRedAlliance()) {
             // When on red alliance, we need to rotate the field coordinate system 180
             // degrees
             // This matches PathPlanner's coordinate system where the origin stays on blue
