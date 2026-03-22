@@ -25,6 +25,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -345,7 +346,6 @@ public class Swerve extends SubsystemBase {
      *
      * @return A {@link Command} which will run the alignment.
      */
-
     public Command aimAtTarget() {
         PIDController headingController = new PIDController(5, 0, 0);
         headingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -353,20 +353,28 @@ public class Swerve extends SubsystemBase {
 
         return run(() -> {
             int primaryId = Vision.getHubAprilTag();
-            Optional<Pose2d> result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
+            Optional<Pose3d> tagPoseOpt = Vision.fieldLayout.getTagPose(primaryId);
 
-            if (result.isPresent()) {
-                Pose2d targetPose = result.get();
-                double rotationSpeed = headingController.calculate(targetPose.getRotation().getRadians(), 0);
-                System.out.println("Aiming at pose: " + targetPose + ". Rotation speed: " + rotationSpeed);
-                drive(new ChassisSpeeds(0, 0, rotationSpeed));
-            } else {
+            if (tagPoseOpt.isEmpty() || !Vision.seesNumber(primaryId)) {
                 drive(new ChassisSpeeds(0, 0, 0));
+                return;
             }
+
+            Pose2d robotPose = getPose();
+            Pose2d tagPose = tagPoseOpt.get().toPose2d();
+
+            // Angle from robot to the tag
+            double dx = tagPose.getX() - robotPose.getX();
+            double dy = tagPose.getY() - robotPose.getY();
+            double angleToTag = Math.atan2(dy, dx);
+
+            double rotationSpeed = headingController.calculate(
+                    robotPose.getRotation().getRadians(),
+                    angleToTag);
+
+            drive(new ChassisSpeeds(0, 0, rotationSpeed));
         })
-                // Ensure robot stops when command ends
                 .finallyDo(() -> drive(new ChassisSpeeds(0, 0, 0)))
-                // Automatically end when aligned
                 .until(headingController::atSetpoint);
     }
 
