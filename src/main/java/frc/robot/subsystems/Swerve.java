@@ -236,6 +236,13 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public Command lockPose()
+    {
+        return run(() -> {
+            swerveDrive.lockPose();
+        });
+    }
+
     @Override
     public void simulationPeriodic() {
     }

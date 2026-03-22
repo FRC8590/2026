@@ -199,8 +199,8 @@ public class RobotContainer {
                         ? driveFieldOrientedAngularVelocitySim
                         : driveFieldOrientedAnglularVelocity);
 
-        driverXbox.povUp().onTrue(Constants.drivebase.shiftUp());
-        driverXbox.povDown().onTrue(Constants.drivebase.shiftDown());
+        driverXbox.povRight().onTrue(Constants.drivebase.shiftUp());
+        driverXbox.povLeft().onTrue(Constants.drivebase.shiftDown());
 
         driverXbox.x().whileTrue(Constants.intake.intakeDown());
         driverXbox.b().whileTrue(Constants.intake.intakeUp());
@@ -208,8 +208,10 @@ public class RobotContainer {
         driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
         driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
 
-        driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
-        driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
+        driverXbox.povUp().whileTrue(Constants.belt.beltAndIndexerRun());
+        driverXbox.povUp().whileFalse(Constants.belt.beltAndIndexerStop());
+
+        driverXbox.povDown().whileTrue(Constants.drivebase.lockPose());
 
         driverXbox.leftStick().whileTrue(Constants.drivebase.ZeroGryo());
         driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
