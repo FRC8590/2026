@@ -8,8 +8,6 @@ public class Shoot extends ParallelCommandGroup {
         addCommands(
                 Constants.shooter.shooterSetRPMFromVision(),
                 Constants.belt.beltAndIndexerRun());
-        addRequirements(Constants.belt, Constants.shooter);
-
     }
 
 }

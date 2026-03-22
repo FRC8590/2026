@@ -9,7 +9,6 @@ public class StableShoot extends ParallelCommandGroup {
         addCommands(
                 Constants.shooter.shooterSetStableGoalRPM(),
                 Constants.belt.beltAndIndexerRun());
-        addRequirements(Constants.belt, Constants.shooter);
     }
 
 }
