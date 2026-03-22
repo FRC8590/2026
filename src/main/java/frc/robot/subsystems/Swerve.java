@@ -225,7 +225,7 @@ public class Swerve extends SubsystemBase {
         swerveDrive.updateOdometry();
         Constants.vision.updatePoseEstimation(swerveDrive);
 
-        if (++telemetryCounter >= 15) {
+        if (++telemetryCounter >= 5) {
             field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
             for (int i = 0; i < swerveModules.length; i++) {

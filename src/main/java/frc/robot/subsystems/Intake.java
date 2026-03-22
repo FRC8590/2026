@@ -194,11 +194,11 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         if (++telemetryCounter >= 10) {
             pivotAngleEntry.setDouble(encoder.getPosition());
+            pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
             telemetryCounter = 0;
         }
         if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
-            pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
-            pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
+            //pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
         }
     }
 }
