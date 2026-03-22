@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -156,7 +155,7 @@ public class RobotContainer {
         m_chooser.addOption("Blue Left Outpost", "Blue-TrBo-Op-7Bo");
 
         // Initialize with proper alliance orientation
-        NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
+        NamedCommands.registerCommand("Shoot", new StableShoot());
         NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
         NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
         NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
@@ -200,8 +199,8 @@ public class RobotContainer {
                         ? driveFieldOrientedAngularVelocitySim
                         : driveFieldOrientedAnglularVelocity);
 
-        driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
-        driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
+        driverXbox.povUp().onTrue(Constants.drivebase.shiftUp());
+        driverXbox.povDown().onTrue(Constants.drivebase.shiftDown());
 
         driverXbox.x().whileTrue(Constants.intake.intakeDown());
         driverXbox.b().whileTrue(Constants.intake.intakeUp());
@@ -236,10 +235,6 @@ public class RobotContainer {
         String selectedAuto = m_chooser.getSelected();
         return Constants.drivebase.getAutonomousCommand(selectedAuto);
 
-    }
-
-    public void setDriveMode() {
-        configureBindings();
     }
 
     public void setMotorBrake(boolean brake) {

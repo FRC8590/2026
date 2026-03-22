@@ -25,6 +25,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -159,7 +160,7 @@ public class Swerve extends SubsystemBase {
         currentSpeed = Constants.DEFAULT_SPEED;
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
         // objects being created.
-        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.LOW;
         try {
             swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED,
                     new Pose2d(new Translation2d(Meter.of(7.566),
@@ -192,7 +193,6 @@ public class Swerve extends SubsystemBase {
         // Stop the odometry thread if we are using vision that way we can synchronize
         // updates better.
         swerveDrive.stopOdometryThread();
-        setupPathPlanner();
 
         initShuffleboard();
 
@@ -217,16 +217,22 @@ public class Swerve extends SubsystemBase {
                         Rotation2d.fromDegrees(180)));
     }
 
+    private int telemetryCounter = 0;
+
     @Override
     public void periodic() {
         // When vision is enabled we must manually update odometry in SwerveDrive
         swerveDrive.updateOdometry();
         Constants.vision.updatePoseEstimation(swerveDrive);
-        field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
-        for (int i = 0; i < swerveModules.length; i++) {
-            swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
-            swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
+        if (++telemetryCounter >= 15) {
+            field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
+
+            for (int i = 0; i < swerveModules.length; i++) {
+                swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
+                swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
+            }
+            telemetryCounter = 0;
         }
     }
 
@@ -345,7 +351,6 @@ public class Swerve extends SubsystemBase {
      *
      * @return A {@link Command} which will run the alignment.
      */
-
     public Command aimAtTarget() {
         PIDController headingController = new PIDController(5, 0, 0);
         headingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -353,20 +358,28 @@ public class Swerve extends SubsystemBase {
 
         return run(() -> {
             int primaryId = Vision.getHubAprilTag();
-            Optional<Pose2d> result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
+            Optional<Pose3d> tagPoseOpt = Vision.fieldLayout.getTagPose(primaryId);
 
-            if (result.isPresent()) {
-                Pose2d targetPose = result.get();
-                double rotationSpeed = headingController.calculate(targetPose.getRotation().getRadians(), 0);
-                System.out.println("Aiming at pose: " + targetPose + ". Rotation speed: " + rotationSpeed);
-                drive(new ChassisSpeeds(0, 0, rotationSpeed));
-            } else {
+            if (tagPoseOpt.isEmpty() || !Vision.seesNumber(primaryId)) {
                 drive(new ChassisSpeeds(0, 0, 0));
+                return;
             }
+
+            Pose2d robotPose = getPose();
+            Pose2d tagPose = tagPoseOpt.get().toPose2d();
+
+            // Angle from robot to the tag
+            double dx = tagPose.getX() - robotPose.getX();
+            double dy = tagPose.getY() - robotPose.getY();
+            double angleToTag = Math.atan2(dy, dx);
+
+            double rotationSpeed = headingController.calculate(
+                    robotPose.getRotation().getRadians(),
+                    angleToTag);
+
+            drive(new ChassisSpeeds(0, 0, rotationSpeed));
         })
-                // Ensure robot stops when command ends
                 .finallyDo(() -> drive(new ChassisSpeeds(0, 0, 0)))
-                // Automatically end when aligned
                 .until(headingController::atSetpoint);
     }
 
@@ -535,6 +548,7 @@ public class Swerve extends SubsystemBase {
     /* Increase the current speed. */
     public Command shiftUp() {
         return runOnce(() -> {
+            System.out.println("Shifting up speed");
             if (currentSpeed == Constants.MAX_SPEED) {
                 System.err.println("Swerve is already at max speed, cannot accelerate");
             } else {
@@ -548,6 +562,7 @@ public class Swerve extends SubsystemBase {
     public Command shiftDown() {
         return runOnce(() -> {
             assert (currentSpeed > 0);
+            System.out.println("Shifting down speed");
             if (currentSpeed == 1) {
                 System.err.println("Cannot make the swerves any slower");
             } else {

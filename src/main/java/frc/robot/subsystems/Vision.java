@@ -24,8 +24,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -243,9 +241,6 @@ public class Vision {
                 swerveDrive.addVisionMeasurement(pose.estimatedPose.toPose2d(),
                         pose.timestampSeconds,
                         camera.curStdDevs);
-                SmartDashboard.putNumber("poseX", pose.estimatedPose.toPose2d().getX());
-                SmartDashboard.putNumber("poseY", pose.estimatedPose.toPose2d().getY());
-
             }
         }
 

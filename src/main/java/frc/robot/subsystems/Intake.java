@@ -3,11 +3,8 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -42,16 +39,17 @@ public class Intake extends SubsystemBase {
     /** Relative Encoder */
     private final RelativeEncoder encoder;
     /** PID */
-    private double p = 0.4;
+    
+    private double p = 0.55; // Riley TODO: Originaly 0.4; if not tested, revert back!
     private double i = 0;
     private double d = 0;
     /** FeedForward */
     private double kv = 0.1;
-    private double kcos = 0.45;
+    private double kcos = 0.5; // Riley TODO: Originaly 0.45; if not tested, revert back!
     private double kcosratio = 1;
     // also kcos messing things up
     private double goalUpRadians = 0.72;
-    private double goalDownRadians = -0.1;
+    private double goalDownRadians = -0.2; // Riley TODO: Originaly -0.1; if not tested, revert back!
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
@@ -136,6 +134,7 @@ public class Intake extends SubsystemBase {
     private void setGoal(double pointSet) {
         System.out.println("Set intake goal: " + pointSet);
         setPoint = pointSet;
+        intakeEntry.setDouble(setPoint);
     }
 
     private void up() {
@@ -189,11 +188,15 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> down());
     }
 
+    private int telemetryCounter = 0;
+
     @Override
     public void periodic() {
-        pivotAngleEntry.setDouble(encoder.getPosition());
+        if (++telemetryCounter >= 10) {
+            pivotAngleEntry.setDouble(encoder.getPosition());
+            telemetryCounter = 0;
+        }
         if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
-            intakeEntry.setDouble(setPoint);
             pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
             pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
         }

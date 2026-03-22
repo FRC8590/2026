@@ -22,6 +22,10 @@ public class Robot extends TimedRobot {
 
     private static Robot instance;
     private Command m_autonomousCommand;
+    private GenericEntry isRedAllianceEntry = Shuffleboard
+            .getTab("Console")
+            .add("On red alliance?", false)
+            .getEntry();
 
     public RobotContainer m_robotContainer;
 
@@ -31,32 +35,46 @@ public class Robot extends TimedRobot {
         private Timer timer;
         private double waitTime = -1;
         private GenericEntry shuffleboardEntry;
+        private long lastPublishedSecond = -1;
 
         public Countdown(String name) {
             timer = new Timer();
             shuffleboardEntry = Shuffleboard
-                    .getTab("Console").add(name, 0).getEntry();
+                    .getTab("Console")
+                    .add(name, 0)
+                    .getEntry();
         }
 
-        public void start(double waitTime) {
+        public void start(long waitTime) {
             this.waitTime = waitTime;
+            lastPublishedSecond = -1;
             timer.reset();
             timer.start();
-            shuffleboardEntry.setDouble(waitTime);
+            shuffleboardEntry.setInteger(waitTime);
         }
 
         public void stop() {
             timer.stop();
         }
 
-        public double remaining() {
+        public double step() {
             double remainingTime = waitTime - timer.get();
+
             if (remainingTime <= 0) {
-                stop();
-                shuffleboardEntry.setInteger(0);
-            } else {
-                shuffleboardEntry.setDouble(Math.round(remainingTime));
+                if (lastPublishedSecond != 0) {
+                    stop();
+                    shuffleboardEntry.setInteger(0);
+                    lastPublishedSecond = 0;
+                }
+                return 0;
             }
+
+            long secondsToDisplay = Math.round(remainingTime);
+            if (secondsToDisplay != lastPublishedSecond) {
+                shuffleboardEntry.setInteger(secondsToDisplay);
+                lastPublishedSecond = secondsToDisplay;
+            }
+
             return remainingTime;
         }
     }
@@ -98,6 +116,7 @@ public class Robot extends TimedRobot {
 
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
 
+        Constants.drivebase.setupPathPlanner();
     }
 
     /**
@@ -121,16 +140,6 @@ public class Robot extends TimedRobot {
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
         Constants.vision.updateVisionField();
-
-        // SmartDashboard.putBoolean("right camrea status",
-        // Constants.vision.getEnabled(1));
-        if (timeUntilEnd.remaining() <= 0) {
-            // If timeUntilEnd() is ever 0, we're either going into teleop
-            // or the game is ending. For simplicity, we always assume that
-            // we're going into teleop, because the timer will disable if
-            // we're disabling anyway.
-            timeUntilEnd.start(140 /* 2:20 minutes */);
-        }
     }
 
     /**
@@ -160,6 +169,10 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         System.out.println("Robot in auto");
 
+        isRedAllianceEntry.setBoolean(Systems.isRedAlliance());
+        System.out.println("gyro start");
+        Constants.drivebase.zeroGyroWithAlliance();
+        System.out.println("gyro calibrated");
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
@@ -168,10 +181,6 @@ public class Robot extends TimedRobot {
         }
 
         timeUntilEnd.start(20);
-        System.out.println("gyro start");
-        Constants.drivebase.zeroGyroWithAlliance();
-        System.out.println("gyro calibrated");
-        Shuffleboard.getTab("Console").add("On red alliance?", Systems.isRedAlliance());
     }
 
     /**
@@ -180,6 +189,7 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousPeriodic() {
         // Constants.SHOOTER.processIntakeCoralAuto();
+        timeUntilEnd.step();
     }
 
     @Override
@@ -198,9 +208,9 @@ public class Robot extends TimedRobot {
             // System.out.println(CommandScheduler.getInstance());
             // CommandScheduler.getInstance().cancelAll();
         }
-        m_robotContainer.setDriveMode();
 
         allianceShiftCountdown.start(10);
+        timeUntilEnd.start(140 /* 2:20 minutes */);
     }
 
     /**
@@ -208,10 +218,12 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        double remainingTime = allianceShiftCountdown.remaining();
+        double remainingTime = allianceShiftCountdown.step();
         if (remainingTime <= 0) {
             allianceShiftCountdown.start(25);
         }
+
+        timeUntilEnd.step();
     }
 
     /**
