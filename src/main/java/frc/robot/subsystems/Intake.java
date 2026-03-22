@@ -39,20 +39,26 @@ public class Intake extends SubsystemBase {
     /** Relative Encoder */
     private final RelativeEncoder encoder;
     /** PID */
-    private double p = 0.4;
+    
+    private double p = 0.55; // Riley TODO: Originaly 0.4; if not tested, revert back!
     private double i = 0;
     private double d = 0;
     /** FeedForward */
     private double kv = 0.1;
-    private double kcos = 0.45;
+    private double kcos = 0.5; // Riley TODO: Originaly 0.45; if not tested, revert back!
     private double kcosratio = 1;
     // also kcos messing things up
     private double goalUpRadians = 0.72;
-    private double goalDownRadians = -0.1;
+    private double goalDownRadians = -0.2; // Riley TODO: Originaly -0.1; if not tested, revert back!
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
+    private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
     private GenericEntry intakeEntry;
     private GenericEntry pivotAngleEntry;
+    private GenericEntry pivotMotorRPMEntry;
+
+    // Riley TODO: Delete this after testing
+    private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0.8).getEntry();
 
     public Intake() {
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -103,10 +109,13 @@ public class Intake extends SubsystemBase {
                 .withPosition(0, 0);
         SimpleWidget intakeWidget = intakeLayout.add("Position", 0);
         SimpleWidget pivotAngleWidget = intakeLayout.add("Pivot Angle", 0);
-
         intakeEntry = intakeWidget.getEntry();
         pivotAngleEntry = pivotAngleWidget.getEntry();
 
+        pivotMotorRPMEntry = Shuffleboard
+                .getTab("Intake")
+                .add("Pivot Motor RPM", 0)
+                .getEntry();
     }
 
     /**
@@ -142,7 +151,8 @@ public class Intake extends SubsystemBase {
 
     private void run() {
         if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
-            intakeMotor.set(.5);
+            // Riley: TODO: Set this to the best value found in testing
+            intakeMotor.set(intakePercentEntry.getDouble(0));
         }
     }
 
@@ -188,6 +198,7 @@ public class Intake extends SubsystemBase {
         }
         if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
             pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+            pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
         }
     }
 }

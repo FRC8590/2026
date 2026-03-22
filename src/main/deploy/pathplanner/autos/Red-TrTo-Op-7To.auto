@@ -5,15 +5,34 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "IntakeDown"
+            "pathName": "Red-TrTo-7To"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.5
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Red-TrTo-Op"
+            "pathName": "Red-7To-Op"
           }
         },
         {
@@ -45,12 +64,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "BeltAndIndexerStop"
           }
         }
       ]

@@ -39,6 +39,7 @@ public class Shooter extends SubsystemBase {
     private GenericEntry targRPMEntry;
     private GenericEntry currRPMFrontEntry;
     private GenericEntry currRPMBackEntry;
+    private GenericEntry setRPMEntry;
 
     public Shooter() {
         p = 0.0001;
@@ -83,6 +84,12 @@ public class Shooter extends SubsystemBase {
         currRPMFrontEntry = currRPMFrontWidget.getEntry();
         currRPMBackEntry = currRPMBackWidget.getEntry();
         targRPMEntry = targRPMWidget.getEntry();
+
+        setRPMEntry = Shuffleboard
+                .getTab("Shooter")
+                .add("Stable shoot RPM", 2000)
+                .withWidget(BuiltInWidgets.kNumberSlider)
+                .getEntry();
     }
 
     private void setGoalRPM(double rpm) {
@@ -120,6 +127,12 @@ public class Shooter extends SubsystemBase {
                 Constants.vision.simulateShoot(8, 29);
             }
             setGoalRPM(rpm);
+        });
+    }
+
+    public Command shooterSetStableGoalRPM() {
+        return run(() -> {
+            setGoalRPM(setRPMEntry.getInteger(2000));
         });
     }
 

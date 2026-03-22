@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.Shoot;
+import frc.robot.commands.StableShoot;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import swervelib.SwerveInputStream;
 
@@ -114,14 +115,11 @@ public class RobotContainer {
     // Derive the heading axis with math!
     SwerveInputStream driveDirectAngleSim = driveAngularVelocitySim.copy()
             .withControllerHeadingAxis(() -> Math.sin(
-                    driverXbox.getRawAxis(
-                            2) * Math.PI)
+                    driverXbox.getRawAxis(2) * Math.PI)
                     * (Math.PI * 2),
                     () -> Math.cos(
-                            driverXbox.getRawAxis(
-                                    2) * Math.PI)
-                            *
-                            (Math.PI * 2))
+                            driverXbox.getRawAxis(2) * Math.PI)
+                            * (Math.PI * 2))
             .headingWhile(true);
 
     Command driveFieldOrientedDirectAngleSim = Constants.drivebase.driveFieldOriented(driveDirectAngleSim);
@@ -144,21 +142,17 @@ public class RobotContainer {
                 .withPosition(0, 0)
                 .withSize(2, 1);
 
-        Shuffleboard.getTab("Autonomous")
-                .add("On Red Side?", true)
-                .withWidget(BuiltInWidgets.kBooleanBox)
-                .getEntry();
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
-        m_chooser.addOption("Sample Auto", "Sample Auto");
-        m_chooser.addOption("Blue Top FI", "Blue-TrTo-7To");
-        m_chooser.addOption("Blue Mid FI", "Blue-TrMd-7Md");
-        m_chooser.addOption("Blue Bot FI", "Blue-TrBo-7Bo");
-        m_chooser.addOption("Red Top FI", "Red-TrTo-7To");
-        m_chooser.addOption("Red Mid FI", "Red-TrMd-7Md");
-        m_chooser.addOption("Red Bot FI", "Red-TrBo-7Bo");
-        m_chooser.addOption("Red Outpost", "Red-TrTo-Op-7To");
-        m_chooser.addOption("Blue Outpost", "Blue-TrBo-Op-7Bo");
+        // m_chooser.addOption("Sample Auto", "Sample Auto");
+        m_chooser.addOption("Blue Left F.I.", "Blue-TrTo-7To");
+        m_chooser.addOption("Blue Mid F.I.", "Blue-TrMd-7Md");
+        m_chooser.addOption("Blue Right F.I.", "Blue-TrBo-7Bo");
+        m_chooser.addOption("Red Right F.I.", "Red-TrTo-7To");
+        m_chooser.addOption("Red Mid F.I.", "Red-TrMd-7Md");
+        m_chooser.addOption("Red Left F.I.", "Red-TrBo-7Bo");
+        m_chooser.addOption("Red Right Outpost", "Red-TrTo-Op-7To");
+        m_chooser.addOption("Blue Left Outpost", "Blue-TrBo-Op-7Bo");
 
         // Initialize with proper alliance orientation
         NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
@@ -205,29 +199,31 @@ public class RobotContainer {
                         ? driveFieldOrientedAngularVelocitySim
                         : driveFieldOrientedAnglularVelocity);
 
-        driverXbox.povUp().whileTrue(Constants.drivebase.shiftUp());
-        driverXbox.povDown().whileFalse(Constants.drivebase.shiftDown());
+        driverXbox.povUp().onTrue(Constants.drivebase.shiftUp());
+        driverXbox.povDown().onTrue(Constants.drivebase.shiftDown());
 
         driverXbox.x().whileTrue(Constants.intake.intakeDown());
+        driverXbox.b().whileTrue(Constants.intake.intakeUp());
+        driverXbox.leftTrigger().whileTrue(Constants.intake.intakeDown());
         driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
         driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
 
         driverXbox.povRight().whileTrue(Constants.belt.beltAndIndexerRun());
         driverXbox.povRight().whileFalse(Constants.belt.beltAndIndexerStop());
 
-        driverXbox.y().whileTrue(Constants.drivebase.ZeroGryo());
-        // driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
-        // driverXbox.a().whileFalse(Constants.belt.beltStop());
-        // driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
-        // driverXbox.a().whileFalse(Constants.belt.indexerStop());
-        driverXbox.rightBumper().whileTrue(Constants.shooter.shooterSetGoalRPM(2000));
+        driverXbox.leftStick().whileTrue(Constants.drivebase.ZeroGryo());
+        driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
+        driverXbox.a().whileFalse(Constants.belt.beltStop());
+        driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
+        driverXbox.a().whileFalse(Constants.belt.indexerStop());
+        driverXbox.rightBumper().whileTrue(new StableShoot());
         driverXbox.rightBumper().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
         driverXbox.rightBumper().whileFalse(Constants.belt.beltAndIndexerStop());
         driverXbox.rightTrigger().whileTrue(new Shoot());
         driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
         driverXbox.rightTrigger().whileFalse(Constants.belt.beltAndIndexerStop());
 
-        driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
+        driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
     }
 
     /**
@@ -239,10 +235,6 @@ public class RobotContainer {
         String selectedAuto = m_chooser.getSelected();
         return Constants.drivebase.getAutonomousCommand(selectedAuto);
 
-    }
-
-    public void setDriveMode() {
-        configureBindings();
     }
 
     public void setMotorBrake(boolean brake) {

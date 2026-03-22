@@ -160,7 +160,7 @@ public class Swerve extends SubsystemBase {
         currentSpeed = Constants.DEFAULT_SPEED;
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
         // objects being created.
-        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.LOW;
         try {
             swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED,
                     new Pose2d(new Translation2d(Meter.of(7.566),
@@ -193,7 +193,6 @@ public class Swerve extends SubsystemBase {
         // Stop the odometry thread if we are using vision that way we can synchronize
         // updates better.
         swerveDrive.stopOdometryThread();
-        setupPathPlanner();
 
         initShuffleboard();
 
@@ -233,7 +232,6 @@ public class Swerve extends SubsystemBase {
                 swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
                 swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
             }
-
             telemetryCounter = 0;
         }
     }
@@ -550,6 +548,7 @@ public class Swerve extends SubsystemBase {
     /* Increase the current speed. */
     public Command shiftUp() {
         return runOnce(() -> {
+            System.out.println("Shifting up speed");
             if (currentSpeed == Constants.MAX_SPEED) {
                 System.err.println("Swerve is already at max speed, cannot accelerate");
             } else {
@@ -563,6 +562,7 @@ public class Swerve extends SubsystemBase {
     public Command shiftDown() {
         return runOnce(() -> {
             assert (currentSpeed > 0);
+            System.out.println("Shifting down speed");
             if (currentSpeed == 1) {
                 System.err.println("Cannot make the swerves any slower");
             } else {
@@ -623,8 +623,7 @@ public class Swerve extends SubsystemBase {
         zeroGyro();
 
         // Get the current alliance
-        var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent() && Systems.isRedAlliance()) {
+        if (Systems.isRedAlliance()) {
             // When on red alliance, we need to rotate the field coordinate system 180
             // degrees
             // This matches PathPlanner's coordinate system where the origin stays on blue

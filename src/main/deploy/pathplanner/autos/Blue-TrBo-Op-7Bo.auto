@@ -5,15 +5,34 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "IntakeDown"
+            "pathName": "Blue-TrBt-7Bt"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.5
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-TrBo-Op"
+            "pathName": "Blue-7Bo-Op"
           }
         },
         {
@@ -45,12 +64,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "BeltAndIndexerStop"
           }
         }
       ]

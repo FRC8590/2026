@@ -4,28 +4,28 @@
     {
       "anchor": {
         "x": 13.0,
-        "y": 0.6
+        "y": 7.35
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.572461538461539,
-        "y": 1.3721410256410262
+        "x": 13.653858974358975,
+        "y": 6.930423076923078
       },
       "isLocked": false,
-      "linkedName": "red - bottom trench"
+      "linkedName": "red - top trench"
     },
     {
       "anchor": {
-        "x": 13.13628,
-        "y": 2.25226
+        "x": 14.03443,
+        "y": 5.42145
       },
       "prevControl": {
-        "x": 13.270128205128206,
-        "y": 2.0349487179487173
+        "x": 14.365957692307694,
+        "y": 5.92969717948718
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "red - hub 7ft away bottom"
+      "linkedName": "red - hub 7ft away top"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 124.74375612286406
+    "rotation": -140.0
   },
   "reversed": false,
   "folder": "Red",
