@@ -486,17 +486,8 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    /**
-     * Drive the robot given a chassis field oriented velocity.
-     *
-     * @param velocity Velocity according to the field.
-     */
-    public void driveFieldOriented(ChassisSpeeds velocity) {
-        updateSpeed(velocity);
-        if (Systems.isSystemEnabled(Systems.enableDrive)) {
-            swerveDrive.driveFieldOriented(velocity);
-        }
-    }
+    private double idleStartTime = -1;
+    private static final double LOCK_DELAY_SECONDS = 0.3;
 
     /**
      * Drive the robot given a chassis field oriented velocity.
@@ -508,7 +499,23 @@ public class Swerve extends SubsystemBase {
             ChassisSpeeds speeds = velocity.get();
             updateSpeed(speeds);
             if (Systems.isSystemEnabled(Systems.enableDrive)) {
-                swerveDrive.driveFieldOriented(speeds);
+                boolean isIdle = Math.abs(speeds.vxMetersPerSecond) < 0.05 &&
+                                Math.abs(speeds.vyMetersPerSecond) < 0.05 &&
+                                Math.abs(speeds.omegaRadiansPerSecond) < 0.05;
+
+                // For defensive purposes, we want to lock the wheels when we're not
+                // moving. This makes it very difficult to push us.
+                if (isIdle) {
+                    if (idleStartTime < 0) {
+                        idleStartTime = Timer.getFPGATimestamp();
+                    }
+                    if (Timer.getFPGATimestamp() - idleStartTime >= LOCK_DELAY_SECONDS) {
+                        swerveDrive.lockPose();
+                    }
+                } else {
+                    idleStartTime = -1;
+                    swerveDrive.driveFieldOriented(speeds);
+                }
             }
         });
     }
