@@ -98,8 +98,10 @@ public class Belt extends SubsystemBase {
     }
 
     public void runBeltAndIndexer() {
-        runBelt();
-        runIndexer();
+        if (Constants.shooter.atRPM()) {
+            runBelt();
+            runIndexer();
+        }
     }
 
     public void stopBeltAndIndexer() {
