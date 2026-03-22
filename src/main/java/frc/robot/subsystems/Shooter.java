@@ -5,15 +5,12 @@ import frc.robot.Robot;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkBase;
@@ -71,8 +68,6 @@ public class Shooter extends SubsystemBase {
         shooterConfig.inverted(true);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        SmartDashboard.putNumber("Shooter Speed", goalRPM);
-
         // Shuffleboard setup
         ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
 
@@ -87,9 +82,7 @@ public class Shooter extends SubsystemBase {
 
         currRPMFrontEntry = currRPMFrontWidget.getEntry();
         currRPMBackEntry = currRPMBackWidget.getEntry();
-
         targRPMEntry = targRPMWidget.getEntry();
-
     }
 
     private void setGoalRPM(double rpm) {
@@ -157,6 +150,8 @@ public class Shooter extends SubsystemBase {
         return run(() -> setGoalRPM(0));
     }
 
+    private int telemetryCounter = 0;
+
     /**
      * This method will be called once per scheduler run
      * Put values you want to moniter here
@@ -168,12 +163,11 @@ public class Shooter extends SubsystemBase {
             backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
         }
 
-        //goalRPM = SmartDashboard.getNumber("Shooter Speed", goalRPM);
-        SmartDashboard.putNumber("Set Shooter Speed ", goalRPM);
-        SmartDashboard.putNumber("Front Motor RPM ", frontMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Back Motor RPM ", backMotor.getEncoder().getVelocity());
-        targRPMEntry.setDouble(goalRPM);
-        currRPMBackEntry.setDouble(backMotor.getEncoder().getVelocity() / 6);
-        currRPMFrontEntry.setDouble(frontMotor.getEncoder().getVelocity() / 6);
+        if (++telemetryCounter >= 20) {
+            targRPMEntry.setDouble(goalRPM);
+            currRPMBackEntry.setDouble(backMotor.getEncoder().getVelocity() / 6);
+            currRPMFrontEntry.setDouble(frontMotor.getEncoder().getVelocity() / 6);
+            telemetryCounter = 0;
+        }
     }
 }

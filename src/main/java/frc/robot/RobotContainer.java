@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -152,25 +151,24 @@ public class RobotContainer {
         SmartDashboard.putData("Auto choices", m_chooser);
         m_chooser.setDefaultOption("Do Nothing", "nada");
         m_chooser.addOption("Sample Auto", "Sample Auto");
-        m_chooser.addOption("Blue Top FI","Blue-TrTo-7To");
-        m_chooser.addOption("Blue Mid FI","Blue-TrMd-7Md");
-        m_chooser.addOption("Blue Bot FI","Blue-TrBo-7Bo");
-        m_chooser.addOption("Red Top FI","Red-TrTo-7To");
-        m_chooser.addOption("Red Mid FI","Red-TrMd-7Md");
-        m_chooser.addOption("Red Bot FI","Red-TrBo-7Bo");
-        m_chooser.addOption("Red Outpost","Red-TrTo-Op-7To");
-        m_chooser.addOption("Blue Outpost","Blue-TrBo-Op-7Bo");
+        m_chooser.addOption("Blue Top FI", "Blue-TrTo-7To");
+        m_chooser.addOption("Blue Mid FI", "Blue-TrMd-7Md");
+        m_chooser.addOption("Blue Bot FI", "Blue-TrBo-7Bo");
+        m_chooser.addOption("Red Top FI", "Red-TrTo-7To");
+        m_chooser.addOption("Red Mid FI", "Red-TrMd-7Md");
+        m_chooser.addOption("Red Bot FI", "Red-TrBo-7Bo");
+        m_chooser.addOption("Red Outpost", "Red-TrTo-Op-7To");
+        m_chooser.addOption("Blue Outpost", "Blue-TrBo-Op-7Bo");
 
-    // Initialize with proper alliance orientation
-    NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
-    NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
-    NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
-    NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
-    NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
-    NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
-    NamedCommands.registerCommand("BeltAndIndexerStop", Constants.belt.beltAndIndexerStop());
-    NamedCommands.registerCommand("IntakeDown", Constants.intake.intakeDown());
-
+        // Initialize with proper alliance orientation
+        NamedCommands.registerCommand("Shoot", Constants.shooter.shooterSetGoalRPM(2000));
+        NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
+        NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
+        NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
+        NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
+        NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
+        NamedCommands.registerCommand("BeltAndIndexerStop", Constants.belt.beltAndIndexerStop());
+        NamedCommands.registerCommand("IntakeDown", Constants.intake.intakeDown());
 
     }
 
@@ -231,7 +229,6 @@ public class RobotContainer {
 
         driverXbox.b().whileTrue(Constants.drivebase.aimAtTarget());
     }
-    
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.

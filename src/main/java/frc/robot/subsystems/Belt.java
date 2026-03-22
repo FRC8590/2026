@@ -151,9 +151,14 @@ public class Belt extends SubsystemBase {
         return run(() -> stopBeltAndIndexer());
     }
 
+    private int telemetryCounter = 0;
+
     @Override
     public void periodic() {
-        beltEntry.setDouble(beltMotor.getEncoder().getVelocity() / 6);
-        indexerEntry.setDouble(indexMotor.getEncoder().getVelocity() / 6);
+        if (++telemetryCounter >= 50) {
+            beltEntry.setDouble(beltMotor.getEncoder().getVelocity() / 6);
+            indexerEntry.setDouble(indexMotor.getEncoder().getVelocity() / 6);
+            telemetryCounter = 0;
+        }
     }
 }

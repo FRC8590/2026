@@ -31,18 +31,22 @@ public class Robot extends TimedRobot {
         private Timer timer;
         private double waitTime = -1;
         private GenericEntry shuffleboardEntry;
+        private long lastPublishedSecond = -1;
 
         public Countdown(String name) {
             timer = new Timer();
             shuffleboardEntry = Shuffleboard
-                    .getTab("Console").add(name, 0).getEntry();
+                    .getTab("Console")
+                    .add(name, 0)
+                    .getEntry();
         }
 
-        public void start(double waitTime) {
+        public void start(long waitTime) {
             this.waitTime = waitTime;
+            lastPublishedSecond = -1;
             timer.reset();
             timer.start();
-            shuffleboardEntry.setDouble(waitTime);
+            shuffleboardEntry.setInteger(waitTime);
         }
 
         public void stop() {
@@ -51,12 +55,22 @@ public class Robot extends TimedRobot {
 
         public double remaining() {
             double remainingTime = waitTime - timer.get();
+
             if (remainingTime <= 0) {
-                stop();
-                shuffleboardEntry.setInteger(0);
-            } else {
-                shuffleboardEntry.setDouble(Math.round(remainingTime));
+                if (lastPublishedSecond != 0) {
+                    stop();
+                    shuffleboardEntry.setInteger(0);
+                    lastPublishedSecond = 0;
+                }
+                return 0;
             }
+
+            long secondsToDisplay = Math.round(remainingTime);
+            if (secondsToDisplay != lastPublishedSecond) {
+                shuffleboardEntry.setInteger(secondsToDisplay);
+                lastPublishedSecond = secondsToDisplay;
+            }
+
             return remainingTime;
         }
     }
@@ -125,8 +139,6 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
         Constants.vision.updateVisionField();
 
-        // SmartDashboard.putBoolean("right camrea status",
-        // Constants.vision.getEnabled(1));
         if (timeUntilEnd.remaining() <= 0) {
             // If timeUntilEnd() is ever 0, we're either going into teleop
             // or the game is ending. For simplicity, we always assume that

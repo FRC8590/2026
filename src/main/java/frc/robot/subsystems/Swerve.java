@@ -218,16 +218,23 @@ public class Swerve extends SubsystemBase {
                         Rotation2d.fromDegrees(180)));
     }
 
+    private int telemetryCounter = 0;
+
     @Override
     public void periodic() {
         // When vision is enabled we must manually update odometry in SwerveDrive
         swerveDrive.updateOdometry();
         Constants.vision.updatePoseEstimation(swerveDrive);
-        field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
-        for (int i = 0; i < swerveModules.length; i++) {
-            swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
-            swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
+        if (++telemetryCounter >= 15) {
+            field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
+
+            for (int i = 0; i < swerveModules.length; i++) {
+                swerveEntries[i][0].setDouble(swerveModules[i].getDriveMotor().getVelocity() / 6);
+                swerveEntries[i][1].setDouble(swerveModules[i].getAngleMotor().getVelocity() / 6);
+            }
+
+            telemetryCounter = 0;
         }
     }
 
