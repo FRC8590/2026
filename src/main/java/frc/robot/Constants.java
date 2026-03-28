@@ -65,8 +65,8 @@ public final class Constants {
 
     // Control Loop Timing
     public static final double LOOP_TIME = 0.05; // seconds
-    public static final double DEFAULT_SPEED = 6.0; // meters per second
-    public static final double MAX_SPEED = 8.0; // meters per second
+    public static final double DEFAULT_SPEED = 5.0; // meters per second
+    public static final double MAX_SPEED = 6.0; // meters per second
     public static double visionTimerOffset = 0;
 
     // Subsystem Instances

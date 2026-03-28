@@ -32,6 +32,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -44,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Systems;
 import frc.robot.subsystems.Vision.Cameras;
 
@@ -75,6 +77,8 @@ public class Swerve extends SubsystemBase {
      * AprilTag field layout.
      */
     public final AprilTagFieldLayout aprilTagFieldLayout = Constants.layout;
+
+    private Field2d simField = new Field2d();
 
     private double currentSpeed;
     private GenericEntry driveSpeedEntry;
@@ -129,7 +133,12 @@ public class Swerve extends SubsystemBase {
                 .getEntry();
 
         Shuffleboard.getTab("Console")
-                .add("Current Pose", field)
+                .add("Estimated Pose", field)
+                .withSize(4, 2)
+                .withWidget(BuiltInWidgets.kField);
+
+        Shuffleboard.getTab("Console")
+                .add("Simulated Pose", simField)
                 .withSize(4, 2)
                 .withWidget(BuiltInWidgets.kField);
     }
@@ -173,23 +182,30 @@ public class Swerve extends SubsystemBase {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot
-                                                 // via
-                                                 // angle.
-        swerveDrive.setCosineCompensator(false);// !SwerveDriveTelemetry.isSimulation); // Disables cosine compensation
-                                                // for
-                                                // simulations since it causes discrepancies not seen in real life.
-        swerveDrive.setAngularVelocityCompensation(true,
-                true,
-                0.1); // Correct for skew that gets worse as angular velocity increases. Start with a
-                      // coefficient of 0.1.
-        swerveDrive.setModuleEncoderAutoSynchronize(false,
-                1); // Enable if you want to resynchronize your absolute encoders and motor encoders
-                    // periodically when they are not moving.
+
+        boolean isInSimulation = Robot.isSimulation();
+
+        // Heading correction should only be used while controlling the robot
+        // via angle.
+        swerveDrive.setHeadingCorrection(false);
+        swerveDrive.setCosineCompensator(isInSimulation);
+
+        // Correct for skew that gets worse as angular velocity increases.
+        // Start with a coefficient of 0.1.
+        // We need to disable this when simulating because the simulation
+        // overcompensates.
+        swerveDrive.setAngularVelocityCompensation(!isInSimulation,
+                !isInSimulation,
+                0.1);
+
+        // Enable if you want to resynchronize your absolute encoders and motor encoders
+        // periodically when they are not moving.
+        swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
 
         // swerveDrive.pushOffsetsToEncoders(); // DEPRECATED, but might break things if
         // suggested replacement doesn't work
         swerveDrive.useExternalFeedbackSensor(); // we will see if this destroys things
+
         // Stop the odometry thread if we are using vision that way we can synchronize
         // updates better.
         swerveDrive.stopOdometryThread();
@@ -225,7 +241,7 @@ public class Swerve extends SubsystemBase {
         swerveDrive.updateOdometry();
         Constants.vision.updatePoseEstimation(swerveDrive);
 
-        if (++telemetryCounter >= 5) {
+        if (++telemetryCounter >= 5 || Robot.isSimulation()) {
             field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
 
             for (int i = 0; i < swerveModules.length; i++) {
@@ -236,8 +252,7 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public Command lockPose()
-    {
+    public Command lockPose() {
         return run(() -> {
             swerveDrive.lockPose();
         });
@@ -245,6 +260,8 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
+        swerveDrive.getSimulationDriveTrainPose()
+                .ifPresent(simField::setRobotPose);
     }
 
     private void updateSpeed(ChassisSpeeds speeds) {
@@ -500,8 +517,8 @@ public class Swerve extends SubsystemBase {
             updateSpeed(speeds);
             if (Systems.isSystemEnabled(Systems.enableDrive)) {
                 boolean isIdle = Math.abs(speeds.vxMetersPerSecond) < 0.05 &&
-                                Math.abs(speeds.vyMetersPerSecond) < 0.05 &&
-                                Math.abs(speeds.omegaRadiansPerSecond) < 0.05;
+                        Math.abs(speeds.vyMetersPerSecond) < 0.05 &&
+                        Math.abs(speeds.omegaRadiansPerSecond) < 0.05;
 
                 // For defensive purposes, we want to lock the wheels when we're not
                 // moving. This makes it very difficult to push us.

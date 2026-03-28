@@ -106,12 +106,13 @@ public class RobotContainer {
     Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
     SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-            () -> driverXbox.getLeftY() * getSide(), // getSide will invert if on Red side
-            () -> driverXbox.getLeftX() * getSide())
-            .withControllerRotationAxis(() -> -driverXbox.getRightX())
+            () -> -driverXbox.getLeftY() * getSide() * Constants.scaleFactor,
+            () -> -driverXbox.getLeftX() * getSide() * Constants.scaleFactor)
+            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * Constants.scaleFactor)
             .deadband(Constants.OPERATOR_CONSTANTS.deadband())
-            .scaleTranslation(0.8)
-            .allianceRelativeControl(true);
+            .robotRelative(false)
+            .allianceRelativeControl(false);
+
     // Derive the heading axis with math!
     SwerveInputStream driveDirectAngleSim = driveAngularVelocitySim.copy()
             .withControllerHeadingAxis(() -> Math.sin(
