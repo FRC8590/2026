@@ -80,9 +80,6 @@ public class Vision {
     public EstimatedRobotPose estimatedVisionPose;
     private static VisionSystemSim visionSim;
 
-    private static VisionTargetSim ballSim;
-    private static VisionTargetSim hubSim;
-
     private static GenericEntry seesAprilTagEntry;
 
     // Physics state
@@ -110,14 +107,6 @@ public class Vision {
                     Units.inchesToMeters(47),
                     Units.inchesToMeters(47),
                     Units.inchesToMeters(72));
-            hubSim = new VisionTargetSim(
-                    new Pose3d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), 0, new Rotation3d()),
-                    hubModel);
-            visionSim.addVisionTargets(hubSim);
-
-            TargetModel ballModel = new TargetModel(Units.inchesToMeters(5.91));
-            ballSim = new VisionTargetSim(new Pose3d(), ballModel);
-            visionSim.addVisionTargets(ballSim);
         }
 
         seesAprilTagEntry = Shuffleboard
@@ -137,34 +126,6 @@ public class Vision {
 
         isBallInFlight = true;
         lastSimTime = Timer.getFPGATimestamp();
-    }
-
-    private void updateBallSim() {
-        if (!isBallInFlight)
-            return;
-
-        double now = Timer.getFPGATimestamp();
-        double dt = now - lastSimTime;
-        lastSimTime = now;
-
-        // Kinematics: x = x0 + vt | z = z0 + vt - 1/2gt^2
-        double nextX = ballPose.getX() + (ballVelocityX * dt * currentPose.get().getRotation().getCos());
-        double nextY = ballPose.getY() + (ballVelocityX * dt * currentPose.get().getRotation().getSin());
-        ballVelocityZ -= 9.81 * dt; // Gravity
-        double nextZ = ballPose.getZ() + (ballVelocityZ * dt);
-
-        ballPose = new Pose3d(nextX, nextY, nextZ, new Rotation3d());
-        ballSim.setPose(ballPose);
-
-        double distToHub = ballPose.getTranslation().getDistance(hubSim.getPose().getTranslation());
-        if (distToHub < Units.inchesToMeters(20) && Math.abs(nextZ - Units.inchesToMeters(72)) < 0.2) {
-            System.out.println("--- GOAL SCORED! ---");
-            isBallInFlight = false;
-        }
-
-        if (nextZ <= 0) {
-            isBallInFlight = false;
-        }
     }
 
     /**
@@ -226,7 +187,6 @@ public class Vision {
              * Therefore, we must ensure that the actual robot pose is provided in the
              * simulator when updating the vision simulation during the simulation.
              */
-            updateBallSim();
             visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
         }
 
@@ -363,14 +323,17 @@ public class Vision {
          * Z: -17.923
          * A: 29
          */
-        /*RIGHT_CAM("right", // 29 degrees is aplied to yaw instead of pitch because of the 90* rotation of
-                           // the camera
-                new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0),
-                new Translation3d(
-                        Units.inchesToMeters(7.491),
-                        Units.inchesToMeters(8.427),
-                        Units.inchesToMeters(17.923)),
-                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),*/
+        /*
+         * RIGHT_CAM("right", // 29 degrees is aplied to yaw instead of pitch because of
+         * the 90* rotation of
+         * // the camera
+         * new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0),
+         * new Translation3d(
+         * Units.inchesToMeters(7.491),
+         * Units.inchesToMeters(8.427),
+         * Units.inchesToMeters(17.923)),
+         * VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+         */
 
         /**
          * Last updated on [3/18/2026] by [Riley W.].
