@@ -113,9 +113,6 @@ public class Robot extends TimedRobot {
         // immediately when disabled, but then also let it be pushed more
         disabledTimer = new Timer();
 
-        // Constants.visionTimerOffset =
-        // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
-
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
 
         Constants.drivebase.setupPathPlanner();

@@ -34,6 +34,8 @@ public class Shooter extends SubsystemBase {
 
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
 
+    public static final double SHOOTER_MAX_RPM = 6784;
+
     /** cV: cruiseVelocity. mA: maxAcceleration */
     private double goalRPM = 0, p, i, d, kA, kV, cV, mA;
 
@@ -76,11 +78,11 @@ public class Shooter extends SubsystemBase {
         ShuffleboardLayout shooterLayout = shooterTab.getLayout("Shooter", BuiltInLayouts.kGrid).withSize(2, 2)
                 .withPosition(4, 0);
         SimpleWidget currRPMFrontWidget = shooterLayout.add("Front motor RPM", 0).withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 1);
+                .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM)).withPosition(0, 1);
         SimpleWidget currRPMBackWidget = shooterLayout.add("Back motor RPM", 0).withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("Min", 0, "Max", Constants.SHOOTER_MAX_RPM)).withPosition(1, 1);
+                .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM)).withPosition(1, 1);
         SimpleWidget targRPMWidget = shooterLayout.add("Target RPM", 0).withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("min", 0, "max", Constants.SHOOTER_MAX_RPM)).withPosition(0, 0);
+                .withProperties(Map.of("min", 0, "max", SHOOTER_MAX_RPM)).withPosition(0, 0);
 
         currRPMFrontEntry = currRPMFrontWidget.getEntry();
         currRPMBackEntry = currRPMBackWidget.getEntry();
@@ -152,7 +154,7 @@ public class Shooter extends SubsystemBase {
         double wheelCircumference = Math.PI * wheelDiameter;
         double rpm = (v0 / slipFactor) / wheelCircumference * 60;
 
-        return Math.min(rpm, Constants.SHOOTER_MAX_RPM);
+        return Math.min(rpm, SHOOTER_MAX_RPM);
     }
 
     /**
@@ -173,7 +175,7 @@ public class Shooter extends SubsystemBase {
      * @return command that sets the goal RPM
      */
     public Command shooterSetGoalRPM(double rpm) {
-        if (rpm > Constants.SHOOTER_MAX_RPM)
+        if (rpm > SHOOTER_MAX_RPM)
             return run(() -> setGoalRPM(goalRPM));
         return run(() -> {
             if (Robot.isSimulation()) {

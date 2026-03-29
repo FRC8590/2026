@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -42,7 +43,6 @@ import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import org.photonvision.simulation.VisionTargetSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import swervelib.SwerveDrive;
@@ -58,7 +58,8 @@ public class Vision {
     /**
      * April Tag Field Layout of the year.
      */
-    public static final AprilTagFieldLayout fieldLayout = Constants.layout;
+    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout
+            .loadField(AprilTagFields.k2026RebuiltAndymark);
     /**
      * Ambiguity defined as a value between (0,1). Used in
      * {@link Vision#filterPose}.

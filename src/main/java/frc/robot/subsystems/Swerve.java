@@ -21,7 +21,6 @@ import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.revrobotics.spark.SparkMax;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,7 +31,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -69,15 +67,20 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class Swerve extends SubsystemBase {
 
+    public static final double DEFAULT_SPEED = 5.0; // meters per second
+    public static final double MAX_SPEED = 6.0; // meters per second
+
     /**
      * Swerve drive object.
      */
     public final SwerveDrive swerveDrive;
-    /**
-     * AprilTag field layout.
-     */
-    public final AprilTagFieldLayout aprilTagFieldLayout = Constants.layout;
 
+    /*
+     * Field containing the simulated pose based on YagSL.
+     * This is for use in AdvantageScope, and doesn't work when the robot
+     * isn't in simulation mode. Use the "Estimated Pose" (based on vision)
+     * for real matches.
+     */
     private Field2d simField = new Field2d();
 
     private double currentSpeed;
@@ -120,15 +123,15 @@ public class Swerve extends SubsystemBase {
                 .add("Speed", 0)
                 .withWidget(BuiltInWidgets.kDial)
                 .withSize(1, 1)
-                .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+                .withProperties(Map.of("min", 0, "max", MAX_SPEED))
                 .withPosition(0, 0)
                 .getEntry();
 
         currentShiftEntry = Shuffleboard.getTab("Drive")
-                .add("Target Speed", Constants.DEFAULT_SPEED)
+                .add("Target Speed", DEFAULT_SPEED)
                 .withWidget(BuiltInWidgets.kNumberBar)
                 .withSize(1, 1)
-                .withProperties(Map.of("min", 0, "max", Constants.MAX_SPEED))
+                .withProperties(Map.of("min", 0, "max", MAX_SPEED))
                 .withPosition(0, 1)
                 .getEntry();
 
@@ -166,12 +169,12 @@ public class Swerve extends SubsystemBase {
         System.out.println("\t\"drive\": {\"factor\": " + driveConversionFactor + " }");
         System.out.println("}");
 
-        currentSpeed = Constants.DEFAULT_SPEED;
+        currentSpeed = DEFAULT_SPEED;
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
         // objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.LOW;
         try {
-            swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED,
+            swerveDrive = new SwerveParser(directory).createSwerveDrive(MAX_SPEED,
                     new Pose2d(new Translation2d(Meter.of(7.566),
                             Meter.of(6.19)),
                             Rotation2d.fromDegrees(180)));
@@ -222,10 +225,10 @@ public class Swerve extends SubsystemBase {
      */
     public Swerve(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg) {
         initShuffleboard();
-        currentSpeed = Constants.DEFAULT_SPEED;
+        currentSpeed = DEFAULT_SPEED;
         swerveDrive = new SwerveDrive(driveCfg,
                 controllerCfg,
-                Constants.MAX_SPEED,
+                MAX_SPEED,
                 new Pose2d(
                         new Translation2d(
                                 Meter.of(7.566),
@@ -580,7 +583,7 @@ public class Swerve extends SubsystemBase {
     public Command shiftUp() {
         return runOnce(() -> {
             System.out.println("Shifting up speed");
-            if (currentSpeed == Constants.MAX_SPEED) {
+            if (currentSpeed == MAX_SPEED) {
                 System.err.println("Swerve is already at max speed, cannot accelerate");
             } else {
                 currentShiftEntry.setDouble(++currentSpeed);

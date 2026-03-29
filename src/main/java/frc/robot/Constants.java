@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import au.grapplerobotics.LaserCan;
-
 import java.io.File;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -40,38 +38,7 @@ import frc.robot.subsystems.Vision;
 public final class Constants {
     private Constants() {
     } // Prevent instantiation
-
-    // Vision & Field Constants
-
-    // private static final List<AprilTag> tagList = new ArrayList<AprilTag>() {{
-    // add(tag1);
-    // }};
-
-    // public static final AprilTagFieldLayout layout = new AprilTagFieldLayout(
-    // tagList,
-    // 7.62, // Field length (meters)
-    // 3.6068 // Field width (meters)
-    // );
-
-    public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
-
-    // Robot Physical Properties
-    public static final double ROBOT_MASS = Units.lbsToKilograms(135); // TODO: record 2026 mass
-    public static final Matter CHASSIS = new Matter(
-            new Translation3d(0, 0, Units.inchesToMeters(14)),
-            ROBOT_MASS);
-
-    public static final double SHOOTER_MAX_RPM = 6784;
-
-    // Control Loop Timing
-    public static final double LOOP_TIME = 0.05; // seconds
-    public static final double DEFAULT_SPEED = 5.0; // meters per second
-    public static final double MAX_SPEED = 6.0; // meters per second
-    public static double visionTimerOffset = 0;
-
-    // Subsystem Instances
-    public static final Swerve drivebase = new Swerve(
-            new File(Filesystem.getDeployDirectory(), "swerve/neo"));
+      // Subsystem Instances
 
     // Constants Records
     public static final BeltConstants BELT_CONSTANTS = BeltConstants.DEFAULT;
@@ -82,19 +49,11 @@ public final class Constants {
     public static final OperatorConstants OPERATOR_CONSTANTS = OperatorConstants.DEFAULT;
 
     // Subsystem Instances
+
+    public static final Swerve drivebase = new Swerve(
+            new File(Filesystem.getDeployDirectory(), "swerve/neo"));
     public static Vision vision = new Vision(() -> drivebase.getPose());
     public static Belt belt = new Belt();
     public static Intake intake = new Intake();
     public static Shooter shooter = new Shooter();
-    public static final LaserCan laserCan = new LaserCan(8);
-
-    // Basically the sensitivity of the swerves
-    public static double scaleFactor = 1;
-
-    public enum ScoreLocation {
-        LEFT2,
-        LEFT3,
-        RIGHT2,
-        RIGHT3
-    }
 }

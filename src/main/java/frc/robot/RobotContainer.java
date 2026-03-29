@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -19,7 +18,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.Shoot;
 import frc.robot.commands.StableShoot;
-import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import swervelib.SwerveInputStream;
 
 /**
@@ -39,26 +37,8 @@ public class RobotContainer {
     // auto list object
     private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-    // The robot's subsystems and commands are defined here...
-    // Applies deadbands and inverts controls because joysticks
-    // are back-right positive while robot
-    // controls are front-left positive
-    // left stick controls translation
-    // right stick controls the rotational velocity
-    // buttons are quick rotation positions to different ways to face
-    // WARNING: default buttons are on the same buttons as the ones defined in
-    // configureBindings
-    AbsoluteDriveAdv closedAbsoluteDriveAdv = new AbsoluteDriveAdv(Constants.drivebase,
-            () -> -MathUtil.applyDeadband(driverXbox.getLeftY(),
-                    Constants.OPERATOR_CONSTANTS.leftYDeadband()),
-            () -> -MathUtil.applyDeadband(driverXbox.getLeftX(),
-                    Constants.OPERATOR_CONSTANTS.leftYDeadband()),
-            () -> -MathUtil.applyDeadband(driverXbox.getRightX(),
-                    Constants.OPERATOR_CONSTANTS.leftYDeadband()),
-            driverXbox.getHID()::getYButtonPressed,
-            driverXbox.getHID()::getAButtonPressed,
-            driverXbox.getHID()::getXButtonPressed,
-            driverXbox.getHID()::getBButtonPressed);
+    // Basically the sensitivity of the swerves
+    public static double scaleFactor = 1;
 
     /**
      * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -66,20 +46,20 @@ public class RobotContainer {
      */
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-            () -> driverXbox.getLeftY() * getSide() * Constants.scaleFactor,
-            () -> driverXbox.getLeftX() * getSide() * Constants.scaleFactor)
-            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * Constants.scaleFactor)
+            () -> driverXbox.getLeftY() * getSide() * scaleFactor,
+            () -> driverXbox.getLeftX() * getSide() * scaleFactor)
+            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
             .deadband(Constants.OPERATOR_CONSTANTS.deadband())
             .robotRelative(false)
             .allianceRelativeControl(false);
 
     SwerveInputStream driveRobotOriented = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-            () -> -driverXbox.getLeftY() * Constants.scaleFactor,
-            () -> -driverXbox.getLeftX() * Constants.scaleFactor)
-            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.6 * Constants.scaleFactor)
+            () -> -driverXbox.getLeftY() * scaleFactor,
+            () -> -driverXbox.getLeftX() * scaleFactor)
+            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.6 * scaleFactor)
             .deadband(Constants.OPERATOR_CONSTANTS.deadband())
             .robotRelative(true)
-            .scaleTranslation(Constants.scaleFactor);
+            .scaleTranslation(scaleFactor);
 
     /**
      * Clone's the angular velocity input stream and converts it to a fieldRelative
@@ -106,9 +86,9 @@ public class RobotContainer {
     Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
 
     SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
-            () -> -driverXbox.getLeftY() * getSide() * Constants.scaleFactor,
-            () -> -driverXbox.getLeftX() * getSide() * Constants.scaleFactor)
-            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * Constants.scaleFactor)
+            () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
+            () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
+            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
             .deadband(Constants.OPERATOR_CONSTANTS.deadband())
             .robotRelative(false)
             .allianceRelativeControl(false);
