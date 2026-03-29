@@ -22,7 +22,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -32,13 +31,11 @@ import frc.robot.Systems;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
-import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -72,60 +69,23 @@ public class Vision {
      */
     // Riley: also never used?
     // private double longDistangePoseEstimationCount = 0;
-    /**
-     * Current pose from the pose estimator using wheel odometry.
-     */
-    private Supplier<Pose2d> currentPose;
 
     public EstimatedRobotPose estimatedVisionPose;
     private static VisionSystemSim visionSim;
 
-    private static GenericEntry seesAprilTagEntry;
-
-    // Physics state
-    private double ballVelocityX = 0;
-    private double ballVelocityZ = 0;
-    private Pose3d ballPose = new Pose3d(0, 0, 0, new Rotation3d());
-    private boolean isBallInFlight = false;
-    private double lastSimTime = 0;
+    private static final GenericEntry seesAprilTagEntry = Shuffleboard
+            .getTab("Vision")
+            .add("Sees AprilTag?", false)
+            .getEntry();
 
     /**
      * Constructor for the Vision class.
-     *
-     * @param currentPose Current pose supplier, should reference
-     *                    {@link SwerveDrive#getPose()}
      */
-    public Vision(Supplier<Pose2d> currentPose) {
-        this.currentPose = currentPose;
-
+    public Vision() {
         if (Robot.isSimulation()) {
             visionSim = new VisionSystemSim("main");
             visionSim.addAprilTags(fieldLayout);
-
-            // These measurements come directly from the game manual
-            TargetModel hubModel = new TargetModel(
-                    Units.inchesToMeters(47),
-                    Units.inchesToMeters(47),
-                    Units.inchesToMeters(72));
         }
-
-        seesAprilTagEntry = Shuffleboard
-                .getTab("Vision")
-                .add("Sees AprilTag?", false)
-                .getEntry();
-    }
-
-    /** Simulate launching a ball from the current robot position */
-    public void simulateShoot(double velocityMPS, double angleDegrees) {
-        Pose2d robotPose = currentPose.get();
-        ballPose = new Pose3d(robotPose.getX(), robotPose.getY(), 0.5, new Rotation3d());
-
-        double angleRad = Math.toRadians(angleDegrees);
-        ballVelocityX = velocityMPS * Math.cos(angleRad);
-        ballVelocityZ = velocityMPS * Math.sin(angleRad);
-
-        isBallInFlight = true;
-        lastSimTime = Timer.getFPGATimestamp();
     }
 
     /**
@@ -236,12 +196,14 @@ public class Vision {
     /**
      * Get distance of the robot from the AprilTag pose.
      *
-     * @param id AprilTag ID
+     * @param id          AprilTag ID
+     * @param currentPose Current pose from the pose estimator using wheel odometry,
+     *                    as returned by {@link SwerveDrive#getPose()}
      * @return Distance
      */
-    public double getDistanceFromAprilTag(int id) {
+    public double getDistanceFromAprilTag(int id, Pose2d currentPose) {
         Optional<Pose3d> tag = fieldLayout.getTagPose(id);
-        return tag.map(pose3d -> PhotonUtils.getDistanceToPose(currentPose.get(), pose3d.toPose2d())).orElse(-1.0);
+        return tag.map(pose3d -> PhotonUtils.getDistanceToPose(currentPose, pose3d.toPose2d())).orElse(-1.0);
     }
 
     /**
@@ -267,7 +229,6 @@ public class Vision {
     }
 
     public void updateVisionField() {
-
         List<PhotonTrackedTarget> targets = new ArrayList<PhotonTrackedTarget>();
         for (Cameras c : Cameras.values()) {
             if (!c.resultsList.isEmpty()) {
@@ -622,12 +583,14 @@ public class Vision {
      * distance.
      * This is more stable for precision alignment than multi-tag pose estimation.
      * 
-     * @param tagId  The ID of the AprilTag to use
-     * @param camera The camera that sees the tag
+     * @param tagId       The ID of the AprilTag to use
+     * @param camera      The camera that sees the tag
+     * @param currentPose Current pose from the pose estimator using wheel odometry,
+     *                    as returned by {@link SwerveDrive#getPose()}
      * @return Optional containing the estimated robot pose, or empty if the tag
      *         isn't visible
      */
-    public Optional<Pose2d> getSingleTagPoseEstimate(int tagId, Cameras camera) {
+    public Optional<Pose2d> getSingleTagPoseEstimate(int tagId, Cameras camera, Pose2d currentPose) {
         // Check if the camera can see the tag
         Optional<PhotonTrackedTarget> targetOpt = Optional.empty();
         for (PhotonPipelineResult result : camera.resultsList) {
@@ -671,7 +634,7 @@ public class Vision {
         double distance2d = distance3d * Math.cos(Math.toRadians(ty) + cameraPitchRadians);
 
         // Calculate robot angle relative to tag
-        Rotation2d robotAngle = currentPose.get().getRotation();
+        Rotation2d robotAngle = currentPose.getRotation();
         Rotation2d cameraAngle = Rotation2d.fromDegrees(robotToCamera.getRotation().getZ());
         Rotation2d totalAngle = robotAngle.plus(cameraAngle);
 
@@ -703,11 +666,13 @@ public class Vision {
      * Gets best single-tag pose estimate from all cameras.
      * Prioritizes closer tags for better accuracy.
      * 
-     * @param tagId The ID of the AprilTag to use
+     * @param tagId       The ID of the AprilTag to use
+     * @param currentPose Current pose from the pose estimator using wheel odometry,
+     *                    as returned by {@link SwerveDrive#getPose()}
      * @return Optional containing the estimated robot pose, or empty if the tag
      *         isn't visible
      */
-    public Optional<Pose2d> getBestDoubleTagPoseEstimate(int firstTagId, int secondTagId) {
+    public Optional<Pose2d> getBestSingleTagPoseEstimate(int tagId, Pose2d currentPose) {
         Optional<Pose2d> bestPose = Optional.empty();
         double bestDistance = Double.MAX_VALUE;
 
@@ -718,8 +683,8 @@ public class Vision {
             for (PhotonPipelineResult result : camera.resultsList) {
                 if (result.hasTargets()) {
                     for (PhotonTrackedTarget target : result.getTargets()) {
-                        int tagId = target.getFiducialId();
-                        if (tagId == firstTagId || tagId == secondTagId) {
+                        int foundTagId = target.getFiducialId();
+                        if (tagId == foundTagId) {
                             double distance = target.getBestCameraToTarget().getTranslation().getNorm();
                             // Only process if this is closer than the current best
                             if (distance < bestDistance) {
@@ -734,7 +699,7 @@ public class Vision {
             }
 
             if (targetOpt.isPresent()) {
-                Optional<Pose2d> pose = getSingleTagPoseEstimate(usedId, camera);
+                Optional<Pose2d> pose = getSingleTagPoseEstimate(usedId, camera, currentPose);
                 if (pose.isPresent()) {
                     bestPose = pose;
                 }
@@ -742,10 +707,5 @@ public class Vision {
         }
 
         return bestPose;
-    }
-
-    public Optional<Pose2d> getBestSingleTagPoseEstimate(int tagId) {
-        // -1 will never be a valid tag
-        return getBestDoubleTagPoseEstimate(tagId, -1);
     }
 }

@@ -78,15 +78,29 @@ public class Swerve extends SubsystemBase {
      * isn't in simulation mode. Use the "Estimated Pose" (based on vision)
      * for real matches.
      */
-    private Field2d simField = new Field2d();
+    private final Field2d simField = new Field2d();
 
     private double currentSpeed;
-    private GenericEntry driveSpeedEntry;
-    private GenericEntry currentShiftEntry;
+    private final GenericEntry driveSpeedEntry = Shuffleboard.getTab("Drive")
+            .add("Speed", 0)
+            .withWidget(BuiltInWidgets.kDial)
+            .withSize(1, 1)
+            .withProperties(Map.of("min", 0, "max", MAX_SPEED))
+            .withPosition(0, 0)
+            .getEntry();
+    private final GenericEntry currentShiftEntry = Shuffleboard.getTab("Drive")
+            .add("Target Speed", DEFAULT_SPEED)
+            .withWidget(BuiltInWidgets.kNumberBar)
+            .withSize(1, 1)
+            .withProperties(Map.of("min", 0, "max", MAX_SPEED))
+            .withPosition(0, 1)
+            .getEntry();
 
     private SwerveModule[] swerveModules;
     private GenericEntry[][] swerveEntries;
-    private Field2d field = new Field2d();
+    private final Field2d field = new Field2d();
+
+    private final Vision visionSystem;
 
     private final void initShuffleboard() {
         swerveModules = swerveDrive.getModules();
@@ -116,22 +130,6 @@ public class Swerve extends SubsystemBase {
 
         }
 
-        driveSpeedEntry = Shuffleboard.getTab("Drive")
-                .add("Speed", 0)
-                .withWidget(BuiltInWidgets.kDial)
-                .withSize(1, 1)
-                .withProperties(Map.of("min", 0, "max", MAX_SPEED))
-                .withPosition(0, 0)
-                .getEntry();
-
-        currentShiftEntry = Shuffleboard.getTab("Drive")
-                .add("Target Speed", DEFAULT_SPEED)
-                .withWidget(BuiltInWidgets.kNumberBar)
-                .withSize(1, 1)
-                .withProperties(Map.of("min", 0, "max", MAX_SPEED))
-                .withPosition(0, 1)
-                .getEntry();
-
         Shuffleboard.getTab("Console")
                 .add("Estimated Pose", field)
                 .withSize(4, 2)
@@ -148,7 +146,8 @@ public class Swerve extends SubsystemBase {
      *
      * @param directory Directory of swerve drive config files.
      */
-    public Swerve(File directory) {
+    public Swerve(File directory, Vision vision) {
+        visionSystem = vision;
 
         // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
         // In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
@@ -220,7 +219,8 @@ public class Swerve extends SubsystemBase {
      * @param driveCfg      SwerveDriveConfiguration for the swerve.
      * @param controllerCfg Swerve Controller.
      */
-    public Swerve(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg) {
+    public Swerve(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg, Vision vision) {
+        visionSystem = vision;
         initShuffleboard();
         currentSpeed = DEFAULT_SPEED;
         swerveDrive = new SwerveDrive(driveCfg,
@@ -239,8 +239,7 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         // When vision is enabled we must manually update odometry in SwerveDrive
         swerveDrive.updateOdometry();
-        Robot
-                .getInstance().m_robotContainer.vision.updatePoseEstimation(swerveDrive);
+        visionSystem.updatePoseEstimation(swerveDrive);
 
         if (++telemetryCounter >= 5 || Robot.isSimulation()) {
             field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());
@@ -473,7 +472,7 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * The primary method for controlling the drivebase. Takes a
+     * The primary method for controlling the drive. Takes a
      * {@link Translation2d} and a rotation rate, and
      * calculates and commands module states accordingly. Can use either open-loop
      * or closed-loop velocity control for
@@ -679,7 +678,7 @@ public class Swerve extends SubsystemBase {
 
     /**
      * Gets the current yaw angle of the robot, as reported by the swerve pose
-     * estimator in the underlying drivebase.
+     * estimator in the underlying drive.
      * Note, this is not the raw gyro reading, this may be corrected from calls to
      * resetOdometry().
      *

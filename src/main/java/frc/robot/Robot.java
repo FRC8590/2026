@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
 
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
 
-        m_robotContainer.drivebase.setupPathPlanner();
+        m_robotContainer.drive.setupPathPlanner();
     }
 
     /**
@@ -120,7 +120,7 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         isRedAllianceEntry.setBoolean(Systems.isRedAlliance());
-        m_robotContainer.drivebase.zeroGyroWithAlliance();
+        m_robotContainer.drive.zeroGyroWithAlliance();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)

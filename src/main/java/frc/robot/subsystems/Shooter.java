@@ -5,12 +5,8 @@ import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkBase;
@@ -36,61 +32,71 @@ public class Shooter extends SubsystemBase {
 
     public static final double SHOOTER_MAX_RPM = 6784;
 
-    /** cV: cruiseVelocity. mA: maxAcceleration */
-    private double goalRPM = 0, p, i, d, kA, kV, cV, mA;
+    /** cruiseVelocity: cruiseVelocity. maxAcceleration: maxAcceleration */
+    private double goalRPM = 0;
 
-    private GenericEntry targRPMEntry;
-    private GenericEntry currRPMFrontEntry;
-    private GenericEntry currRPMBackEntry;
-    private GenericEntry setRPMEntry = Shuffleboard
+    private double p = 0.0001;
+    private double i = 0;
+    private double d = 0;
+    private double kA = 0;
+    private double kV = 0.0019;
+    // Cruise velocity
+    private double cruiseVelocity = 6700;
+    // Max acceleration
+    private double maxAcceleration = 4000; // TODO: increase
+
+    private final GenericEntry targRPMEntry = Shuffleboard
+            .getTab("Shooter")
+            .add("Target RPM", 0)
+            .withWidget(BuiltInWidgets.kDial)
+            .withProperties(Map.of("min", 0, "max", SHOOTER_MAX_RPM))
+            .getEntry();
+
+    private final GenericEntry currRPMFrontEntry = Shuffleboard
+            .getTab("Shooter")
+            .add("Front motor RPM", 0)
+            .withWidget(BuiltInWidgets.kDial)
+            .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM))
+            .getEntry();
+
+    private final GenericEntry currRPMBackEntry = Shuffleboard
+            .getTab("Shooter")
+            .add("Back motor RPM", 0)
+            .withWidget(BuiltInWidgets.kDial)
+            .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM))
+            .getEntry();
+
+    private final GenericEntry setRPMEntry = Shuffleboard
             .getTab("Shooter")
             .add("Stable shoot RPM", 2000)
             .withWidget(BuiltInWidgets.kNumberSlider)
-            .getEntry();;
+            .getEntry();
 
-    public Shooter() {
-        p = 0.0001;
-        i = 0;
-        d = 0;
-        kA = 0;
-        kV = 0.0019;
-        cV = 6700;
-        mA = 4000; // todo increase
+    private final Vision visionSystem;
+    private final Swerve driveSystem;
 
-        shooterConfig // configure motors
+    public Shooter(Vision vision, Swerve drive) {
+        visionSystem = vision;
+        driveSystem = drive;
+
+        shooterConfig
                 .inverted(false)
                 .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(60)
-                .closedLoopRampRate(0.001); // todo look at this
-        shooterConfig.closedLoop // configure PID
+                .closedLoopRampRate(0.001); // TODO: look at this
+        shooterConfig.closedLoop
                 .pid(p, i, d);
         shooterConfig.closedLoop.feedForward
                 .kA(kA)
                 .kV(kV);
-        shooterConfig.closedLoop.maxMotion // configure maxMotion
-                .cruiseVelocity(cV)
-                .maxAcceleration(mA);
+        shooterConfig.closedLoop.maxMotion
+                .cruiseVelocity(cruiseVelocity)
+                .maxAcceleration(maxAcceleration);
 
         frontMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         shooterConfig.inverted(true);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
-        // Shuffleboard setup
-        ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-
-        ShuffleboardLayout shooterLayout = shooterTab.getLayout("Shooter", BuiltInLayouts.kGrid).withSize(2, 2)
-                .withPosition(4, 0);
-        SimpleWidget currRPMFrontWidget = shooterLayout.add("Front motor RPM", 0).withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM)).withPosition(0, 1);
-        SimpleWidget currRPMBackWidget = shooterLayout.add("Back motor RPM", 0).withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM)).withPosition(1, 1);
-        SimpleWidget targRPMWidget = shooterLayout.add("Target RPM", 0).withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("min", 0, "max", SHOOTER_MAX_RPM)).withPosition(0, 0);
-
-        currRPMFrontEntry = currRPMFrontWidget.getEntry();
-        currRPMBackEntry = currRPMBackWidget.getEntry();
-        targRPMEntry = targRPMWidget.getEntry();
     }
 
     private void setGoalRPM(double rpm) {
@@ -176,11 +182,6 @@ public class Shooter extends SubsystemBase {
         if (rpm > SHOOTER_MAX_RPM)
             return run(() -> setGoalRPM(goalRPM));
         return run(() -> {
-            if (Robot.isSimulation()) {
-                // TODO: Peter: Tune this based on the regression model
-                Robot
-                        .getInstance().m_robotContainer.vision.simulateShoot(8, 29);
-            }
             setGoalRPM(rpm);
         });
     }
@@ -194,9 +195,7 @@ public class Shooter extends SubsystemBase {
     public Command shooterSetRPMFromVision() {
         return run(() -> {
             int primaryId = Vision.getHubAprilTag();
-            var result = Robot
-                    .getInstance().m_robotContainer.vision
-                    .getBestSingleTagPoseEstimate(primaryId);
+            var result = visionSystem.getBestSingleTagPoseEstimate(primaryId, driveSystem.getPose());
             if (!result.isPresent()) {
                 // Nothing seen -- hope for the best!
                 return;
