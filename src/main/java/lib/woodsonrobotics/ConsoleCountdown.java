@@ -33,7 +33,11 @@ public class ConsoleCountdown {
         timer.stop();
     }
 
-    /* Advance the countdown. */
+    /*
+     * Advance the countdown.
+     * 
+     * @return The remaining time on the countdown, which may be zero.
+     */
     public double step() {
         double remainingTime = waitTime - timer.get();
 

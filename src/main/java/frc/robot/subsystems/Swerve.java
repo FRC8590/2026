@@ -6,8 +6,6 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meter;
 
-import edu.wpi.first.math.controller.PIDController;
-
 import swervelib.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -24,7 +22,6 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -44,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Robot;
 import frc.robot.Systems;
+import frc.robot.services.vision.VisionService;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +98,7 @@ public class Swerve extends SubsystemBase {
     private GenericEntry[][] swerveEntries;
     private final Field2d field = new Field2d();
 
-    private final Vision visionSystem;
+    private final VisionService visionService;
 
     private final void initShuffleboard() {
         swerveModules = swerveDrive.getModules();
@@ -146,8 +144,8 @@ public class Swerve extends SubsystemBase {
      *
      * @param directory Directory of swerve drive config files.
      */
-    public Swerve(File directory, Vision vision) {
-        visionSystem = vision;
+    public Swerve(File directory, VisionService vision) {
+        visionService = vision;
 
         // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
         // In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
@@ -219,8 +217,9 @@ public class Swerve extends SubsystemBase {
      * @param driveCfg      SwerveDriveConfiguration for the swerve.
      * @param controllerCfg Swerve Controller.
      */
-    public Swerve(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg, Vision vision) {
-        visionSystem = vision;
+    public Swerve(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg,
+            VisionService vision) {
+        visionService = vision;
         initShuffleboard();
         currentSpeed = DEFAULT_SPEED;
         swerveDrive = new SwerveDrive(driveCfg,
@@ -239,7 +238,7 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         // When vision is enabled we must manually update odometry in SwerveDrive
         swerveDrive.updateOdometry();
-        visionSystem.updatePoseEstimation(swerveDrive);
+        visionService.updateSwerveEstimation(swerveDrive);
 
         if (++telemetryCounter >= 5 || Robot.isSimulation()) {
             field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());

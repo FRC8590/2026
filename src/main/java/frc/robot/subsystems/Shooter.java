@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import frc.robot.Robot;
 import frc.robot.Systems;
+import frc.robot.services.vision.VisionService;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
@@ -32,14 +33,13 @@ public class Shooter extends SubsystemBase {
 
     public static final double SHOOTER_MAX_RPM = 6784;
 
-    /** cruiseVelocity: cruiseVelocity. maxAcceleration: maxAcceleration */
     private double goalRPM = 0;
 
-    private double p = 0.0001;
-    private double i = 0;
-    private double d = 0;
-    private double kA = 0;
-    private double kV = 0.0019;
+    private final double p = 0.0001;
+    private final double i = 0;
+    private final double d = 0;
+    private final double kA = 0;
+    private final double kV = 0.0019;
     // Cruise velocity
     private double cruiseVelocity = 6700;
     // Max acceleration
@@ -72,11 +72,11 @@ public class Shooter extends SubsystemBase {
             .withWidget(BuiltInWidgets.kNumberSlider)
             .getEntry();
 
-    private final Vision visionSystem;
+    private final VisionService visionService;
     private final Swerve driveSystem;
 
-    public Shooter(Vision vision, Swerve drive) {
-        visionSystem = vision;
+    public Shooter(VisionService vision, Swerve drive) {
+        visionService = vision;
         driveSystem = drive;
 
         shooterConfig
@@ -173,7 +173,7 @@ public class Shooter extends SubsystemBase {
 
     /**
      * Change the goal RPM of the shooter. If rpm is greater than 6784, goal RPM is
-     * not changed.
+     * not changed.setGoalRPM
      * 
      * @param rpm rotations per minute you want the shooter to run at
      * @return command that sets the goal RPM
@@ -194,8 +194,9 @@ public class Shooter extends SubsystemBase {
 
     public Command shooterSetRPMFromVision() {
         return run(() -> {
-            int primaryId = Vision.getHubAprilTag();
-            var result = visionSystem.getBestSingleTagPoseEstimate(primaryId, driveSystem.getPose());
+            // TODO
+            int primaryId = 26;// Vision.getHubAprilTag();
+            var result = visionService.getBestSingleTagPoseEstimate(primaryId, driveSystem.getPose());
             if (!result.isPresent()) {
                 // Nothing seen -- hope for the best!
                 return;
@@ -229,7 +230,7 @@ public class Shooter extends SubsystemBase {
 
     /**
      * This method will be called once per scheduler run
-     * Put values you want to moniter here
+     * Put values you want to monitkAer here
      */
     @Override
     public void periodic() {

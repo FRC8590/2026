@@ -69,6 +69,7 @@ public class Robot extends TimedRobot {
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
 
         m_robotContainer.drive.setupPathPlanner();
+        m_robotContainer.vision.startVisionThread();
     }
 
     /**
@@ -91,7 +92,6 @@ public class Robot extends TimedRobot {
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
-        m_robotContainer.vision.updateVisionField();
     }
 
     /**

@@ -4,7 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -23,12 +29,15 @@ import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.commands.AimAtTarget;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.StableShoot;
+import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
-import frc.robot.subsystems.Vision;
 import swervelib.SwerveInputStream;
+import lib.woodsonrobotics.vision.Camera;
+import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
+import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -39,7 +48,19 @@ import swervelib.SwerveInputStream;
  * trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    public final Vision vision = new Vision();
+    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout
+            .loadField(AprilTagFields.k2026RebuiltAndymark);
+
+    private final Camera[] ALL_CAMERAS = {
+            new SimulatedPhotonVisionCamera(PhotonVisionCamera.newArduCamera("front", fieldLayout, new Transform3d(
+                    new Translation3d(
+                            Units.inchesToMeters(-7.491),
+                            Units.inchesToMeters(-8.427),
+                            Units.inchesToMeters(17.923)),
+                    new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0))))
+    };
+
+    public final VisionService vision = new VisionService(ALL_CAMERAS);
     public final Swerve drive = new Swerve(
             new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision);
     public final Shooter shooter = new Shooter(vision, drive);
