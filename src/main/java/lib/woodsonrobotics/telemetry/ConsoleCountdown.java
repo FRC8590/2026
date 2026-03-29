@@ -1,4 +1,4 @@
-package lib.woodsonrobotics;
+package lib.woodsonrobotics.telemetry;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Timer;
