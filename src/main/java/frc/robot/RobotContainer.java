@@ -20,6 +20,7 @@ import java.io.File;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
+import frc.robot.commands.AimAtTarget;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.StableShoot;
 import frc.robot.subsystems.Belt;
@@ -223,7 +224,7 @@ public class RobotContainer {
         driverXbox.rightTrigger().whileFalse(shooter.shooterSetGoalRPM(0));
         driverXbox.rightTrigger().whileFalse(belt.beltAndIndexerStop());
 
-        driverXbox.y().whileTrue(drive.aimAtTarget());
+        driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
     }
 
     /**

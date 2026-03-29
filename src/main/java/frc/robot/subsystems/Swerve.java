@@ -371,43 +371,6 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * Aim the robot at the target returned by PhotonVision.
-     *
-     * @return A {@link Command} which will run the alignment.
-     */
-    public Command aimAtTarget() {
-        PIDController headingController = new PIDController(5, 0, 0);
-        headingController.enableContinuousInput(-Math.PI, Math.PI);
-        headingController.setTolerance(Units.degreesToRadians(0.5));
-
-        return run(() -> {
-            int primaryId = Vision.getHubAprilTag();
-            Optional<Pose3d> tagPoseOpt = Vision.fieldLayout.getTagPose(primaryId);
-
-            if (tagPoseOpt.isEmpty() || !Vision.seesNumber(primaryId)) {
-                drive(new ChassisSpeeds(0, 0, 0));
-                return;
-            }
-
-            Pose2d robotPose = getPose();
-            Pose2d tagPose = tagPoseOpt.get().toPose2d();
-
-            // Angle from robot to the tag
-            double dx = tagPose.getX() - robotPose.getX();
-            double dy = tagPose.getY() - robotPose.getY();
-            double angleToTag = Math.atan2(dy, dx);
-
-            double rotationSpeed = headingController.calculate(
-                    robotPose.getRotation().getRadians(),
-                    angleToTag);
-
-            drive(new ChassisSpeeds(0, 0, rotationSpeed));
-        })
-                .finallyDo(() -> drive(new ChassisSpeeds(0, 0, 0)))
-                .until(headingController::atSetpoint);
-    }
-
-    /**
      * Get the path follower with events.
      *
      * @param pathName PathPlanner path name.
