@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
-import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.networktables.GenericEntry;
 
@@ -62,10 +60,6 @@ public class Intake extends SubsystemBase {
             .getTab("Intake")
             .add("Pivot Motor RPM", 0)
             .getEntry();
-    private GenericEntry intakePercentEntry = Shuffleboard
-            .getTab("Intake")
-            .add("Intake Set motor value [-1,1]: ", 0.8)
-            .getEntry();
 
     public Intake() {
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -120,60 +114,24 @@ public class Intake extends SubsystemBase {
      *                 the way back
      */
     private void setGoal(double pointSet) {
-        System.out.println("Set intake goal: " + pointSet);
         setPoint = pointSet;
         intakeEntry.setDouble(setPoint);
     }
 
-    private void up() {
-        System.out.println("Intake up");
-        // intakeMotor.set(0);
+    public void up() {
         setGoal(goalUpRadians);
     }
 
-    private void down() {
-        // intakeMotor.set(1);
-        System.out.println("Intake down");
+    public void down() {
         setGoal(goalDownRadians);
     }
 
-    private void run() {
-        if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
-            // Riley: TODO: Set this to the best value found in testing
-            intakeMotor.set(intakePercentEntry.getDouble(0));
-        }
+    public void run() {
+        intakeMotor.set(0.8);
     }
 
-    private void stop() {
-        if (Systems.isSystemEnabled(Systems.enableIntakeWheels)) {
-            intakeMotor.set(0);
-        }
-    }
-
-    public Command intakeRun() {
-        return runOnce(() -> run());
-    }
-
-    public Command intakeStop() {
-        return runOnce(() -> stop());
-    }
-
-    /**
-     * pivot up the and stop the intake
-     * 
-     * @return runnable Command
-     */
-    public Command intakeUp() {
-        return runOnce(() -> up());
-    }
-
-    /**
-     * pivot down and start the intake
-     * 
-     * @return runnable Command
-     */
-    public Command intakeDown() {
-        return runOnce(() -> down());
+    public void stop() {
+        intakeMotor.set(0);
     }
 
     private int telemetryCounter = 0;
@@ -185,9 +143,7 @@ public class Intake extends SubsystemBase {
             pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
             telemetryCounter = 0;
         }
-        if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
-            pivotMotor.getClosedLoopController().setSetpoint(setPoint,
-                    SparkBase.ControlType.kMAXMotionPositionControl);
-        }
+        pivotMotor.getClosedLoopController().setSetpoint(setPoint,
+                SparkBase.ControlType.kMAXMotionPositionControl);
     }
 }

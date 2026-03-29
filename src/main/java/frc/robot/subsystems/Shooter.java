@@ -234,10 +234,8 @@ public class Shooter extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        if (Systems.isSystemEnabled(Systems.enableShooter)) {
-            frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
-            backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
-        }
+        frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
+        backMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);
 
         if (++telemetryCounter >= 20) {
             targRPMEntry.setDouble(goalRPM);

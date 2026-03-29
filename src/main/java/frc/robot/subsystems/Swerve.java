@@ -456,12 +456,11 @@ public class Swerve extends SubsystemBase {
      *                      robot-relative.
      */
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
-        if (Systems.isSystemEnabled(Systems.enableDrive)) {
-            swerveDrive.drive(translation,
-                    rotation,
-                    fieldRelative,
-                    false); // Open loop is disabled since it shouldn't be used most of the time.
-        }
+        swerveDrive.drive(translation,
+                rotation,
+                fieldRelative,
+                false); // Open loop is disabled since it shouldn't be used most of the time.
+
     }
 
     private double idleStartTime = -1;
@@ -476,24 +475,22 @@ public class Swerve extends SubsystemBase {
         return run(() -> {
             ChassisSpeeds speeds = velocity.get();
             updateSpeed(speeds);
-            if (Systems.isSystemEnabled(Systems.enableDrive)) {
-                boolean isIdle = Math.abs(speeds.vxMetersPerSecond) < 0.05 &&
-                        Math.abs(speeds.vyMetersPerSecond) < 0.05 &&
-                        Math.abs(speeds.omegaRadiansPerSecond) < 0.05;
+            boolean isIdle = Math.abs(speeds.vxMetersPerSecond) < 0.05 &&
+                    Math.abs(speeds.vyMetersPerSecond) < 0.05 &&
+                    Math.abs(speeds.omegaRadiansPerSecond) < 0.05;
 
-                // For defensive purposes, we want to lock the wheels when we're not
-                // moving. This makes it very difficult to push us.
-                if (isIdle) {
-                    if (idleStartTime < 0) {
-                        idleStartTime = Timer.getFPGATimestamp();
-                    }
-                    if (Timer.getFPGATimestamp() - idleStartTime >= LOCK_DELAY_SECONDS) {
-                        swerveDrive.lockPose();
-                    }
-                } else {
-                    idleStartTime = -1;
-                    swerveDrive.driveFieldOriented(speeds);
+            // For defensive purposes, we want to lock the wheels when we're not
+            // moving. This makes it very difficult to push us.
+            if (isIdle) {
+                if (idleStartTime < 0) {
+                    idleStartTime = Timer.getFPGATimestamp();
                 }
+                if (Timer.getFPGATimestamp() - idleStartTime >= LOCK_DELAY_SECONDS) {
+                    swerveDrive.lockPose();
+                }
+            } else {
+                idleStartTime = -1;
+                swerveDrive.driveFieldOriented(speeds);
             }
         });
     }
@@ -505,9 +502,8 @@ public class Swerve extends SubsystemBase {
      */
     public void driveRobotRelative(ChassisSpeeds velocity) {
         updateSpeed(velocity);
-        if (Systems.isSystemEnabled(Systems.enableDrive)) {
-            swerveDrive.drive(velocity);
-        }
+        swerveDrive.drive(velocity);
+
     }
 
     /**
@@ -517,11 +513,9 @@ public class Swerve extends SubsystemBase {
      */
     public Command driveRobotRelative(Supplier<ChassisSpeeds> velocity) {
         return run(() -> {
-            if (Systems.isSystemEnabled(Systems.enableDrive)) {
-                ChassisSpeeds speeds = velocity.get();
-                updateSpeed(speeds);
-                swerveDrive.drive(speeds);
-            }
+            ChassisSpeeds speeds = velocity.get();
+            updateSpeed(speeds);
+            swerveDrive.drive(speeds);
         });
     }
 
@@ -532,9 +526,7 @@ public class Swerve extends SubsystemBase {
      */
     public void drive(ChassisSpeeds velocity) {
         updateSpeed(velocity);
-        if (Systems.isSystemEnabled(Systems.enableDrive)) {
-            swerveDrive.drive(velocity);
-        }
+        swerveDrive.drive(velocity);
     }
 
     /* Increase the current speed. */

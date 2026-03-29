@@ -27,10 +27,14 @@ import java.io.File;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.AimAtTarget;
+import frc.robot.commands.Feed;
+import frc.robot.commands.RunIntake;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.StableShoot;
+import frc.robot.commands.Unjam;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
+import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
@@ -64,7 +68,8 @@ public class RobotContainer {
     public final Swerve drive = new Swerve(
             new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision);
     public final Shooter shooter = new Shooter(vision, drive);
-    public final Belt belt = new Belt(shooter);
+    public final Belt belt = new Belt();
+    public final Indexer indexer = new Indexer();
     public final Intake intake = new Intake();
 
     private final double deadband = 0.01;
@@ -173,16 +178,7 @@ public class RobotContainer {
         m_chooser.addOption("Red Left F.I.", "Red-TrBo-7Bo");
         m_chooser.addOption("Red Right Outpost", "Red-TrTo-Op-7To");
         m_chooser.addOption("Blue Left Outpost", "Blue-TrBo-Op-7Bo");
-
-        // Initialize with proper alliance orientation
-        NamedCommands.registerCommand("Shoot", new StableShoot(shooter, belt));
-        NamedCommands.registerCommand("IndexerRun", belt.indexerRun());
-        NamedCommands.registerCommand("BeltRun", belt.beltRun());
-        NamedCommands.registerCommand("IndexerStop", belt.indexerStop());
-        NamedCommands.registerCommand("BeltStop", belt.beltStop());
-        NamedCommands.registerCommand("BeltAndIndexerRun", belt.beltAndIndexerRun());
-        NamedCommands.registerCommand("BeltAndIndexerStop", belt.beltAndIndexerStop());
-        NamedCommands.registerCommand("IntakeDown", intake.intakeDown());
+        NamedCommands.registerCommand("Shoot", new StableShoot(shooter, belt, indexer));
 
     }
 
@@ -222,28 +218,17 @@ public class RobotContainer {
         driverXbox.povRight().onTrue(drive.shiftUp());
         driverXbox.povLeft().onTrue(drive.shiftDown());
 
-        driverXbox.x().whileTrue(intake.intakeDown());
-        driverXbox.b().whileTrue(intake.intakeUp());
-        driverXbox.leftTrigger().whileTrue(intake.intakeDown());
-        driverXbox.leftTrigger().whileTrue(intake.intakeRun());
-        driverXbox.leftTrigger().whileFalse(intake.intakeStop());
+        driverXbox.leftTrigger().whileTrue(new RunIntake(intake));
 
-        driverXbox.povUp().whileTrue(belt.beltAndIndexerRun());
-        driverXbox.povUp().whileFalse(belt.beltAndIndexerStop());
+        driverXbox.povUp().whileTrue(new Feed(belt, indexer));
 
         driverXbox.povDown().whileTrue(drive.lockPose());
 
         driverXbox.leftStick().whileTrue(drive.ZeroGryo());
-        driverXbox.a().whileTrue(belt.beltRunReversed());
-        driverXbox.a().whileFalse(belt.beltStop());
-        driverXbox.a().whileTrue(belt.indexerRunReversed());
-        driverXbox.a().whileFalse(belt.indexerStop());
-        driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt));
-        driverXbox.rightBumper().whileFalse(shooter.shooterSetGoalRPM(0));
-        driverXbox.rightBumper().whileFalse(belt.beltAndIndexerStop());
-        driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, vision, drive));
-        driverXbox.rightTrigger().whileFalse(shooter.shooterSetGoalRPM(0));
-        driverXbox.rightTrigger().whileFalse(belt.beltAndIndexerStop());
+        driverXbox.a().whileTrue(new Unjam(belt, indexer));
+
+        driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt, indexer));
+        driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision, drive));
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
     }
