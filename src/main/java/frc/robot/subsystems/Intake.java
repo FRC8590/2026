@@ -3,11 +3,7 @@ package frc.robot.subsystems;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.networktables.GenericEntry;
 
 import com.revrobotics.spark.SparkMax;
@@ -54,16 +50,22 @@ public class Intake extends SubsystemBase {
     private double goalDownRadians = -0.2; // Riley TODO: Originaly -0.1; if not tested, revert back!
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
-    private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
-    private GenericEntry intakeEntry;
-    private GenericEntry pivotAngleEntry;
-    private GenericEntry pivotMotorRPMEntry = Shuffleboard
+    private final GenericEntry intakeEntry = Shuffleboard
+            .getTab("Intake")
+            .add("Position", 0)
+            .getEntry();
+    private final GenericEntry pivotAngleEntry = Shuffleboard
+            .getTab("Intake")
+            .add("Pivot Angle", 0)
+            .getEntry();
+    private final GenericEntry pivotMotorRPMEntry = Shuffleboard
             .getTab("Intake")
             .add("Pivot Motor RPM", 0)
-            .getEntry();;
-
-    // Riley TODO: Delete this after testing
-    private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0.8).getEntry();
+            .getEntry();
+    private GenericEntry intakePercentEntry = Shuffleboard
+            .getTab("Intake")
+            .add("Intake Set motor value [-1,1]: ", 0.8)
+            .getEntry();
 
     public Intake() {
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -108,14 +110,6 @@ public class Intake extends SubsystemBase {
 
         encoder = pivotMotor.getAlternateEncoder();
         encoder.setPosition(0.744); // zero encoder, such that the down position is 0 and the up position is 0.7
-        ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-
-        ShuffleboardLayout intakeLayout = shooterTab.getLayout("Intake", BuiltInLayouts.kList).withSize(2, 2)
-                .withPosition(0, 0);
-        SimpleWidget intakeWidget = intakeLayout.add("Position", 0);
-        SimpleWidget pivotAngleWidget = intakeLayout.add("Pivot Angle", 0);
-        intakeEntry = intakeWidget.getEntry();
-        pivotAngleEntry = pivotAngleWidget.getEntry();
     }
 
     /**
