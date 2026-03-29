@@ -42,14 +42,11 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
-import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Systems;
-import frc.robot.subsystems.Vision.Cameras;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.Format;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -242,7 +239,8 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         // When vision is enabled we must manually update odometry in SwerveDrive
         swerveDrive.updateOdometry();
-        Constants.vision.updatePoseEstimation(swerveDrive);
+        Robot
+                .getInstance().m_robotContainer.vision.updatePoseEstimation(swerveDrive);
 
         if (++telemetryCounter >= 5 || Robot.isSimulation()) {
             field.setRobotPose(swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition());

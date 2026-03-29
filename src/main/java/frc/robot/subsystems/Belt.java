@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
@@ -23,8 +23,11 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 
 public class Belt extends SubsystemBase {
-    private final SparkMax beltMotor = new SparkMax(Constants.BELT_CONSTANTS.beltMotorID(), MotorType.kBrushless);
-    private final SparkFlex indexMotor = new SparkFlex(Constants.BELT_CONSTANTS.indexMotorID(), MotorType.kBrushless);
+    private final int beltMotorID = 11;
+    private final int indexMotorID = 14;
+
+    private final SparkMax beltMotor = new SparkMax(beltMotorID, MotorType.kBrushless);
+    private final SparkFlex indexMotor = new SparkFlex(indexMotorID, MotorType.kBrushless);
 
     private final SparkMaxConfig beltMotorConfig = new SparkMaxConfig();
     private final SparkFlexConfig indexMotorConfig = new SparkFlexConfig();
@@ -98,7 +101,8 @@ public class Belt extends SubsystemBase {
     }
 
     public void runBeltAndIndexer() {
-        if (Constants.shooter.atRPM()) {
+        if (Robot
+                .getInstance().m_robotContainer.shooter.atRPM()) {
             runBelt();
             runIndexer();
         }

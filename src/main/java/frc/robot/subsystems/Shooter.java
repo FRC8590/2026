@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,16 +20,17 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.ResetMode;
 
-import static edu.wpi.first.units.Units.Inches;
-
 import java.util.Map;
 
 import com.revrobotics.PersistMode;
 
 public class Shooter extends SubsystemBase {
-    private final SparkFlex frontMotor = new SparkFlex(Constants.SHOOTER_CONSTANTS.frontMotorID(),
-            MotorType.kBrushless);
-    private final SparkFlex backMotor = new SparkFlex(Constants.SHOOTER_CONSTANTS.backMotorID(), MotorType.kBrushless);
+
+    private final int frontMotorID = 12;
+    private final int backMotorID = 13;
+
+    private final SparkFlex frontMotor = new SparkFlex(frontMotorID, MotorType.kBrushless);
+    private final SparkFlex backMotor = new SparkFlex(backMotorID, MotorType.kBrushless);
 
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
 
@@ -42,7 +42,11 @@ public class Shooter extends SubsystemBase {
     private GenericEntry targRPMEntry;
     private GenericEntry currRPMFrontEntry;
     private GenericEntry currRPMBackEntry;
-    private GenericEntry setRPMEntry;
+    private GenericEntry setRPMEntry = Shuffleboard
+            .getTab("Shooter")
+            .add("Stable shoot RPM", 2000)
+            .withWidget(BuiltInWidgets.kNumberSlider)
+            .getEntry();;
 
     public Shooter() {
         p = 0.0001;
@@ -87,12 +91,6 @@ public class Shooter extends SubsystemBase {
         currRPMFrontEntry = currRPMFrontWidget.getEntry();
         currRPMBackEntry = currRPMBackWidget.getEntry();
         targRPMEntry = targRPMWidget.getEntry();
-
-        setRPMEntry = Shuffleboard
-                .getTab("Shooter")
-                .add("Stable shoot RPM", 2000)
-                .withWidget(BuiltInWidgets.kNumberSlider)
-                .getEntry();
     }
 
     private void setGoalRPM(double rpm) {
@@ -180,7 +178,8 @@ public class Shooter extends SubsystemBase {
         return run(() -> {
             if (Robot.isSimulation()) {
                 // TODO: Peter: Tune this based on the regression model
-                Constants.vision.simulateShoot(8, 29);
+                Robot
+                        .getInstance().m_robotContainer.vision.simulateShoot(8, 29);
             }
             setGoalRPM(rpm);
         });
@@ -195,7 +194,9 @@ public class Shooter extends SubsystemBase {
     public Command shooterSetRPMFromVision() {
         return run(() -> {
             int primaryId = Vision.getHubAprilTag();
-            var result = Constants.vision.getBestSingleTagPoseEstimate(primaryId);
+            var result = Robot
+                    .getInstance().m_robotContainer.vision
+                    .getBestSingleTagPoseEstimate(primaryId);
             if (!result.isPresent()) {
                 // Nothing seen -- hope for the best!
                 return;

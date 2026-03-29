@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Systems;
 

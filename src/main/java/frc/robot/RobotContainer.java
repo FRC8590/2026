@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -14,10 +15,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import java.io.File;
+
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.Shoot;
 import frc.robot.commands.StableShoot;
+import frc.robot.subsystems.Belt;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Vision;
 import swervelib.SwerveInputStream;
 
 /**
@@ -29,6 +38,14 @@ import swervelib.SwerveInputStream;
  * trigger mappings) should be declared here.
  */
 public class RobotContainer {
+    public final Swerve drivebase = new Swerve(
+            new File(Filesystem.getDeployDirectory(), "swerve/neo"));
+    public Vision vision = new Vision(() -> drivebase.getPose());
+    public Belt belt = new Belt();
+    public Intake intake = new Intake();
+    public Shooter shooter = new Shooter();
+
+    private final double deadband = 0.01;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     public final CommandXboxController driverXbox = new CommandXboxController(0);
@@ -45,19 +62,19 @@ public class RobotContainer {
      * by angular velocity.
      */
 
-    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
             () -> driverXbox.getLeftY() * getSide() * scaleFactor,
             () -> driverXbox.getLeftX() * getSide() * scaleFactor)
             .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
-            .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+            .deadband(deadband)
             .robotRelative(false)
             .allianceRelativeControl(false);
 
-    SwerveInputStream driveRobotOriented = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+    SwerveInputStream driveRobotOriented = SwerveInputStream.of(drivebase.getSwerveDrive(),
             () -> -driverXbox.getLeftY() * scaleFactor,
             () -> -driverXbox.getLeftX() * scaleFactor)
             .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.6 * scaleFactor)
-            .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+            .deadband(deadband)
             .robotRelative(true)
             .scaleTranslation(scaleFactor);
 
@@ -75,21 +92,21 @@ public class RobotContainer {
     // controls are front-left positive
     // left stick controls translation
     // right stick controls the desired angle NOT angular rotation
-    Command driveFieldOrientedDirectAngle = Constants.drivebase.driveFieldOriented(driveDirectAngle);
-    Command driveRobotOrientedAngular = Constants.drivebase.driveRobotRelative(driveRobotOriented);
+    Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
+    Command driveRobotOrientedAngular = drivebase.driveRobotRelative(driveRobotOriented);
 
     // Applies deadbands and inverts controls because joysticks
     // are back-right positive while robot
     // controls are front-left positive
     // left stick controls translation
     // right stick controls the angular velocity of the robot
-    Command driveFieldOrientedAnglularVelocity = Constants.drivebase.driveFieldOriented(driveAngularVelocity);
+    Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
-    SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(Constants.drivebase.getSwerveDrive(),
+    SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(drivebase.getSwerveDrive(),
             () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
             () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
             .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
-            .deadband(Constants.OPERATOR_CONSTANTS.deadband())
+            .deadband(deadband)
             .robotRelative(false)
             .allianceRelativeControl(false);
 
@@ -103,10 +120,10 @@ public class RobotContainer {
                             * (Math.PI * 2))
             .headingWhile(true);
 
-    Command driveFieldOrientedDirectAngleSim = Constants.drivebase.driveFieldOriented(driveDirectAngleSim);
-    Command driveFieldOrientedAngularVelocitySim = Constants.drivebase.driveFieldOriented(driveAngularVelocitySim);
+    Command driveFieldOrientedDirectAngleSim = drivebase.driveFieldOriented(driveDirectAngleSim);
+    Command driveFieldOrientedAngularVelocitySim = drivebase.driveFieldOriented(driveAngularVelocitySim);
 
-    Command driveSetpointGenSim = Constants.drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
+    Command driveSetpointGenSim = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -137,13 +154,13 @@ public class RobotContainer {
 
         // Initialize with proper alliance orientation
         NamedCommands.registerCommand("Shoot", new StableShoot());
-        NamedCommands.registerCommand("IndexerRun", Constants.belt.indexerRun());
-        NamedCommands.registerCommand("BeltRun", Constants.belt.beltRun());
-        NamedCommands.registerCommand("IndexerStop", Constants.belt.indexerStop());
-        NamedCommands.registerCommand("BeltStop", Constants.belt.beltStop());
-        NamedCommands.registerCommand("BeltAndIndexerRun", Constants.belt.beltAndIndexerRun());
-        NamedCommands.registerCommand("BeltAndIndexerStop", Constants.belt.beltAndIndexerStop());
-        NamedCommands.registerCommand("IntakeDown", Constants.intake.intakeDown());
+        NamedCommands.registerCommand("IndexerRun", belt.indexerRun());
+        NamedCommands.registerCommand("BeltRun", belt.beltRun());
+        NamedCommands.registerCommand("IndexerStop", belt.indexerStop());
+        NamedCommands.registerCommand("BeltStop", belt.beltStop());
+        NamedCommands.registerCommand("BeltAndIndexerRun", belt.beltAndIndexerRun());
+        NamedCommands.registerCommand("BeltAndIndexerStop", belt.beltAndIndexerStop());
+        NamedCommands.registerCommand("IntakeDown", intake.intakeDown());
 
     }
 
@@ -175,38 +192,38 @@ public class RobotContainer {
      * Flight joysticks}.
      */
     private void configureBindings() {
-        Constants.drivebase.setDefaultCommand(
+        drivebase.setDefaultCommand(
                 RobotBase.isSimulation()
                         ? driveFieldOrientedAngularVelocitySim
                         : driveFieldOrientedAnglularVelocity);
 
-        driverXbox.povRight().onTrue(Constants.drivebase.shiftUp());
-        driverXbox.povLeft().onTrue(Constants.drivebase.shiftDown());
+        driverXbox.povRight().onTrue(drivebase.shiftUp());
+        driverXbox.povLeft().onTrue(drivebase.shiftDown());
 
-        driverXbox.x().whileTrue(Constants.intake.intakeDown());
-        driverXbox.b().whileTrue(Constants.intake.intakeUp());
-        driverXbox.leftTrigger().whileTrue(Constants.intake.intakeDown());
-        driverXbox.leftTrigger().whileTrue(Constants.intake.intakeRun());
-        driverXbox.leftTrigger().whileFalse(Constants.intake.intakeStop());
+        driverXbox.x().whileTrue(intake.intakeDown());
+        driverXbox.b().whileTrue(intake.intakeUp());
+        driverXbox.leftTrigger().whileTrue(intake.intakeDown());
+        driverXbox.leftTrigger().whileTrue(intake.intakeRun());
+        driverXbox.leftTrigger().whileFalse(intake.intakeStop());
 
-        driverXbox.povUp().whileTrue(Constants.belt.beltAndIndexerRun());
-        driverXbox.povUp().whileFalse(Constants.belt.beltAndIndexerStop());
+        driverXbox.povUp().whileTrue(belt.beltAndIndexerRun());
+        driverXbox.povUp().whileFalse(belt.beltAndIndexerStop());
 
-        driverXbox.povDown().whileTrue(Constants.drivebase.lockPose());
+        driverXbox.povDown().whileTrue(drivebase.lockPose());
 
-        driverXbox.leftStick().whileTrue(Constants.drivebase.ZeroGryo());
-        driverXbox.a().whileTrue(Constants.belt.beltRunReversed());
-        driverXbox.a().whileFalse(Constants.belt.beltStop());
-        driverXbox.a().whileTrue(Constants.belt.indexerRunReversed());
-        driverXbox.a().whileFalse(Constants.belt.indexerStop());
+        driverXbox.leftStick().whileTrue(drivebase.ZeroGryo());
+        driverXbox.a().whileTrue(belt.beltRunReversed());
+        driverXbox.a().whileFalse(belt.beltStop());
+        driverXbox.a().whileTrue(belt.indexerRunReversed());
+        driverXbox.a().whileFalse(belt.indexerStop());
         driverXbox.rightBumper().whileTrue(new StableShoot());
-        driverXbox.rightBumper().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
-        driverXbox.rightBumper().whileFalse(Constants.belt.beltAndIndexerStop());
+        driverXbox.rightBumper().whileFalse(shooter.shooterSetGoalRPM(0));
+        driverXbox.rightBumper().whileFalse(belt.beltAndIndexerStop());
         driverXbox.rightTrigger().whileTrue(new Shoot());
-        driverXbox.rightTrigger().whileFalse(Constants.shooter.shooterSetGoalRPM(0));
-        driverXbox.rightTrigger().whileFalse(Constants.belt.beltAndIndexerStop());
+        driverXbox.rightTrigger().whileFalse(shooter.shooterSetGoalRPM(0));
+        driverXbox.rightTrigger().whileFalse(belt.beltAndIndexerStop());
 
-        driverXbox.y().whileTrue(Constants.drivebase.aimAtTarget());
+        driverXbox.y().whileTrue(drivebase.aimAtTarget());
     }
 
     /**
@@ -216,16 +233,16 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         String selectedAuto = m_chooser.getSelected();
-        return Constants.drivebase.getAutonomousCommand(selectedAuto);
+        return drivebase.getAutonomousCommand(selectedAuto);
 
     }
 
     public void setMotorBrake(boolean brake) {
-        Constants.drivebase.setMotorBrake(false);
+        drivebase.setMotorBrake(false);
     }
 
     public void zeroEverything() {
-        Constants.drivebase.zeroGyro();
+        drivebase.zeroGyro();
     }
 
     /**
@@ -238,11 +255,11 @@ public class RobotContainer {
      */
 
     public void setDriveFeedForward(double kS, double kV, double kA) {
-        Constants.drivebase.replaceSwerveModuleFeedforward(kS, kV, kA);
+        drivebase.replaceSwerveModuleFeedforward(kS, kV, kA);
     }
 
     public void resetAndStop() {
-        Constants.drivebase.drive(new Translation2d(), 0, false);
+        drivebase.drive(new Translation2d(), 0, false);
     }
 
 }

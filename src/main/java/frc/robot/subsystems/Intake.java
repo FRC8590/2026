@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import frc.robot.Constants;
 import frc.robot.Systems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,20 +28,23 @@ public class Intake extends SubsystemBase {
      * @see 100:15 ratio, subject to change
      */
 
-    // public so we can monitor the pivot motor in the dashboard.
-    public final SparkMax pivotMotor = new SparkMax(Constants.INTAKE_CONSTANTS.pivotMotorID(), MotorType.kBrushless);
-    private final SparkMax intakeMotor = new SparkMax(Constants.INTAKE_CONSTANTS.intakeMotorID(), MotorType.kBrushless);
+    private final int pivotMotorID = 9;
+    private final int intakeMotorID = 10;
+
+    private final SparkMax pivotMotor = new SparkMax(pivotMotorID, MotorType.kBrushless);
+    private final SparkMax intakeMotor = new SparkMax(intakeMotorID, MotorType.kBrushless);
 
     private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
     private final SparkMaxConfig pivotConfig = new SparkMaxConfig();
 
     /** Relative Encoder */
     private final RelativeEncoder encoder;
+
     /** PID */
-    
     private double p = 0.55; // Riley TODO: Originaly 0.4; if not tested, revert back!
     private double i = 0;
     private double d = 0;
+
     /** FeedForward */
     private double kv = 0.1;
     private double kcos = 0.5; // Riley TODO: Originaly 0.45; if not tested, revert back!
@@ -55,7 +57,10 @@ public class Intake extends SubsystemBase {
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
     private GenericEntry intakeEntry;
     private GenericEntry pivotAngleEntry;
-    private GenericEntry pivotMotorRPMEntry;
+    private GenericEntry pivotMotorRPMEntry = Shuffleboard
+            .getTab("Intake")
+            .add("Pivot Motor RPM", 0)
+            .getEntry();;
 
     // Riley TODO: Delete this after testing
     private GenericEntry intakePercentEntry = tab.add("Intake Set motor value [-1,1]: ", 0.8).getEntry();
@@ -111,18 +116,7 @@ public class Intake extends SubsystemBase {
         SimpleWidget pivotAngleWidget = intakeLayout.add("Pivot Angle", 0);
         intakeEntry = intakeWidget.getEntry();
         pivotAngleEntry = pivotAngleWidget.getEntry();
-
-        pivotMotorRPMEntry = Shuffleboard
-                .getTab("Intake")
-                .add("Pivot Motor RPM", 0)
-                .getEntry();
     }
-
-    /**
-     * 
-     * = = = = = = = = = = METHODS = = = = = = = = = =
-     * 
-     */
 
     /**
      * Set the intake up or down
@@ -198,7 +192,8 @@ public class Intake extends SubsystemBase {
             telemetryCounter = 0;
         }
         if (Systems.isSystemEnabled(Systems.enableIntakeArm)) {
-            //pivotMotor.getClosedLoopController().setSetpoint(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+            pivotMotor.getClosedLoopController().setSetpoint(setPoint,
+                    SparkBase.ControlType.kMAXMotionPositionControl);
         }
     }
 }

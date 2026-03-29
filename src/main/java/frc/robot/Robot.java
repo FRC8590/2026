@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import lib.woodsonrobotics.ConsoleCountdown;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
 
     private static Robot instance;
+
     private Command m_autonomousCommand;
     private GenericEntry isRedAllianceEntry = Shuffleboard
             .getTab("Console")
@@ -33,63 +35,14 @@ public class Robot extends TimedRobot {
 
     private Timer disabledTimer;
 
-    private class Countdown {
-        private Timer timer;
-        private double waitTime = -1;
-        private GenericEntry shuffleboardEntry;
-        private long lastPublishedSecond = -1;
-
-        public Countdown(String name) {
-            timer = new Timer();
-            shuffleboardEntry = Shuffleboard
-                    .getTab("Console")
-                    .add(name, 0)
-                    .getEntry();
-        }
-
-        public void start(long waitTime) {
-            this.waitTime = waitTime;
-            lastPublishedSecond = -1;
-            timer.reset();
-            timer.start();
-            shuffleboardEntry.setInteger(waitTime);
-        }
-
-        public void stop() {
-            timer.stop();
-        }
-
-        public double step() {
-            double remainingTime = waitTime - timer.get();
-
-            if (remainingTime <= 0) {
-                if (lastPublishedSecond != 0) {
-                    stop();
-                    shuffleboardEntry.setInteger(0);
-                    lastPublishedSecond = 0;
-                }
-                return 0;
-            }
-
-            long secondsToDisplay = Math.round(remainingTime);
-            if (secondsToDisplay != lastPublishedSecond) {
-                shuffleboardEntry.setInteger(secondsToDisplay);
-                lastPublishedSecond = secondsToDisplay;
-            }
-
-            return remainingTime;
-        }
-    }
+    private final double wheelLockTime = 10.0;
 
     // Rebuilt-specific; time until the hub switches
-    private Countdown allianceShiftCountdown;
-    private Countdown timeUntilEnd;
+    private ConsoleCountdown allianceShiftCountdown = new ConsoleCountdown("Time until shift");
+    private ConsoleCountdown timeUntilEnd = new ConsoleCountdown("Time until end");
 
     public Robot() {
         instance = this;
-        allianceShiftCountdown = new Countdown("Time until shift");
-        timeUntilEnd = new Countdown("Time until end");
-
     }
 
     public static Robot getInstance() {
@@ -115,7 +68,7 @@ public class Robot extends TimedRobot {
 
         m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
 
-        Constants.drivebase.setupPathPlanner();
+        m_robotContainer.drivebase.setupPathPlanner();
     }
 
     /**
@@ -138,7 +91,7 @@ public class Robot extends TimedRobot {
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
-        Constants.vision.updateVisionField();
+        m_robotContainer.vision.updateVisionField();
     }
 
     /**
@@ -154,7 +107,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        if (disabledTimer.hasElapsed(Constants.DRIVE_CONSTANTS.wheelLockTime())) {
+        if (disabledTimer.hasElapsed(wheelLockTime)) {
             disabledTimer.stop();
         }
         m_robotContainer.resetAndStop();
@@ -166,12 +119,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        System.out.println("Robot in auto");
-
         isRedAllianceEntry.setBoolean(Systems.isRedAlliance());
-        System.out.println("gyro start");
-        Constants.drivebase.zeroGyroWithAlliance();
-        System.out.println("gyro calibrated");
+        m_robotContainer.drivebase.zeroGyroWithAlliance();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
