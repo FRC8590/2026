@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -44,7 +46,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.SimulatedShooter;
 import swervelib.SwerveInputStream;
 import lib.woodsonrobotics.SystemWrapper;
-import lib.woodsonrobotics.vision.Camera;
 import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
 import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 
@@ -60,22 +61,21 @@ public class RobotContainer {
     public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout
             .loadField(AprilTagFields.k2026RebuiltAndymark);
 
-    private final Camera[] ALL_CAMERAS = {
-            new SimulatedPhotonVisionCamera(PhotonVisionCamera.newArduCamera("front", fieldLayout, new Transform3d(
+    private final PhotonVisionCamera[] ALL_CAMERAS = {
+            PhotonVisionCamera.newArduCamera("front", fieldLayout, new Transform3d(
                     new Translation3d(
                             Units.inchesToMeters(-7.491),
                             Units.inchesToMeters(-8.427),
                             Units.inchesToMeters(17.923)),
-                    new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0))))
+                    new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0)))
     };
 
-    public final VisionService vision = new VisionService(ALL_CAMERAS);
-    public final SystemWrapper<SimulatedSwerve> drive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
-            new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
-    public final SystemWrapper<Shooter> shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
-    public final SystemWrapper<Belt> belt = new SystemWrapper<>("belt", () -> new Belt());
-    public final SystemWrapper<Indexer> indexer = new SystemWrapper<>("indexer", () -> new Indexer());
-    public final SystemWrapper<Intake> intake = new SystemWrapper<>("intake", () -> new SimulatedIntake(drive));
+    public final VisionService vision;
+    public final SystemWrapper<? extends Swerve> drive;
+    public final SystemWrapper<Shooter> shooter;
+    public final SystemWrapper<Belt> belt;
+    public final SystemWrapper<Indexer> indexer;
+    public final SystemWrapper<Intake> intake;
 
     private final double deadband = 0.01;
 
@@ -93,9 +93,28 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        // Configure the trigger bindings
+        // These don't have simulation variants
+        belt = new SystemWrapper<>("belt", () -> new Belt());
+        indexer = new SystemWrapper<>("indexer", () -> new Indexer());
+        if (Robot.isReal()) {
+            vision = new VisionService(ALL_CAMERAS);
+            drive = new SystemWrapper<>("drive", () -> new Swerve(
+                    new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
+            shooter = new SystemWrapper<>("shooter", () -> new Shooter());
+            intake = new SystemWrapper<>("intake", () -> new Intake());
+        } else {
+            SimulatedPhotonVisionCamera[] simulated = Arrays.stream(ALL_CAMERAS)
+                    .map(SimulatedPhotonVisionCamera::new)
+                    .toArray(SimulatedPhotonVisionCamera[]::new);
+            vision = new VisionService(simulated);
+            SystemWrapper<SimulatedSwerve> simulatedDrive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
+                    new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
+            drive = simulatedDrive;
+            shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
+            intake = new SystemWrapper<>("intake", () -> new SimulatedIntake(simulatedDrive));
+        }
+
         configureBindings();
-        DriverStation.silenceJoystickConnectionWarning(true);
 
         // set up the shuffleboard tab
         Shuffleboard.getTab("Autonomous")
@@ -196,6 +215,10 @@ public class RobotContainer {
         driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision, drive));
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
+
+        if (Robot.isSimulation()) {
+            DriverStation.silenceJoystickConnectionWarning(true);
+        }
     }
 
     /**
