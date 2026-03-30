@@ -2,8 +2,8 @@ package frc.robot.commands.shooter;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.services.vision.VisionService;
 
 import lib.woodsonrobotics.SystemWrapper;

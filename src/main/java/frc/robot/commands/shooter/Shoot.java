@@ -6,9 +6,8 @@ import frc.robot.commands.feeder.Feed;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
-
+import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
 /*

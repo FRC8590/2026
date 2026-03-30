@@ -37,8 +37,9 @@ import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.SimulatedShooter;
 import swervelib.SwerveInputStream;
 import lib.woodsonrobotics.SystemWrapper;
 import lib.woodsonrobotics.vision.Camera;
@@ -69,7 +70,7 @@ public class RobotContainer {
     public final VisionService vision = new VisionService(ALL_CAMERAS);
     public final SystemWrapper<Swerve> drive = new SystemWrapper<>("drive", () -> new Swerve(
             new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
-    public final SystemWrapper<Shooter> shooter = new SystemWrapper<>("shooter", () -> new Shooter());
+    public final SystemWrapper<Shooter> shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
     public final SystemWrapper<Belt> belt = new SystemWrapper<>("belt", () -> new Belt());
     public final SystemWrapper<Indexer> indexer = new SystemWrapper<>("indexer", () -> new Indexer());
     public final SystemWrapper<Intake> intake = new SystemWrapper<>("intake", () -> new Intake());
