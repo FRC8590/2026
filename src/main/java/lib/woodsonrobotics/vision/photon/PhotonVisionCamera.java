@@ -111,7 +111,7 @@ public class PhotonVisionCamera extends Camera {
     public void refresh() {
         resultsLock.lock();
         try {
-            resultsList = camera.getAllUnreadResults();
+            resultsList.addAll(camera.getAllUnreadResults());
             resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
                 return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
             });

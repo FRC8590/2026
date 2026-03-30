@@ -76,4 +76,10 @@ public class SimulatedShooter extends Shooter {
                 .getGamePiecesArrayByType("Fuel");
         fuelPosePublisher.accept(fuelPoses);
     }
+
+    @Override
+    public boolean atRPM() {
+        super.atRPM();
+        return getGoalRPM() > 0;
+    }
 }

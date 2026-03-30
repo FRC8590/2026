@@ -83,6 +83,10 @@ public class Shooter extends SubsystemBase {
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
+    public double getGoalRPM() {
+        return goalRPM;
+    }
+
     /*
      * Set the goal RPM on the shooter.
      * 

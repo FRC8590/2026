@@ -32,25 +32,17 @@ public class SetDynamicShooterSpeed extends Command {
         if (!drive.isPresent()) {
             return;
         }
-        var pose = drive.get().getPose();
 
-        int primaryId = 26;// TODO: Vision.getHubAprilTag();
-        var result = visionService.getBestSingleTagPoseEstimate(primaryId, pose);
-        if (!result.isPresent()) {
-            // Nothing seen!
+        int primaryId = 26;
+        var tagPoseOpt = visionService.getTagFieldPose(primaryId);
+        if (tagPoseOpt.isEmpty()) {
             return;
         }
 
-        /*
-         * The model assumes the distance from getMeasureX() is
-         * horizontal distance to the tag, which is generally
-         * true, but not exact, depending on where the tag is
-         * positioned relative to the hub center. If shots are
-         * consistently off by a fixed amount at all distances,
-         * we can correct it with a small offset constant.
-         */
-        double distanceMeters = result.get().getMeasureX().in(Units.Meters);
+        double distanceMeters = drive.get().getPose().getTranslation()
+                .getDistance(tagPoseOpt.get().getTranslation());
         double rpm = Shooter.distanceToRPM(distanceMeters);
+        System.out.println("Shooting at RPM " + rpm);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
     }
 
@@ -61,6 +53,10 @@ public class SetDynamicShooterSpeed extends Command {
 
     @Override
     public boolean isFinished() {
-        return false;
+        var shooter = shooterSystem.get();
+        if (shooter.isEmpty()) {
+            return true;
+        }
+        return shooter.get().atRPM();
     }
 }

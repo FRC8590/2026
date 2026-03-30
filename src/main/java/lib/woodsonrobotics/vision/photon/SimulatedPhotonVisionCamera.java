@@ -42,7 +42,7 @@ public class SimulatedPhotonVisionCamera extends PhotonVisionCamera {
     public void refresh() {
         resultsLock.lock();
         try {
-            resultsList = cameraSim.getCamera().getAllUnreadResults();
+            resultsList.addAll(cameraSim.getCamera().getAllUnreadResults());
             resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
                 return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
             });

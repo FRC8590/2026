@@ -21,7 +21,6 @@ public class StableShoot extends SequentialCommandGroup {
             SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer) {
         addCommands(
                 new SetShooterSpeed(shooter, 2000),
-                new WaitUntilCommand(shooter.condition(Shooter::atRPM)),
                 new Feed(belt, indexer));
     }
 

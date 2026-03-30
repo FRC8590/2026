@@ -63,10 +63,16 @@ public class RobotContainer {
     private final PhotonVisionCamera[] ALL_CAMERAS = {
             PhotonVisionCamera.newArduCamera("front", fieldLayout, new Transform3d(
                     new Translation3d(
-                            Units.inchesToMeters(-7.491),
-                            Units.inchesToMeters(-8.427),
-                            Units.inchesToMeters(17.923)),
-                    new Rotation3d(Units.degreesToRadians(90), Units.degreesToRadians(29), 0)))
+                            Units.inchesToMeters(0),
+                            Units.inchesToMeters(24),
+                            Units.inchesToMeters(0)),
+                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 0))),
+            PhotonVisionCamera.newArduCamera("rear", fieldLayout, new Transform3d(
+                    new Translation3d(
+                            Units.inchesToMeters(0),
+                            Units.inchesToMeters(24),
+                            Units.inchesToMeters(0)),
+                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 180)))
     };
 
     public final VisionService vision;
@@ -210,8 +216,8 @@ public class RobotContainer {
         driverXbox.leftStick().whileTrue(new ZeroGyro(drive));
         driverXbox.a().whileTrue(new Unjam(belt, indexer));
 
-        driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt, indexer));
-        driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision, drive));
+        // driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt, indexer));
+        driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision, drive));
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
 

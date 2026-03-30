@@ -31,6 +31,10 @@ public class SetShooterSpeed extends Command {
 
     @Override
     public boolean isFinished() {
-        return false;
+        var shooter = shooterSystem.get();
+        if (shooter.isEmpty()) {
+            return true;
+        }
+        return shooter.get().atRPM();
     }
 }

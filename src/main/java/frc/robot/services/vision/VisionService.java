@@ -189,4 +189,18 @@ public class VisionService {
 
         return bestPose;
     }
+
+    /**
+     * Gets the field-relative pose of a given AprilTag from the layout.
+     * Use this for navigation goals.
+     */
+    public Optional<Pose2d> getTagFieldPose(int tagId) {
+        for (Camera camera : allCameras) {
+            Optional<Pose3d> tagPose = camera.getFieldLayout().getTagPose(tagId);
+            if (tagPose.isPresent()) {
+                return Optional.of(tagPose.get().toPose2d());
+            }
+        }
+        return Optional.empty();
+    }
 }
