@@ -12,6 +12,7 @@ import com.revrobotics.ResetMode;
 
 import com.revrobotics.PersistMode;
 
+/* Subsystem for the indexer wheels (belt not included). */
 public class Indexer extends SubsystemBase {
     private final int indexMotorID = 14;
 
@@ -33,14 +34,17 @@ public class Indexer extends SubsystemBase {
         indexMotor.configure(indexMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
+    /* Run the indexer. */
     public void run() {
         indexMotor.set(0.5);
     }
 
+    /* Stop the indexer. */
     public void stop() {
         indexMotor.set(0);
     }
 
+    /* Run the indexer in reverse. */
     public void runReversed() {
         indexMotor.set(-0.5);
     }

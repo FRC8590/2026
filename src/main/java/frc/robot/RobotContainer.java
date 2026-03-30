@@ -39,7 +39,6 @@ import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
-import swervelib.SwerveDrive;
 import swervelib.SwerveInputStream;
 import lib.woodsonrobotics.SystemWrapper;
 import lib.woodsonrobotics.vision.Camera;
@@ -207,7 +206,7 @@ public class RobotContainer {
     }
 
     public void resetAndStop() {
-        drive.get().ifPresent(swerve -> swerve.drive(new Translation2d(), 0, false));
+        drive.ifEnabled(swerve -> swerve.drive(new Translation2d(), 0, false));
     }
 
 }

@@ -9,6 +9,14 @@ import frc.robot.subsystems.Indexer;
 
 import lib.woodsonrobotics.SystemWrapper;
 
+/*
+ * Shoot fuel into the hub from a preset distance.
+ * 
+ * This does no alignment and always sets the shooter to a hardcoded
+ * RPM, and will run the feeder when the shooter is up to speed.
+ *
+ * Both the shooter and feeder will be stopped when this is finished.
+ */
 public class StableShoot extends SequentialCommandGroup {
     public StableShoot(SystemWrapper<Shooter> shooter,
             SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer) {

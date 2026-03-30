@@ -11,6 +11,15 @@ import frc.robot.subsystems.Swerve;
 
 import lib.woodsonrobotics.SystemWrapper;
 
+/*
+ * Shoot fuel into the hub.
+ * 
+ * This will first align the robot to the hub, then set the
+ * shooter motor based on the distance to the hub (from vision),
+ * and finally run the feeder once the shooter is up to speed.
+ * 
+ * Both the shooter and feeder will be stopped when this is finished.
+ */
 public class Shoot extends SequentialCommandGroup {
     public Shoot(SystemWrapper<Shooter> shooter, SystemWrapper<Belt> belt,
             SystemWrapper<Indexer> indexer, VisionService vision, SystemWrapper<Swerve> drive) {

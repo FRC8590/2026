@@ -8,6 +8,11 @@ import frc.robot.services.vision.VisionService;
 
 import lib.woodsonrobotics.SystemWrapper;
 
+/* Set the shooter speed based on the distance to the hub.
+ * 
+ * This stops the shooter when finished. This does not run
+ * the feeder.
+ */
 public class SetDynamicShooterSpeed extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
     private final SystemWrapper<Swerve> driveSystem;
@@ -46,7 +51,12 @@ public class SetDynamicShooterSpeed extends Command {
          */
         double distanceMeters = result.get().getMeasureX().in(Units.Meters);
         double rpm = Shooter.distanceToRPM(distanceMeters);
-        shooterSystem.get().ifPresent((shooter) -> shooter.setGoalRPM(rpm));
+        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
 
     @Override

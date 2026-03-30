@@ -1,12 +1,9 @@
 package frc.robot.subsystems;
 
-import frc.robot.Robot;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj2.command.Command;
 
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
@@ -19,6 +16,7 @@ import java.util.Map;
 
 import com.revrobotics.PersistMode;
 
+/* Subsystem for the shooter. */
 public class Shooter extends SubsystemBase {
 
     private final int frontMotorID = 12;
@@ -85,6 +83,14 @@ public class Shooter extends SubsystemBase {
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
+    /*
+     * Set the goal RPM on the shooter.
+     * 
+     * Note that this will not immediately move the motor.
+     * Instead, the motor will begin speeding up on the next periodic() call.
+     * 
+     * Use atRPM() to detect when the motor is at the desired RPM.
+     */
     public void setGoalRPM(double rpm) {
         targRPMEntry.setDouble(rpm);
         goalRPM = rpm;
@@ -159,10 +165,6 @@ public class Shooter extends SubsystemBase {
 
     private int telemetryCounter = 0;
 
-    /**
-     * This method will be called once per scheduler run
-     * Put values you want to monitkAer here
-     */
     @Override
     public void periodic() {
         frontMotor.getClosedLoopController().setSetpoint(goalRPM, SparkBase.ControlType.kMAXMotionVelocityControl);

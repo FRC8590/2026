@@ -5,6 +5,16 @@ import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
 import lib.woodsonrobotics.SystemWrapper;
 
+/*
+ * Feed fuel into the shooter.
+ * 
+ * This will run both the belt and indexer at a preset speed.
+ * This does not wait on the shooter at all! If the shooter
+ * isn't at the correct speed when this is executed, then feeding
+ * will still take place!
+ * 
+ * Both the indexer and belt will be stopped when this is finished.
+ */
 public class Feed extends Command {
     private final SystemWrapper<Belt> beltSystem;
     private final SystemWrapper<Indexer> indexerSystem;
@@ -17,14 +27,14 @@ public class Feed extends Command {
 
     @Override
     public void execute() {
-        beltSystem.get().ifPresent((belt) -> belt.run());
-        indexerSystem.get().ifPresent((indexer) -> indexer.run());
+        beltSystem.ifEnabled(belt -> belt.run());
+        indexerSystem.ifEnabled(indexer -> indexer.run());
     }
 
     @Override
     public void end(boolean interrupted) {
-        beltSystem.get().ifPresent((belt) -> belt.stop());
-        indexerSystem.get().ifPresent((indexer) -> indexer.stop());
+        beltSystem.ifEnabled(belt -> belt.stop());
+        indexerSystem.ifEnabled(indexer -> indexer.stop());
     }
 
     @Override

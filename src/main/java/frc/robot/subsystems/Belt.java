@@ -12,6 +12,7 @@ import com.revrobotics.ResetMode;
 
 import com.revrobotics.PersistMode;
 
+/* Subsystem for the belt. */
 public class Belt extends SubsystemBase {
     private final int beltMotorID = 11;
 
@@ -33,14 +34,17 @@ public class Belt extends SubsystemBase {
         beltMotor.configure(beltMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
+    /* Run the belt. */
     public void run() {
         beltMotor.set(1);
     }
 
+    /* Stop the belt. */
     public void stop() {
         beltMotor.set(0);
     }
 
+    /* Run the belt in reverse. */
     public void runReversed() {
         beltMotor.set(-1);
     }

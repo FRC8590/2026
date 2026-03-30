@@ -10,7 +10,7 @@ import frc.robot.subsystems.Swerve;
 import lib.woodsonrobotics.SystemWrapper;
 
 /**
- * Aim the robot at the target returned by PhotonVision.
+ * Aim the robot at the target returned by the vision service.
  */
 public class AimAtTarget extends Command {
     // Peter: I suspect we'll need this at some point
@@ -55,7 +55,7 @@ public class AimAtTarget extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        driveSystem.get().ifPresent((drive) -> drive.drive(new ChassisSpeeds(0, 0, 0)));
+        driveSystem.ifEnabled(swerve -> swerve.drive(new ChassisSpeeds(0, 0, 0)));
     }
 
     @Override

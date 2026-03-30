@@ -14,6 +14,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 
+/* Subsystem for the intake wheels and intake pivot. */
 public class Intake extends SubsystemBase {
     /**
      * This refers to how many rotations the pivotMotor must do
@@ -118,18 +119,22 @@ public class Intake extends SubsystemBase {
         intakeEntry.setDouble(setPoint);
     }
 
+    /* Move the intake up. */
     public void up() {
         setGoal(goalUpRadians);
     }
 
+    /* Move the intake down. */
     public void down() {
         setGoal(goalDownRadians);
     }
 
+    /* Run the intake wheels. */
     public void run() {
         intakeMotor.set(0.8);
     }
 
+    /* Stop the intake wheels. */
     public void stop() {
         intakeMotor.set(0);
     }

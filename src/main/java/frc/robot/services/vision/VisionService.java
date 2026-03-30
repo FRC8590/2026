@@ -27,6 +27,7 @@ public class VisionService {
         allCameras = Arrays.asList(camerasList);
     }
 
+    /* Start the refresh thread. */
     public void startVisionThread() {
         new Thread(() -> {
             while (true) {

@@ -2,6 +2,7 @@ package lib.woodsonrobotics;
 
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -25,6 +26,15 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         this.systemSupplier = supplier;
     }
 
+    /*
+     * Get the subsystem, or nothing if the system is disabled.
+     * 
+     * Do not use the resulting subsystem in an addRequirements() call!
+     * Instead, directly use the wrapper. Using the wrapped subsystem as a
+     * requirement
+     * can cause weird issues, because that instance may become invalid (such as if
+     * the system is rebooted).
+     */
     public Optional<T> get() {
         if (!isEnabled) {
             return Optional.empty();
@@ -37,6 +47,10 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         return Optional.of(cachedSystem);
     }
 
+    /*
+     * Reboot the subsystem. This creates a fresh new instance, which get() will
+     * return.
+     */
     public void reboot() {
         // Unregister the old instance from the scheduler so it
         // doesn't keep running its default command / periodic.
@@ -46,6 +60,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         cachedSystem = systemSupplier.get();
     }
 
+    /* Disable the system. */
     public void disable() {
         isEnabled = false;
         if (cachedSystem != null) {
@@ -54,6 +69,11 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         cachedSystem = null;
     }
 
+    /*
+     * Enable the system. Systems are enabled by default; you only need to call this
+     * if the system was previously disabled by disable(). If disable() wasn't
+     * called, this function will effectively do nothing.
+     */
     public void enable() {
         isEnabled = true;
         // cachedSystem will be lazily created on next getSystem() call
@@ -128,5 +148,11 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         return () -> get()
                 .map(predicate::test)
                 .orElse(false); // if disabled, condition is never true
+    }
+
+    /* Equivalent to wrapper.get().ifPresent(action) */
+    public void ifEnabled(Consumer<? super T> action) {
+        var result = get();
+        result.ifPresent(action);
     }
 }

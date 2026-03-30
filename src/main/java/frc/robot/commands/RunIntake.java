@@ -5,6 +5,11 @@ import frc.robot.subsystems.Intake;
 
 import lib.woodsonrobotics.SystemWrapper;
 
+/* Bring the intake down and run the intake wheels.
+ *
+ * When the command is finished, the wheels will stop
+ * and the intake will be brought back up.
+ */
 public class RunIntake extends Command {
     private final SystemWrapper<Intake> intakeSystem;
 
@@ -15,7 +20,7 @@ public class RunIntake extends Command {
 
     @Override
     public void execute() {
-        intakeSystem.get().ifPresent((intake) -> {
+        intakeSystem.ifEnabled(intake -> {
             intake.down();
             intake.run();
         });
@@ -23,7 +28,7 @@ public class RunIntake extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intakeSystem.get().ifPresent((intake) -> {
+        intakeSystem.ifEnabled(intake -> {
             intake.up();
             intake.stop();
         });

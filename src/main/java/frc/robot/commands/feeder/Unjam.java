@@ -6,6 +6,15 @@ import frc.robot.subsystems.Indexer;
 
 import lib.woodsonrobotics.SystemWrapper;
 
+/*
+ * Unjam the feeder.
+ * 
+ * This runs both the belt and indexer in reverse in hopes that any
+ * stuck fuel will be made unstuck.
+ * 
+ * Both the belt and indexer will be stopped when this is finished.
+ * 
+*/
 public class Unjam extends Command {
     private final SystemWrapper<Belt> beltSystem;
     private final SystemWrapper<Indexer> indexerSystem;
@@ -18,14 +27,14 @@ public class Unjam extends Command {
 
     @Override
     public void execute() {
-        beltSystem.get().ifPresent((belt) -> belt.runReversed());
-        indexerSystem.get().ifPresent((indexer) -> indexer.runReversed());
+        beltSystem.ifEnabled(belt -> belt.runReversed());
+        indexerSystem.ifEnabled(indexer -> indexer.runReversed());
     }
 
     @Override
     public void end(boolean interrupted) {
-        beltSystem.get().ifPresent((belt) -> belt.stop());
-        indexerSystem.get().ifPresent((indexer) -> indexer.stop());
+        beltSystem.ifEnabled(belt -> belt.stop());
+        indexerSystem.ifEnabled(indexer -> indexer.stop());
     }
 
     @Override
