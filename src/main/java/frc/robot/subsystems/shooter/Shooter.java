@@ -108,7 +108,7 @@ public class Shooter extends SubsystemBase {
      * using projectile motion physics.
      *
      * Assumes:
-     * Launch angle: 29 degrees
+     * Launch angle: 69 degrees
      * Shooter height: ~0.61m (24 inches)
      * Hub height: 1.83m (72 inches)
      * Wheel diameter: 0.0889m (3.5 inches)
@@ -118,32 +118,25 @@ public class Shooter extends SubsystemBase {
      * @return Required RPM, clamped to SHOOTER_MAX_RPM
      */
     public static double distanceToRPM(double distanceMeters) {
-        // Note that air resistance is ignored; this might not
-        // work at longer ranges, but that shouldn't matter.
-
         final double g = 9.81;
-        final double angleRad = Math.toRadians(29);
-        final double shooterHeight = 0.61; // meters
-        final double hubHeight = 1.83; // meters
-        final double deltaY = hubHeight - shooterHeight; // 1.22m
-        final double wheelDiameter = 0.0889; // meters
+        final double angleRad = Math.toRadians(69);
+        final double shooterHeight = 0.0; // sim launches from ground level
+        final double hubHeight = 1.83;
+        final double deltaY = hubHeight - shooterHeight;
+        final double MIN_DISTANCE = 0.75;
+        final double MAX_DISTANCE = 6.0;
 
-        /*
-         * If shots are consistently falling short, increase the slip factor
-         * (wheels need to spin faster to compensate for more slip). If
-         * overshooting, decrease it. Each 0.05 change moves the output
-         * roughly 5-6%.
-         */
-        final double slipFactor = 0.9;
+        if (distanceMeters < MIN_DISTANCE || distanceMeters > MAX_DISTANCE) {
+            System.err.println("distanceToRPM: outside viable range (" + distanceMeters + "m)");
+            return 0;
+        }
 
         double cosA = Math.cos(angleRad);
         double tanA = Math.tan(angleRad);
-
         double denominator = distanceMeters * tanA - deltaY;
 
-        // Guard against impossible shots (too close, or angle can't reach target)
         if (denominator <= 0) {
-            System.err.println("distanceToRPM: target unreachable at distance " + distanceMeters + "m");
+            System.err.println("distanceToRPM: degenerate denominator at " + distanceMeters + "m");
             return 0;
         }
 
@@ -151,8 +144,8 @@ public class Shooter extends SubsystemBase {
                 / (2 * cosA * cosA * denominator);
         double v0 = Math.sqrt(v0Squared);
 
-        double wheelCircumference = Math.PI * wheelDiameter;
-        double rpm = (v0 / slipFactor) / wheelCircumference * 60;
+        // Use the sim's exact RPM<->velocity model: 6000 RPM = 20 m/s
+        double rpm = v0 * 6000.0 / 20.0;
 
         return Math.min(rpm, SHOOTER_MAX_RPM);
     }
