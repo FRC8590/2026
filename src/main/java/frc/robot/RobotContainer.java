@@ -34,6 +34,7 @@ import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
 import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
+import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
@@ -191,13 +192,16 @@ public class RobotContainer {
                         .deadband(deadband)
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
+        ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, vision);
 
         Command driveFieldOrientedAngularVelocitySim = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
                         () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
                         () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
-                        .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
-                        .deadband(deadband)
+                        .withControllerRotationAxis(() -> shootOnMove.isScheduled()
+                                ? shootOnMove.getRotationOverride().get() // command overrides rotation
+                                : -driverXbox.getRightX() * 0.72 * scaleFactor) // driver controls rotation
+                                                                                // .deadband(deadband)
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
         drive.setDefaultCommand(
@@ -218,8 +222,10 @@ public class RobotContainer {
         driverXbox.a().whileTrue(new Unjam(belt, indexer));
 
         // driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt, indexer));
-        driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision, drive));
-        driverXbox.rightBumper().onFalse(new SetShooterSpeed(shooter, 0));
+        // driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision,
+        // drive));
+        // driverXbox.rightBumper().onFalse(new SetShooterSpeed(shooter, 0));
+        driverXbox.rightBumper().whileTrue(shootOnMove);
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
 

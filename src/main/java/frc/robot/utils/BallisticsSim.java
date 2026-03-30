@@ -24,7 +24,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 public class BallisticsSim {
     // -----CONFIG-----
-    public static final double shooterAngle = 45;
+    public static final double shooterAngle = 69;
     public static final double findSpeedDerivativeStep = 0.01;
     public static final int findSpeedMaxIterations = 100;
     public static final double findSpeedMaxSpeed = 100;
@@ -32,7 +32,7 @@ public class BallisticsSim {
     public static final double firingSolutionDerivativeStep = 0.001;
     public static final double firingSolutionErrorNudge = Math.toRadians(1);
     public static final double firingSolutionMaxTime = 1;
-    public static final boolean verbose = true;
+    public static final boolean verbose = false;
     // ----------------
 
     // Earth stats
@@ -364,10 +364,13 @@ public class BallisticsSim {
      * @return A {@link Translation2d} containing the speed and angle
      */
     public static Translation2d firingSolution(Translation3d target, Translation2d robotVelocity,
-            double accuracyMargin) {
+            double accuracyMargin, Double initialGuessRadians) {
         double startTime = (double) System.currentTimeMillis() / 1000;
-        // IN RADIANS, DON'T FORGET
-        double currentGuess = Math.atan2(target.getZ(), target.getX());
+        // Use warm-start if provided, otherwise fall back to geometric guess.
+        // This is in radians!
+        double currentGuess = initialGuessRadians != null
+                ? initialGuessRadians
+                : 0.0;
         resultOfCheck currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
         if (Math.abs(currentResult.error) <= accuracyMargin) {
             return (new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
