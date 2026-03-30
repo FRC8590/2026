@@ -22,7 +22,16 @@ public class SimulatedShooter extends Shooter {
 
     public void setGoalRPM(double rpm) {
         super.setGoalRPM(rpm);
-        if (rpm > 0) {
+    }
+
+    private int simulatedFuelCounter = 0;
+
+    @Override
+    public void periodic() {
+        super.periodic();
+        double rpm = getGoalRPM();
+        // Shoot a ball every 200ms
+        if (rpm > 0 && ++simulatedFuelCounter >= 10) {
             Robot.getInstance().m_robotContainer.drive.ifEnabled(swerve -> {
                 var robotSimulationWorldPose = swerve.getPose();
                 var chassisSpeedsFieldRelative = swerve.getFieldVelocity();
@@ -64,14 +73,11 @@ public class SimulatedShooter extends Shooter {
 
                 // Add the projectile to the simulated arena
                 SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
+
+                simulatedFuelCounter = 0;
             });
 
         }
-    }
-
-    @Override
-    public void periodic() {
-        super.periodic();
         Pose3d[] fuelPoses = SimulatedArena.getInstance()
                 .getGamePiecesArrayByType("Fuel");
         fuelPosePublisher.accept(fuelPoses);
@@ -79,7 +85,12 @@ public class SimulatedShooter extends Shooter {
 
     @Override
     public boolean atRPM() {
+        // We want to test the encoder code and whatnot, so we execute it
+        // during the simulation. We don't care about its value, though.
         super.atRPM();
+
+        // Since the encoder will always be zero during simulations, we
+        // just pretend it instantly gets up to speed.
         return getGoalRPM() > 0;
     }
 }

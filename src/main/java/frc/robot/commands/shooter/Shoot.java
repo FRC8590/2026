@@ -23,11 +23,8 @@ public class Shoot extends SequentialCommandGroup {
     public Shoot(SystemWrapper<Shooter> shooter, SystemWrapper<Belt> belt,
             SystemWrapper<Indexer> indexer, VisionService vision, SystemWrapper<? extends Swerve> drive) {
         addCommands(
-                new PrintCommand("shoot 0"),
                 new AimAtTarget(vision, drive),
-                new PrintCommand("shoot 1"),
                 new SetDynamicShooterSpeed(shooter, drive, vision),
-                new PrintCommand("shoot 2"),
                 new Feed(belt, indexer));
     }
 

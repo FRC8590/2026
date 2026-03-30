@@ -10,8 +10,7 @@ import lib.woodsonrobotics.SystemWrapper;
 
 /* Set the shooter speed based on the distance to the hub.
  * 
- * This stops the shooter when finished. This does not run
- * the feeder.
+ * This does not run the feeder.
  */
 public class SetDynamicShooterSpeed extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
@@ -42,13 +41,7 @@ public class SetDynamicShooterSpeed extends Command {
         double distanceMeters = drive.get().getPose().getTranslation()
                 .getDistance(tagPoseOpt.get().getTranslation());
         double rpm = Shooter.distanceToRPM(distanceMeters);
-        System.out.println("Shooting at RPM " + rpm);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
 
     @Override

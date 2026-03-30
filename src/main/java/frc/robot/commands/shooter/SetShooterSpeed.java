@@ -6,8 +6,7 @@ import lib.woodsonrobotics.SystemWrapper;
 
 /* Set the shooter speed to a fixed RPM.
  * 
- * This stops the shooter when finished. This does not run the
- * feeder.
+ * This does not run the feeder.
  */
 public class SetShooterSpeed extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
@@ -22,11 +21,6 @@ public class SetShooterSpeed extends Command {
     @Override
     public void execute() {
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(goalRPM));
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
 
     @Override
