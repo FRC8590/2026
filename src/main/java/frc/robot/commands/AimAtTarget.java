@@ -7,16 +7,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Swerve;
 
+import lib.woodsonrobotics.SystemWrapper;
+
 /**
  * Aim the robot at the target returned by PhotonVision.
  */
 public class AimAtTarget extends Command {
     // Peter: I suspect we'll need this at some point
     // private final Vision visionService;
-    private final Swerve driveSystem;
+    private final SystemWrapper<Swerve> driveSystem;
     private final PIDController headingController = new PIDController(5, 0, 0);
 
-    public AimAtTarget(VisionService vision, Swerve drive) {
+    public AimAtTarget(VisionService vision, SystemWrapper<Swerve> drive) {
         // visionService = vision;
         driveSystem = drive;
         headingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -53,7 +55,7 @@ public class AimAtTarget extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        driveSystem.drive(new ChassisSpeeds(0, 0, 0));
+        driveSystem.get().ifPresent((drive) -> drive.drive(new ChassisSpeeds(0, 0, 0)));
     }
 
     @Override

@@ -40,7 +40,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Robot;
-import frc.robot.Systems;
+import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
 
 import java.io.File;
@@ -593,7 +593,6 @@ public class Swerve extends SubsystemBase {
      * facing toward 0.
      */
     public void zeroGyro() {
-        System.out.println("Zeroing gyro");
         swerveDrive.zeroGyro();
     }
 
@@ -607,7 +606,7 @@ public class Swerve extends SubsystemBase {
         zeroGyro();
 
         // Get the current alliance
-        if (Systems.isRedAlliance()) {
+        if (RobotContainer.isRedAlliance()) {
             // When on red alliance, we need to rotate the field coordinate system 180
             // degrees
             // This matches PathPlanner's coordinate system where the origin stays on blue

@@ -3,24 +3,30 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 
-public class RunIntake extends Command {
-    private final Intake intakeSystem;
+import lib.woodsonrobotics.SystemWrapper;
 
-    public RunIntake(Intake intake) {
+public class RunIntake extends Command {
+    private final SystemWrapper<Intake> intakeSystem;
+
+    public RunIntake(SystemWrapper<Intake> intake) {
         intakeSystem = intake;
         addRequirements(intake);
     }
 
     @Override
     public void execute() {
-        intakeSystem.down();
-        intakeSystem.run();
+        intakeSystem.get().ifPresent((intake) -> {
+            intake.down();
+            intake.run();
+        });
     }
 
     @Override
     public void end(boolean interrupted) {
-        intakeSystem.up();
-        intakeSystem.stop();
+        intakeSystem.get().ifPresent((intake) -> {
+            intake.up();
+            intake.stop();
+        });
     }
 
     @Override

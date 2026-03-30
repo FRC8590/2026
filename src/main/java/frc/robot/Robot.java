@@ -66,9 +66,11 @@ public class Robot extends TimedRobot {
         // immediately when disabled, but then also let it be pushed more
         disabledTimer = new Timer();
 
-        m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
+        m_robotContainer.drive.get().ifPresent(swerve -> {
+            swerve.replaceSwerveModuleFeedforward(.0002, 2.8, 0);
+            swerve.setupPathPlanner();
+        });
 
-        m_robotContainer.drive.setupPathPlanner();
         m_robotContainer.vision.startVisionThread();
     }
 
@@ -119,8 +121,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        isRedAllianceEntry.setBoolean(Systems.isRedAlliance());
-        m_robotContainer.drive.zeroGyroWithAlliance();
+        isRedAllianceEntry.setBoolean(RobotContainer.isRedAlliance());
+        m_robotContainer.drive.get().ifPresent(swerve -> swerve.zeroGyroWithAlliance());
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)

@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
 import frc.robot.Robot;
-import frc.robot.Systems;
-import frc.robot.services.vision.VisionService;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
@@ -66,19 +64,7 @@ public class Shooter extends SubsystemBase {
             .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM))
             .getEntry();
 
-    private final GenericEntry setRPMEntry = Shuffleboard
-            .getTab("Shooter")
-            .add("Stable shoot RPM", 2000)
-            .withWidget(BuiltInWidgets.kNumberSlider)
-            .getEntry();
-
-    private final VisionService visionService;
-    private final Swerve driveSystem;
-
-    public Shooter(VisionService vision, Swerve drive) {
-        visionService = vision;
-        driveSystem = drive;
-
+    public Shooter() {
         shooterConfig
                 .inverted(false)
                 .idleMode(IdleMode.kCoast)
@@ -99,7 +85,7 @@ public class Shooter extends SubsystemBase {
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
-    private void setGoalRPM(double rpm) {
+    public void setGoalRPM(double rpm) {
         targRPMEntry.setDouble(rpm);
         goalRPM = rpm;
     }
@@ -169,61 +155,6 @@ public class Shooter extends SubsystemBase {
      */
     public boolean atRPM() {
         return (frontMotor.getEncoder().getVelocity() + backMotor.getEncoder().getVelocity()) / 2 >= goalRPM - 100;
-    }
-
-    /**
-     * Change the goal RPM of the shooter. If rpm is greater than 6784, goal RPM is
-     * not changed.setGoalRPM
-     * 
-     * @param rpm rotations per minute you want the shooter to run at
-     * @return command that sets the goal RPM
-     */
-    public Command shooterSetGoalRPM(double rpm) {
-        if (rpm > SHOOTER_MAX_RPM)
-            return run(() -> setGoalRPM(goalRPM));
-        return run(() -> {
-            setGoalRPM(rpm);
-        });
-    }
-
-    public Command shooterSetStableGoalRPM() {
-        return run(() -> {
-            setGoalRPM(setRPMEntry.getInteger(2000));
-        });
-    }
-
-    public Command shooterSetRPMFromVision() {
-        return run(() -> {
-            // TODO
-            int primaryId = 26;// Vision.getHubAprilTag();
-            var result = visionService.getBestSingleTagPoseEstimate(primaryId, driveSystem.getPose());
-            if (!result.isPresent()) {
-                // Nothing seen -- hope for the best!
-                return;
-            }
-
-            /*
-             * The model assumes the distance from getMeasureX() is
-             * horizontal distance to the tag, which is generally
-             * true, but not exact, depending on where the tag is
-             * positioned relative to the hub center. If shots are
-             * consistently off by a fixed amount at all distances,
-             * we can correct it with a small offset constant.
-             */
-            double distanceMeters = result.get().getMeasureX().in(Units.Meters);
-            double rpm = distanceToRPM(distanceMeters);
-            System.out.println("Distance: " + distanceMeters + ". RPM: " + rpm);
-            setGoalRPM(rpm);
-        });
-    }
-
-    /**
-     * Sets the goal RPM to zero
-     * 
-     * @return command that sets the goal RPM to 0
-     */
-    public Command shooterStop() {
-        return run(() -> setGoalRPM(0));
     }
 
     private int telemetryCounter = 0;

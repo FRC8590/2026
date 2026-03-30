@@ -27,18 +27,21 @@ import java.io.File;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.AimAtTarget;
-import frc.robot.commands.Feed;
 import frc.robot.commands.RunIntake;
-import frc.robot.commands.Shoot;
-import frc.robot.commands.StableShoot;
-import frc.robot.commands.Unjam;
+import frc.robot.commands.ZeroGyro;
+import frc.robot.commands.feeder.Feed;
+import frc.robot.commands.feeder.Unjam;
+import frc.robot.commands.shooter.Shoot;
+import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
+import swervelib.SwerveDrive;
 import swervelib.SwerveInputStream;
+import lib.woodsonrobotics.SystemWrapper;
 import lib.woodsonrobotics.vision.Camera;
 import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
 import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
@@ -65,12 +68,12 @@ public class RobotContainer {
     };
 
     public final VisionService vision = new VisionService(ALL_CAMERAS);
-    public final Swerve drive = new Swerve(
-            new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision);
-    public final Shooter shooter = new Shooter(vision, drive);
-    public final Belt belt = new Belt();
-    public final Indexer indexer = new Indexer();
-    public final Intake intake = new Intake();
+    public final SystemWrapper<Swerve> drive = new SystemWrapper<>("drive", () -> new Swerve(
+            new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
+    public final SystemWrapper<Shooter> shooter = new SystemWrapper<>("shooter", () -> new Shooter());
+    public final SystemWrapper<Belt> belt = new SystemWrapper<>("belt", () -> new Belt());
+    public final SystemWrapper<Indexer> indexer = new SystemWrapper<>("indexer", () -> new Indexer());
+    public final SystemWrapper<Intake> intake = new SystemWrapper<>("intake", () -> new Intake());
 
     private final double deadband = 0.01;
 
@@ -83,74 +86,6 @@ public class RobotContainer {
 
     // Basically the sensitivity of the swerves
     public static double scaleFactor = 1;
-
-    /**
-     * Converts driver input into a field-relative ChassisSpeeds that is controlled
-     * by angular velocity.
-     */
-
-    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drive.getSwerveDrive(),
-            () -> driverXbox.getLeftY() * getSide() * scaleFactor,
-            () -> driverXbox.getLeftX() * getSide() * scaleFactor)
-            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
-            .deadband(deadband)
-            .robotRelative(false)
-            .allianceRelativeControl(false);
-
-    SwerveInputStream driveRobotOriented = SwerveInputStream.of(drive.getSwerveDrive(),
-            () -> -driverXbox.getLeftY() * scaleFactor,
-            () -> -driverXbox.getLeftX() * scaleFactor)
-            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.6 * scaleFactor)
-            .deadband(deadband)
-            .robotRelative(true)
-            .scaleTranslation(scaleFactor);
-
-    /**
-     * Clone's the angular velocity input stream and converts it to a fieldRelative
-     * input stream.
-     */
-    SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
-            .withControllerHeadingAxis(() -> -driverXbox.getRightX(),
-                    () -> -driverXbox.getRightY())
-            .headingWhile(true);
-
-    // Applies deadbands and inverts controls because joysticks
-    // are back-right positive while robot
-    // controls are front-left positive
-    // left stick controls translation
-    // right stick controls the desired angle NOT angular rotation
-    Command driveFieldOrientedDirectAngle = drive.driveFieldOriented(driveDirectAngle);
-    Command driveRobotOrientedAngular = drive.driveRobotRelative(driveRobotOriented);
-
-    // Applies deadbands and inverts controls because joysticks
-    // are back-right positive while robot
-    // controls are front-left positive
-    // left stick controls translation
-    // right stick controls the angular velocity of the robot
-    Command driveFieldOrientedAnglularVelocity = drive.driveFieldOriented(driveAngularVelocity);
-
-    SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(drive.getSwerveDrive(),
-            () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
-            () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
-            .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
-            .deadband(deadband)
-            .robotRelative(false)
-            .allianceRelativeControl(false);
-
-    // Derive the heading axis with math!
-    SwerveInputStream driveDirectAngleSim = driveAngularVelocitySim.copy()
-            .withControllerHeadingAxis(() -> Math.sin(
-                    driverXbox.getRawAxis(2) * Math.PI)
-                    * (Math.PI * 2),
-                    () -> Math.cos(
-                            driverXbox.getRawAxis(2) * Math.PI)
-                            * (Math.PI * 2))
-            .headingWhile(true);
-
-    Command driveFieldOrientedDirectAngleSim = drive.driveFieldOriented(driveDirectAngleSim);
-    Command driveFieldOrientedAngularVelocitySim = drive.driveFieldOriented(driveAngularVelocitySim);
-
-    Command driveSetpointGenSim = drive.driveWithSetpointGeneratorFieldRelative(driveDirectAngleSim);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -183,13 +118,24 @@ public class RobotContainer {
     }
 
     /**
+     * Checks if the alliance is red, defaults to false if alliance isn't available.
+     *
+     * @return true if the red alliance, false if blue. Defaults to false if none is
+     *         available.
+     */
+    public static boolean isRedAlliance() {
+        var alliance = DriverStation.getAlliance();
+        return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
+    }
+
+    /**
      * Riley: Looks like another Joseff special over here. Appears to return 1 or -1
      * to invert controlls for red vs blue alliance
      * 
      * @return 1 if red side, -1 if blue side
      */
-    public int getSide() {
-        if (Systems.isRedAlliance()) {
+    private static int getSide() {
+        if (isRedAlliance()) {
             return 1;
         } else {
             return -1;
@@ -210,21 +156,38 @@ public class RobotContainer {
      * Flight joysticks}.
      */
     private void configureBindings() {
+        Command driveFieldOrientedAnglularVelocity = drive
+                .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
+                        () -> driverXbox.getLeftY() * getSide() * scaleFactor,
+                        () -> driverXbox.getLeftX() * getSide() * scaleFactor)
+                        .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
+                        .deadband(deadband)
+                        .robotRelative(false)
+                        .allianceRelativeControl(false)));
+
+        Command driveFieldOrientedAngularVelocitySim = drive
+                .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
+                        () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
+                        () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
+                        .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
+                        .deadband(deadband)
+                        .robotRelative(false)
+                        .allianceRelativeControl(false)));
         drive.setDefaultCommand(
                 RobotBase.isSimulation()
                         ? driveFieldOrientedAngularVelocitySim
                         : driveFieldOrientedAnglularVelocity);
 
-        driverXbox.povRight().onTrue(drive.shiftUp());
-        driverXbox.povLeft().onTrue(drive.shiftDown());
+        driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
+        driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
 
         driverXbox.leftTrigger().whileTrue(new RunIntake(intake));
 
         driverXbox.povUp().whileTrue(new Feed(belt, indexer));
 
-        driverXbox.povDown().whileTrue(drive.lockPose());
+        driverXbox.povDown().whileTrue(drive.command(Swerve::lockPose));
 
-        driverXbox.leftStick().whileTrue(drive.ZeroGryo());
+        driverXbox.leftStick().whileTrue(new ZeroGyro(drive));
         driverXbox.a().whileTrue(new Unjam(belt, indexer));
 
         driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt, indexer));
@@ -240,33 +203,11 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         String selectedAuto = m_chooser.getSelected();
-        return drive.getAutonomousCommand(selectedAuto);
-
-    }
-
-    public void setMotorBrake(boolean brake) {
-        drive.setMotorBrake(false);
-    }
-
-    public void zeroEverything() {
-        drive.zeroGyro();
-    }
-
-    /**
-     * Replaces the swerve module feedforward with a new SimpleMotorFeedforward
-     * object.
-     *
-     * @param kS the static gain of the feedforward
-     * @param kV the velocity gain of the feedforward
-     * @param kA the acceleration gain of the feedforward
-     */
-
-    public void setDriveFeedForward(double kS, double kV, double kA) {
-        drive.replaceSwerveModuleFeedforward(kS, kV, kA);
+        return drive.command(swerve -> swerve.getAutonomousCommand(selectedAuto));
     }
 
     public void resetAndStop() {
-        drive.drive(new Translation2d(), 0, false);
+        drive.get().ifPresent(swerve -> swerve.drive(new Translation2d(), 0, false));
     }
 
 }
