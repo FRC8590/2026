@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Meter;
 
@@ -67,15 +67,7 @@ public class Swerve extends SubsystemBase {
     /**
      * Swerve drive object.
      */
-    public final SwerveDrive swerveDrive;
-
-    /*
-     * Field containing the simulated pose based on YagSL.
-     * This is for use in AdvantageScope, and doesn't work when the robot
-     * isn't in simulation mode. Use the "Estimated Pose" (based on vision)
-     * for real matches.
-     */
-    private final Field2d simField = new Field2d();
+    protected final SwerveDrive swerveDrive;
 
     private double currentSpeed;
     private final GenericEntry driveSpeedEntry = Shuffleboard.getTab("Drive")
@@ -129,11 +121,6 @@ public class Swerve extends SubsystemBase {
 
         Shuffleboard.getTab("Console")
                 .add("Estimated Pose", field)
-                .withSize(4, 2)
-                .withWidget(BuiltInWidgets.kField);
-
-        Shuffleboard.getTab("Console")
-                .add("Simulated Pose", simField)
                 .withSize(4, 2)
                 .withWidget(BuiltInWidgets.kField);
     }
@@ -254,12 +241,6 @@ public class Swerve extends SubsystemBase {
         return run(() -> {
             swerveDrive.lockPose();
         });
-    }
-
-    @Override
-    public void simulationPeriodic() {
-        swerveDrive.getSimulationDriveTrainPose()
-                .ifPresent(simField::setRobotPose);
     }
 
     private void updateSpeed(ChassisSpeeds speeds) {

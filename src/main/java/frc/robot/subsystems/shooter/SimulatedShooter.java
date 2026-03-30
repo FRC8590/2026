@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -39,13 +40,13 @@ public class SimulatedShooter extends Shooter {
                         robotSimulationWorldPose.getRotation(),
                         // Add the shooter’s rotation
                         // + new Rotation2d(90),
-                        // Initial height of the flying note
-                        Meters.of(0.45),
+                        // Initial height of the flying fuel
+                        Inches.of(16.78),
                         // The launch speed is proportional to the RPM; assumed to be 16 meters/second
                         // at 6000 RPM
                         MetersPerSecond.of(rpm / 6000 * 20),
                         // The angle at which the note is launched
-                        Radians.of(Math.toRadians(55)));
+                        Radians.of(Math.toRadians(69)));
 
                 fuelOnFly
                         // Set the target center to the Rebbuilt Hub of the current alliance
@@ -58,12 +59,11 @@ public class SimulatedShooter extends Shooter {
                         .withHitTargetCallBack(() -> System.out.println("Hit hub, +1 point!"));
 
                 fuelOnFly
-                        // Configure the note projectile to become a NoteOnField upon touching the
+                        // Configure the fuel projectile to be "on the field" upon touching the
                         // ground
                         .enableBecomesGamePieceOnFieldAfterTouchGround();
 
                 // Add the projectile to the simulated arena
-                System.out.println("Added projectile " + fuelOnFly);
                 SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
             });
 

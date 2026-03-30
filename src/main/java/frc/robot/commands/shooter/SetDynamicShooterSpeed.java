@@ -2,7 +2,7 @@ package frc.robot.commands.shooter;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.services.vision.VisionService;
 
@@ -15,11 +15,11 @@ import lib.woodsonrobotics.SystemWrapper;
  */
 public class SetDynamicShooterSpeed extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
-    private final SystemWrapper<Swerve> driveSystem;
+    private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
 
     public SetDynamicShooterSpeed(SystemWrapper<Shooter> shooter,
-            SystemWrapper<Swerve> drive, VisionService vision) {
+            SystemWrapper<? extends Swerve> drive, VisionService vision) {
         shooterSystem = shooter;
         driveSystem = drive;
         visionService = vision;

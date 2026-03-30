@@ -36,8 +36,10 @@ import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.drive.Swerve;
+import frc.robot.subsystems.drive.SimulatedSwerve;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.SimulatedIntake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.SimulatedShooter;
 import swervelib.SwerveInputStream;
@@ -68,12 +70,12 @@ public class RobotContainer {
     };
 
     public final VisionService vision = new VisionService(ALL_CAMERAS);
-    public final SystemWrapper<Swerve> drive = new SystemWrapper<>("drive", () -> new Swerve(
+    public final SystemWrapper<SimulatedSwerve> drive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
             new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
     public final SystemWrapper<Shooter> shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
     public final SystemWrapper<Belt> belt = new SystemWrapper<>("belt", () -> new Belt());
     public final SystemWrapper<Indexer> indexer = new SystemWrapper<>("indexer", () -> new Indexer());
-    public final SystemWrapper<Intake> intake = new SystemWrapper<>("intake", () -> new Intake());
+    public final SystemWrapper<Intake> intake = new SystemWrapper<>("intake", () -> new SimulatedIntake(drive));
 
     private final double deadband = 0.01;
 

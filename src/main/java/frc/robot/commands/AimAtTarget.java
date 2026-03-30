@@ -5,8 +5,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.services.vision.VisionService;
-import frc.robot.subsystems.Swerve;
-
+import frc.robot.subsystems.drive.Swerve;
 import lib.woodsonrobotics.SystemWrapper;
 
 /**
@@ -15,10 +14,10 @@ import lib.woodsonrobotics.SystemWrapper;
 public class AimAtTarget extends Command {
     // Peter: I suspect we'll need this at some point
     // private final Vision visionService;
-    private final SystemWrapper<Swerve> driveSystem;
+    private final SystemWrapper<? extends Swerve> driveSystem;
     private final PIDController headingController = new PIDController(5, 0, 0);
 
-    public AimAtTarget(VisionService vision, SystemWrapper<Swerve> drive) {
+    public AimAtTarget(VisionService vision, SystemWrapper<? extends Swerve> drive) {
         // visionService = vision;
         driveSystem = drive;
         headingController.enableContinuousInput(-Math.PI, Math.PI);

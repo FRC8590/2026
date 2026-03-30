@@ -6,10 +6,7 @@ package frc.robot;
 
 import org.ironmaple.simulation.SimulatedArena;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;

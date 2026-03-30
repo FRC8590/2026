@@ -6,7 +6,7 @@ import frc.robot.commands.feeder.Feed;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
@@ -21,7 +21,7 @@ import lib.woodsonrobotics.SystemWrapper;
  */
 public class Shoot extends SequentialCommandGroup {
     public Shoot(SystemWrapper<Shooter> shooter, SystemWrapper<Belt> belt,
-            SystemWrapper<Indexer> indexer, VisionService vision, SystemWrapper<Swerve> drive) {
+            SystemWrapper<Indexer> indexer, VisionService vision, SystemWrapper<? extends Swerve> drive) {
         addCommands(
                 new AimAtTarget(vision, drive),
                 new SetDynamicShooterSpeed(shooter, drive, vision),
