@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.ironmaple.utils.FieldMirroringUtils;
 
@@ -73,7 +74,9 @@ public class SimulationService {
                 // speaker's "mouth")
                 .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
                 // Set a callback to run when the fuel hits the target
-                .withHitTargetCallBack(() -> System.out.println("Hit hub, +1 point!"));
+                .withHitTargetCallBack(() -> {
+                    System.out.println("Hit hub, +1 point!");
+                });
 
         fuelOnFly
                 // Configure the fuel projectile to be "on the field" upon touching the
@@ -89,6 +92,10 @@ public class SimulationService {
      * This allows us to throttle how many can be shot over time.
      */
     private long lastSentFuel = -1;
+
+    public void simulationInit() {
+        SimulatedArena.getInstance().resetFieldForAuto();
+    }
 
     public void simulationPeriodic() {
         var shooterOpt = shooterSystem.get();
@@ -121,7 +128,6 @@ public class SimulationService {
                 && (indexerOpt.get().getSpeed() > 0)
                 && (currentTime - lastSentFuel >= 200)) {
             var intakeSimulation = intake.getIntakeSimulation();
-            System.out.println(intakeSimulation.getGamePiecesAmount());
             if (intakeSimulation.obtainGamePieceFromIntake()) {
                 driveSystem.ifEnabled(drive -> {
                     addFuelProjectile(drive, shooterRPM);
