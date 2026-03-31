@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.feeder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
@@ -47,6 +47,10 @@ public class Belt extends SubsystemBase {
     /* Run the belt in reverse. */
     public void runReversed() {
         beltMotor.set(-1);
+    }
+
+    public double getSpeed() {
+        return beltMotor.get();
     }
 
     private int telemetryCounter = 0;

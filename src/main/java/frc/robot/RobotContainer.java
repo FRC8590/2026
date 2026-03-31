@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.io.File;
-import java.util.Arrays;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -38,10 +37,12 @@ import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
+import frc.robot.services.SimulationService;
+import frc.robot.services.vision.SimulatedPhotonVisionService;
 import frc.robot.services.vision.VisionService;
-import frc.robot.subsystems.Belt;
-import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.drive.Swerve;
+import frc.robot.subsystems.feeder.Belt;
+import frc.robot.subsystems.feeder.Indexer;
 import frc.robot.subsystems.drive.SimulatedSwerve;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.SimulatedIntake;
@@ -49,8 +50,8 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.SimulatedShooter;
 import swervelib.SwerveInputStream;
 import lib.woodsonrobotics.SystemWrapper;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
-import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -79,12 +80,20 @@ public class RobotContainer {
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 180)))
     };
 
+    // Services -- these are essentially non-rebootable background systems
     public final VisionService vision;
+    public final SimulationService simulation;
+
+    // All of the subsystems. These are wrapped with SystemWrapper<> to allow
+    // rebooting and disabling.
+    // The <? extends Subsystem> is necessary for when something needs a specific
+    // subtype (such as the simulation service needing SimulatedIntake and not just
+    // Intake).
     public final SystemWrapper<? extends Swerve> drive;
     public final SystemWrapper<Shooter> shooter;
     public final SystemWrapper<Belt> belt;
     public final SystemWrapper<Indexer> indexer;
-    public final SystemWrapper<Intake> intake;
+    public final SystemWrapper<? extends Intake> intake;
 
     private final double deadband = 0.01;
 
@@ -103,24 +112,25 @@ public class RobotContainer {
      */
     public RobotContainer() {
         // These don't have simulation variants
-        belt = new SystemWrapper<>("belt", () -> new Belt());
-        indexer = new SystemWrapper<>("indexer", () -> new Indexer());
+        belt = new SystemWrapper<>("belt", Belt::new);
+        indexer = new SystemWrapper<>("indexer", Indexer::new);
         if (Robot.isReal()) {
             vision = new VisionService(ALL_CAMERAS);
             drive = new SystemWrapper<>("drive", () -> new Swerve(
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
-            shooter = new SystemWrapper<>("shooter", () -> new Shooter());
-            intake = new SystemWrapper<>("intake", () -> new Intake());
+            shooter = new SystemWrapper<>("shooter", Shooter::new);
+            intake = new SystemWrapper<>("intake", Intake::new);
+            simulation = null;
         } else {
-            SimulatedPhotonVisionCamera[] simulated = Arrays.stream(ALL_CAMERAS)
-                    .map(SimulatedPhotonVisionCamera::new)
-                    .toArray(SimulatedPhotonVisionCamera[]::new);
-            vision = new VisionService(simulated);
+            vision = new SimulatedPhotonVisionService(ALL_CAMERAS);
             SystemWrapper<SimulatedSwerve> simulatedDrive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
             drive = simulatedDrive;
-            shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
-            intake = new SystemWrapper<>("intake", () -> new SimulatedIntake(simulatedDrive));
+            shooter = new SystemWrapper<>("shooter", SimulatedShooter::new);
+            SystemWrapper<SimulatedIntake> simulatedIntake = new SystemWrapper<>("intake",
+                    () -> new SimulatedIntake(simulatedDrive));
+            intake = simulatedIntake;
+            simulation = new SimulationService(simulatedIntake, shooter, drive, belt, indexer);
         }
 
         configureBindings();
@@ -155,8 +165,16 @@ public class RobotContainer {
      */
     public static boolean isRedAlliance() {
         var alliance = DriverStation.getAlliance();
-        return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
+        if (alliance.isEmpty()) {
+            throw new RuntimeException("isRedAlliance() checked before alliance set");
+        }
+        return alliance.get() == DriverStation.Alliance.Red;
     }
+
+    // Peter: I think my controller is bad and sends inverted values, so
+    // I added this. We need to make sure this is disabled before we go to
+    // matches.
+    private static boolean invertDrive = true;
 
     /**
      * Riley: Looks like another Joseff special over here. Appears to return 1 or -1
@@ -166,9 +184,9 @@ public class RobotContainer {
      */
     private static int getSide() {
         if (isRedAlliance()) {
-            return 1;
+            return invertDrive ? 1 : -1;
         } else {
-            return -1;
+            return invertDrive ? -1 : 1;
         }
     }
 
@@ -179,7 +197,7 @@ public class RobotContainer {
      */
     public void rebootAllSystems() {
         try {
-            System.out.println("FULL SUBSYSTEM REBOOT!");
+            DriveNotifier.informWarning("FULL SUBSYSTEM REBOOT!");
             CommandScheduler.getInstance().cancelAll();
             // Drive is currently not rebootable :(
             // drive.reboot();
@@ -188,7 +206,7 @@ public class RobotContainer {
             indexer.reboot();
             intake.reboot();
         } catch (Exception e) {
-            System.err.println("Full reboot failed");
+            DriveNotifier.internalError("rebootAllSystems", "Full reboot failed");
             e.printStackTrace();
         }
     }
@@ -219,8 +237,8 @@ public class RobotContainer {
 
         Command driveFieldOrientedAngularVelocitySim = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
-                        () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
-                        () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
+                        () -> driverXbox.getLeftY() * getSide() * scaleFactor,
+                        () -> driverXbox.getLeftX() * getSide() * scaleFactor)
                         .withControllerRotationAxis(() -> shootOnMove.isScheduled()
                                 ? shootOnMove.getRotationOverride().get() // command overrides rotation
                                 : -driverXbox.getRightX() * 0.72 * scaleFactor) // driver controls rotation

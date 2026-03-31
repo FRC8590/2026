@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -127,7 +128,7 @@ public class Shooter extends SubsystemBase {
         final double MAX_DISTANCE = 6.0;
 
         if (distanceMeters < MIN_DISTANCE || distanceMeters > MAX_DISTANCE) {
-            System.err.println("distanceToRPM: outside viable range (" + distanceMeters + "m)");
+            DriveNotifier.operatorError("Shooting distance outside range (" + Math.round(distanceMeters) + "m)");
             return 0;
         }
 
@@ -136,7 +137,8 @@ public class Shooter extends SubsystemBase {
         double denominator = distanceMeters * tanA - deltaY;
 
         if (denominator <= 0) {
-            System.err.println("distanceToRPM: degenerate denominator at " + distanceMeters + "m");
+            DriveNotifier.internalError("distanceToRPM",
+                    "degenerate denominator at " + Math.round(distanceMeters) + "m");
             return 0;
         }
 
@@ -147,7 +149,8 @@ public class Shooter extends SubsystemBase {
         // Use the sim's exact RPM<->velocity model: 6000 RPM = 20 m/s
         double rpm = v0 * 6000.0 / 20.0;
 
-        return Math.min(rpm, SHOOTER_MAX_RPM);
+        // We arbitrarily add 50 to account for some slight undershooting
+        return Math.min(rpm + 50, SHOOTER_MAX_RPM);
     }
 
     /**

@@ -15,11 +15,11 @@ import frc.robot.Robot;
 import lib.woodsonrobotics.vision.EstimatedPose;
 
 public class SimulatedPhotonVisionCamera extends PhotonVisionCamera {
-    public static final VisionSystemSim visionSim = new VisionSystemSim("main");
     private final PhotonCameraSim cameraSim;
+    private final VisionSystemSim visionSystemSim;
 
     public SimulatedPhotonVisionCamera(String name, AprilTagFieldLayout fieldLayout, Transform3d robotToCamTransform,
-            Resolution cameraResolution) {
+            Resolution cameraResolution, VisionSystemSim visionSim) {
         super(name, fieldLayout, robotToCamTransform, cameraResolution);
         visionSim.addAprilTags(fieldLayout);
 
@@ -32,10 +32,12 @@ public class SimulatedPhotonVisionCamera extends PhotonVisionCamera {
         cameraSim = new PhotonCameraSim(camera, cameraProp);
         cameraSim.enableDrawWireframe(true);
         visionSim.addCamera(cameraSim, robotToCamTransform);
+
+        visionSystemSim = visionSim;
     }
 
-    public SimulatedPhotonVisionCamera(PhotonVisionCamera camera) {
-        this(camera.getName(), camera.getFieldLayout(), camera.getRobotToCamera(), camera.getResolution());
+    public SimulatedPhotonVisionCamera(PhotonVisionCamera camera, VisionSystemSim visionSim) {
+        this(camera.getName(), camera.getFieldLayout(), camera.getRobotToCamera(), camera.getResolution(), visionSim);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class SimulatedPhotonVisionCamera extends PhotonVisionCamera {
     public Optional<EstimatedPose> getEstimatedGlobalPose() {
         var result = super.getEstimatedGlobalPose();
         if (result != null && Robot.isSimulation()) {
-            Field2d debugField = visionSim.getDebugField();
+            Field2d debugField = visionSystemSim.getDebugField();
             result.ifPresentOrElse(
                     est -> debugField
                             .getObject("VisionEstimation")

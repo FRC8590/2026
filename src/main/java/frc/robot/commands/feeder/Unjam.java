@@ -1,9 +1,8 @@
 package frc.robot.commands.feeder;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Belt;
-import frc.robot.subsystems.Indexer;
-
+import frc.robot.subsystems.feeder.Belt;
+import frc.robot.subsystems.feeder.Indexer;
 import lib.woodsonrobotics.SystemWrapper;
 
 /*

@@ -13,16 +13,25 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
-/* Wrapper class around a subsystem.
- * 
- * This allows subsystems to be rebooted or disabled.
-*/
 public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
     private final Supplier<T> systemSupplier;
     private T cachedSystem;
     private boolean isEnabled = true;
 
+    /**
+     * Wrapper class around a subsystem.
+     * 
+     * This allows subsystems to be rebooted or disabled.
+     * 
+     * @param name     The name of the subsystem, as it will appear in
+     *                 SmartDashboard.
+     * @param supplier A supplier function that constructs the given subsystem. For
+     *                 example, this could look like (() -> new MySubsystem(vision))
+     *                 or Intake::new. This supplier will be invoked to construct
+     *                 the subsystem.
+     */
     public SystemWrapper(String name, Supplier<T> supplier) {
         setName(name);
         this.systemSupplier = supplier;
@@ -40,7 +49,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         }
     }
 
-    /*
+    /**
      * Get the subsystem, or nothing if the system is disabled.
      * 
      * Do not use the resulting subsystem in an addRequirements() call!
@@ -61,19 +70,19 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         return Optional.of(cachedSystem);
     }
 
-    /*
+    /**
      * Reboot the subsystem. This creates a fresh new instance, which get() will
      * return.
      */
     public void reboot() {
         // Unregister the old instance from the scheduler so it
         // doesn't keep running its default command / periodic.
-        System.err.println("Rebooting " + getName());
+        DriveNotifier.informWarning("Rebooting " + getName());
         T newSystem;
         try {
             newSystem = systemSupplier.get();
         } catch (Exception e) {
-            System.err.println("Reboot of " + getName() + " failed");
+            DriveNotifier.internalError("reboot", "Reboot of " + getName() + " failed");
             e.printStackTrace();
             return;
         }
@@ -84,9 +93,11 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         enable();
     }
 
-    /* Disable the system. */
+    /**
+     * Disable the system.
+     */
     public void disable() {
-        System.out.println("Disabled system " + getName());
+        DriveNotifier.inform("Disabled system " + getName());
         isEnabled = false;
         if (cachedSystem != null) {
             CommandScheduler.getInstance().unregisterSubsystem(cachedSystem);
@@ -95,19 +106,19 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         SmartDashboard.putBoolean("Systems/" + getName() + "/Status", false);
     }
 
-    /*
+    /**
      * Enable the system. Systems are enabled by default; you only need to call this
      * if the system was previously disabled by disable(). If disable() wasn't
      * called, this function will effectively do nothing.
      */
     public void enable() {
-        System.out.println("Enabled system " + getName());
+        DriveNotifier.inform("Enabled system " + getName());
         isEnabled = true;
         SmartDashboard.putBoolean("Systems/" + getName() + "/Status", true);
         // cachedSystem will be lazily created on next getSystem() call
     }
 
-    /*
+    /**
      * Get a command wrapper for this subsystem.
      * 
      * When the command is invoked, the wrapper will be reinvoked to
@@ -168,7 +179,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
         };
     }
 
-    /*
+    /**
      * Wrap a predicate into a BooleanSupplier. This is useful for subsystems
      * that are used with a WaitUntilCommand.
      */
@@ -178,7 +189,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
                 .orElse(false); // if disabled, condition is never true
     }
 
-    /* Equivalent to wrapper.get().ifPresent(action) */
+    /** Equivalent to wrapper.get().ifPresent(action) */
     public void ifEnabled(Consumer<? super T> action) {
         var result = get();
         result.ifPresent(action);

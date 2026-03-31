@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import org.ironmaple.simulation.SimulatedArena;
-
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -13,6 +11,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import lib.woodsonrobotics.telemetry.ConsoleCountdown;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -102,7 +101,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        System.out.println("Robot disabled");
+        DriveNotifier.inform("Robot disabled");
         disabledTimer.reset();
         disabledTimer.start();
 
@@ -145,19 +144,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        System.out.println("Robot in teleop");
+        DriveNotifier.inform("Robot in teleop");
+
         // This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        System.out.println(m_autonomousCommand);
         if (m_autonomousCommand != null) {
-            System.out.println("Cancelling auto command");
+            DriveNotifier.inform("Cancelling auto command");
             m_autonomousCommand.cancel();
-        } else {
-            // System.out.println("Cancelling all commands");
-            // System.out.println(CommandScheduler.getInstance());
-            // CommandScheduler.getInstance().cancelAll();
         }
 
         allianceShiftCountdown.start(10);
@@ -182,6 +177,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationInit() {
+        m_robotContainer.simulation.simulationInit();
     }
 
     /**
@@ -189,6 +185,6 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationPeriodic() {
-        SimulatedArena.getInstance().simulationPeriodic();
+        m_robotContainer.simulation.simulationPeriodic();
     }
 }

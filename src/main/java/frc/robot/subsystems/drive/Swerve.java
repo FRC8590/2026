@@ -42,6 +42,7 @@ import edu.wpi.first.networktables.GenericEntry;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -144,10 +145,6 @@ public class Swerve extends SubsystemBase {
         // The gear ratio is 6.75 motor revolutions per wheel rotation.
         // The encoder resolution per motor revolution is 1 per motor revolution.
         double driveConversionFactor = SwerveMath.calculateMetersPerRotation(Units.inchesToMeters(4), 6.75);
-        System.out.println("\"conversionFactors\": {");
-        System.out.println("\t\"angle\": {\"factor\": " + angleConversionFactor + " },");
-        System.out.println("\t\"drive\": {\"factor\": " + driveConversionFactor + " }");
-        System.out.println("}");
 
         currentSpeed = DEFAULT_SPEED;
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
@@ -513,9 +510,9 @@ public class Swerve extends SubsystemBase {
     /* Increase the current speed. */
     public Command shiftUp() {
         return runOnce(() -> {
-            System.out.println("Shifting up speed");
+            DriveNotifier.inform("Shifting up speed");
             if (currentSpeed == MAX_SPEED) {
-                System.err.println("Swerve is already at max speed, cannot accelerate");
+                DriveNotifier.operatorError("Swerve is already at max speed, cannot accelerate");
             } else {
                 currentShiftEntry.setDouble(++currentSpeed);
                 swerveDrive.setMaximumAllowableSpeeds(currentSpeed, swerveDrive.getMaximumChassisAngularVelocity());
@@ -527,9 +524,9 @@ public class Swerve extends SubsystemBase {
     public Command shiftDown() {
         return runOnce(() -> {
             assert (currentSpeed > 0);
-            System.out.println("Shifting down speed");
+            DriveNotifier.inform("Shifting down speed");
             if (currentSpeed == 1) {
-                System.err.println("Cannot make the swerves any slower");
+                DriveNotifier.operatorError("Cannot make the swerves any slower");
             } else {
                 currentShiftEntry.setDouble(--currentSpeed);
                 swerveDrive.setMaximumAllowableSpeeds(currentSpeed, swerveDrive.getMaximumChassisAngularVelocity());
@@ -693,7 +690,7 @@ public class Swerve extends SubsystemBase {
      * Lock the swerve drive to prevent it from moving.
      */
     public void lock() {
-        System.out.println("Swerve locked");
+        DriveNotifier.inform("Swerve locked");
         swerveDrive.lockPose();
     }
 

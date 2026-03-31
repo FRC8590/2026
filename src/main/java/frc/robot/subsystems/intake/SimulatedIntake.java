@@ -10,6 +10,10 @@ import lib.woodsonrobotics.SystemWrapper;
 public class SimulatedIntake extends Intake {
     private IntakeSimulation intakeSimulation;
 
+    public IntakeSimulation getIntakeSimulation() {
+        return intakeSimulation;
+    }
+
     public SimulatedIntake(SystemWrapper<SimulatedSwerve> swerve) {
         super();
 
@@ -27,6 +31,9 @@ public class SimulatedIntake extends Intake {
                 Meters.of(0.2),
                 IntakeSimulation.IntakeSide.BACK,
                 30);
+
+        // We start with 8 fuel in the intake.
+        intakeSimulation.setGamePiecesCount(8);
     }
 
     @Override
