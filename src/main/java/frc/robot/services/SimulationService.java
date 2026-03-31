@@ -41,7 +41,7 @@ public class SimulationService {
         indexerSystem = indexer;
     }
 
-    private void addFuelProjectile(Swerve swerve, double rpm) {
+    private void addFuelProjectile(Swerve swerve, double rpm, double yValue) {
         var robotSimulationWorldPose = swerve.getPose();
         var chassisSpeedsFieldRelative = swerve.getFieldVelocity();
         // This is taken from the MapleSim docs
@@ -50,7 +50,7 @@ public class SimulationService {
                 robotSimulationWorldPose.getTranslation(),
                 // Specify the translation of the shooter from the robot center (in the
                 // shooter’s reference frame)
-                new Translation2d(0.2, 0),
+                new Translation2d(0.2, yValue),
                 // Specify the field-relative speed of the chassis, adding it to the initial
                 // velocity of the projectile
                 chassisSpeedsFieldRelative,
@@ -136,7 +136,9 @@ public class SimulationService {
             var intakeSimulation = intake.getIntakeSimulation();
             if (intakeSimulation.obtainGamePieceFromIntake()) {
                 driveSystem.ifEnabled(drive -> {
-                    addFuelProjectile(drive, shooterRPM);
+                    // TODO: Peter: We should get this to precisely match our CAD
+                    addFuelProjectile(drive, shooterRPM, -0.1);
+                    addFuelProjectile(drive, shooterRPM, 0.1);
                     lastSentFuel = currentTime;
                 });
             }
