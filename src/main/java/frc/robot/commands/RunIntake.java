@@ -10,9 +10,9 @@ import lib.woodsonrobotics.SystemWrapper;
  * and the intake will be brought back up.
  */
 public class RunIntake extends Command {
-    private final SystemWrapper<Intake> intakeSystem;
+    private final SystemWrapper<? extends Intake> intakeSystem;
 
-    public RunIntake(SystemWrapper<Intake> intake) {
+    public RunIntake(SystemWrapper<? extends Intake> intake) {
         intakeSystem = intake;
         addRequirements(intake);
     }

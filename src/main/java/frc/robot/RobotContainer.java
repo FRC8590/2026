@@ -37,11 +37,12 @@ import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
+import frc.robot.services.SimulationService;
 import frc.robot.services.vision.SimulatedPhotonVisionService;
 import frc.robot.services.vision.VisionService;
-import frc.robot.subsystems.Belt;
-import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.drive.Swerve;
+import frc.robot.subsystems.feeder.Belt;
+import frc.robot.subsystems.feeder.Indexer;
 import frc.robot.subsystems.drive.SimulatedSwerve;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.SimulatedIntake;
@@ -79,12 +80,20 @@ public class RobotContainer {
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 180)))
     };
 
+    // Services -- these are essentially non-rebootable background systems
     public final VisionService vision;
+    public final SimulationService simulation;
+
+    // All of the subsystems. These are wrapped with SystemWrapper<> to allow
+    // rebooting and disabling.
+    // The <? extends Subsystem> is necessary for when something needs a specific
+    // subtype (such as the simulation service needing SimulatedIntake and not just
+    // Intake).
     public final SystemWrapper<? extends Swerve> drive;
     public final SystemWrapper<Shooter> shooter;
     public final SystemWrapper<Belt> belt;
     public final SystemWrapper<Indexer> indexer;
-    public final SystemWrapper<Intake> intake;
+    public final SystemWrapper<? extends Intake> intake;
 
     private final double deadband = 0.01;
 
@@ -111,13 +120,17 @@ public class RobotContainer {
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
             shooter = new SystemWrapper<>("shooter", () -> new Shooter());
             intake = new SystemWrapper<>("intake", () -> new Intake());
+            simulation = null;
         } else {
             vision = new SimulatedPhotonVisionService(ALL_CAMERAS);
             SystemWrapper<SimulatedSwerve> simulatedDrive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
             drive = simulatedDrive;
             shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
-            intake = new SystemWrapper<>("intake", () -> new SimulatedIntake(simulatedDrive));
+            SystemWrapper<SimulatedIntake> simulatedIntake = new SystemWrapper<>("intake",
+                    () -> new SimulatedIntake(simulatedDrive));
+            intake = simulatedIntake;
+            simulation = new SimulationService(simulatedIntake, shooter, drive, belt, indexer);
         }
 
         configureBindings();

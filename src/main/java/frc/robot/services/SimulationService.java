@@ -1,14 +1,137 @@
 package frc.robot.services;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
+import org.ironmaple.utils.FieldMirroringUtils;
+
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import frc.robot.subsystems.drive.Swerve;
+import frc.robot.subsystems.feeder.Belt;
+import frc.robot.subsystems.feeder.Indexer;
 import frc.robot.subsystems.intake.SimulatedIntake;
 import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
 public class SimulationService {
-    private SystemWrapper<SimulatedIntake> intakeSystem;
-    private SystemWrapper<Shooter> shooterSystem;
+    private final SystemWrapper<SimulatedIntake> intakeSystem;
+    private final SystemWrapper<Shooter> shooterSystem;
+    private final SystemWrapper<? extends Swerve> driveSystem;
+    private final SystemWrapper<Belt> beltSystem;
+    private final SystemWrapper<Indexer> indexerSystem;
 
-    public void attemptToShoot() {
+    private final StructArrayPublisher<Pose3d> fuelPosePublisher = NetworkTableInstance.getDefault()
+            .getStructArrayTopic("Fuel poses", Pose3d.struct)
+            .publish();
 
+    public SimulationService(SystemWrapper<SimulatedIntake> intake, SystemWrapper<Shooter> shooter,
+            SystemWrapper<? extends Swerve> drive, SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer) {
+        intakeSystem = intake;
+        shooterSystem = shooter;
+        driveSystem = drive;
+        beltSystem = belt;
+        indexerSystem = indexer;
+    }
+
+    private void addFuelProjectile(Swerve swerve, double rpm) {
+        var robotSimulationWorldPose = swerve.getPose();
+        var chassisSpeedsFieldRelative = swerve.getFieldVelocity();
+        // This is taken from the MapleSim docs
+        RebuiltFuelOnFly fuelOnFly = new RebuiltFuelOnFly(
+                // Specify the position of the chassis when the note is launched
+                robotSimulationWorldPose.getTranslation(),
+                // Specify the translation of the shooter from the robot center (in the
+                // shooter’s reference frame)
+                new Translation2d(0.2, 0),
+                // Specify the field-relative speed of the chassis, adding it to the initial
+                // velocity of the projectile
+                chassisSpeedsFieldRelative,
+                // The shooter facing direction is the same as the robot’s facing direction
+                robotSimulationWorldPose.getRotation(),
+                // Add the shooter’s rotation
+                // + new Rotation2d(90),
+                // Initial height of the flying fuel
+                Inches.of(16.78),
+                // The launch speed is proportional to the RPM; assumed to be 16 meters/second
+                // at 6000 RPM
+                MetersPerSecond.of(rpm / 6000 * 20),
+                // The angle at which the note is launched
+                Radians.of(Math.toRadians(69)));
+
+        fuelOnFly
+                // Set the target center to the Rebbuilt Hub of the current alliance
+                .withTargetPosition(() -> FieldMirroringUtils
+                        .toCurrentAllianceTranslation(new Translation3d(0.25, 5.56, 2.3)))
+                // Set the tolerance: x: ±0.5m, y: ±1.2m, z: ±0.3m (this is the size of the
+                // speaker's "mouth")
+                .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
+                // Set a callback to run when the fuel hits the target
+                .withHitTargetCallBack(() -> System.out.println("Hit hub, +1 point!"));
+
+        fuelOnFly
+                // Configure the fuel projectile to be "on the field" upon touching the
+                // ground
+                .enableBecomesGamePieceOnFieldAfterTouchGround();
+
+        // Add the projectile to the simulated arena
+        SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
+    }
+
+    /*
+     * The timestamp, in milliseconds, of when we shot the last piece of fuel.
+     * This allows us to throttle how many can be shot over time.
+     */
+    private long lastSentFuel = -1;
+
+    public void simulationPeriodic() {
+        var shooterOpt = shooterSystem.get();
+        if (shooterOpt.isEmpty()) {
+            return;
+        }
+
+        var intakeOpt = intakeSystem.get();
+        if (intakeOpt.isEmpty()) {
+            return;
+        }
+
+        var beltOpt = beltSystem.get();
+        if (beltOpt.isEmpty()) {
+            return;
+        }
+
+        var indexerOpt = indexerSystem.get();
+        if (indexerOpt.isEmpty()) {
+            return;
+        }
+
+        var shooter = shooterOpt.get();
+        var intake = intakeOpt.get();
+        var shooterRPM = shooter.getGoalRPM();
+        long currentTime = System.currentTimeMillis();
+
+        if (shooterRPM > 0
+                && (beltOpt.get().getSpeed() > 0)
+                && (indexerOpt.get().getSpeed() > 0)
+                && (currentTime - lastSentFuel >= 200)) {
+            var intakeSimulation = intake.getIntakeSimulation();
+            System.out.println(intakeSimulation.getGamePiecesAmount());
+            if (intakeSimulation.obtainGamePieceFromIntake()) {
+                driveSystem.ifEnabled(drive -> {
+                    addFuelProjectile(drive, shooterRPM);
+                    lastSentFuel = currentTime;
+                });
+            }
+        }
+        Pose3d[] fuelPoses = SimulatedArena.getInstance()
+                .getGamePiecesArrayByType("Fuel");
+        fuelPosePublisher.accept(fuelPoses);
+        SimulatedArena.getInstance().simulationPeriodic();
     }
 }

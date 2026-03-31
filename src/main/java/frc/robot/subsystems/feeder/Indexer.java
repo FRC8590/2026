@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.feeder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
@@ -47,6 +47,10 @@ public class Indexer extends SubsystemBase {
     /* Run the indexer in reverse. */
     public void runReversed() {
         indexMotor.set(-0.5);
+    }
+
+    public double getSpeed() {
+        return indexMotor.get();
     }
 
     private int telemetryCounter = 0;
