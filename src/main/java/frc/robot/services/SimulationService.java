@@ -67,15 +67,21 @@ public class SimulationService {
                 Radians.of(Math.toRadians(69)));
 
         fuelOnFly
-                // Set the target center to the Rebbuilt Hub of the current alliance
+                // Set the target center to the Rebuilt Hub of the current alliance
                 .withTargetPosition(() -> FieldMirroringUtils
                         .toCurrentAllianceTranslation(new Translation3d(0.25, 5.56, 2.3)))
                 // Set the tolerance: x: ±0.5m, y: ±1.2m, z: ±0.3m (this is the size of the
-                // speaker's "mouth")
+                // hub's "mouth")
                 .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
                 // Set a callback to run when the fuel hits the target
                 .withHitTargetCallBack(() -> {
                     System.out.println("Hit hub, +1 point!");
+                    // This is roughly in the neutral zone.
+                    // We add an arbitrary random number to it, because game pieces
+                    // that spawn on top of each other in MapleSim are a little weird.
+                    SimulatedArena.getInstance().addGamePiece(
+                            new RebuiltFuelOnField(new Translation2d(10 + (Math.random() - 0.5) * 0.4,
+                                    5 + (Math.random() - 0.5) * 0.4)));
                 });
 
         fuelOnFly
@@ -135,6 +141,7 @@ public class SimulationService {
                 });
             }
         }
+
         Pose3d[] fuelPoses = SimulatedArena.getInstance()
                 .getGamePiecesArrayByType("Fuel");
         fuelPosePublisher.accept(fuelPoses);
