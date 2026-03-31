@@ -1,26 +1,17 @@
 package frc.robot.utils;
 
-import java.util.Vector;
-
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
 import org.apache.commons.math3.ode.events.EventHandler;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
-import org.opencv.core.Mat;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.Timer;
-import java.util.ArrayList;
-
-import edu.wpi.first.math.geometry.Translation2d;
 
 public class BallisticsSim {
     // -----CONFIG-----
@@ -32,6 +23,8 @@ public class BallisticsSim {
     public static final double firingSolutionDerivativeStep = 0.001;
     public static final double firingSolutionErrorNudge = Math.toRadians(1);
     public static final double firingSolutionMaxTime = 0.1;
+    // If the robot is moving slower than this, firingSolution will just return the angle between the robot and the target (assuming the speed is 0) to save time
+    public static final double firingSolutionMinSpeed = 0.1;
     public static final boolean verbose = false;
     // ----------------
 
@@ -366,11 +359,17 @@ public class BallisticsSim {
     public static Translation2d firingSolution(Translation3d target, Translation2d robotVelocity,
             double accuracyMargin, Double initialGuessRadians) {
         double startTime = (double) System.currentTimeMillis() / 1000;
+        // If the speed is low enough then don't bother adjusting the angle; just return the angle between the bot and the target
+        if(robotVelocity.getNorm() < firingSolutionMinSpeed){
+            double currentGuess = Math.atan2(target.getZ(), target.getX());
+            return(new Translation2d(checkFiringSolution(currentGuess, target, robotVelocity).speed, Math.toDegrees(currentGuess)));
+        }
         // Use warm-start if provided, otherwise fall back to geometric guess.
         // This is in radians!
         double currentGuess = initialGuessRadians != null
                 ? initialGuessRadians
-                : 0.0;
+                // Initial guess assumes the robot is stationary
+                : Math.atan2(target.getZ(), target.getX());
         resultOfCheck currentResult = checkFiringSolution(currentGuess, target, robotVelocity);
         if (Math.abs(currentResult.error) <= accuracyMargin) {
             return (new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
