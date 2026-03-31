@@ -32,8 +32,6 @@ import frc.robot.commands.RunIntake;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
-import frc.robot.commands.shooter.SetShooterSpeed;
-import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.vision.VisionService;
