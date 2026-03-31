@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -170,6 +172,27 @@ public class RobotContainer {
         }
     }
 
+    /*
+     * Reboot all subsystems and cancel all active commands.
+     * This is basically a last-resort mechanism if things go horribly
+     * wrong during a match.
+     */
+    public void rebootAllSystems() {
+        try {
+            System.out.println("FULL SUBSYSTEM REBOOT!");
+            CommandScheduler.getInstance().cancelAll();
+            // Drive is currently not rebootable :(
+            // drive.reboot();
+            shooter.reboot();
+            belt.reboot();
+            indexer.reboot();
+            intake.reboot();
+        } catch (Exception e) {
+            System.err.println("Full reboot failed");
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Use this method to define your trigger->command mappings. Triggers can be
      * created via the
@@ -228,6 +251,9 @@ public class RobotContainer {
         // driverXbox.rightBumper().whileTrue(shootOnMove);
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
+
+        driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
+                .onTrue(Commands.runOnce(this::rebootAllSystems));
 
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);

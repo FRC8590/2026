@@ -14,13 +14,13 @@ import com.revrobotics.PersistMode;
 
 /* Subsystem for the indexer wheels (belt not included). */
 public class Indexer extends SubsystemBase {
-    private final int indexMotorID = 14;
+    private static final int indexMotorID = 14;
 
-    private final SparkFlex indexMotor = new SparkFlex(indexMotorID, MotorType.kBrushless);
+    private static final SparkFlex indexMotor = new SparkFlex(indexMotorID, MotorType.kBrushless);
 
     private final SparkFlexConfig indexMotorConfig = new SparkFlexConfig();
 
-    private final GenericEntry indexerEntry = Shuffleboard.getTab("Shooter")
+    private static final GenericEntry indexerEntry = Shuffleboard.getTab("Shooter")
             .add("Index motor RPM", 0)
             .getEntry();
 

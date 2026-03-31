@@ -70,14 +70,14 @@ public class Swerve extends SubsystemBase {
     protected final SwerveDrive swerveDrive;
 
     private double currentSpeed;
-    private final GenericEntry driveSpeedEntry = Shuffleboard.getTab("Drive")
+    private static final GenericEntry driveSpeedEntry = Shuffleboard.getTab("Drive")
             .add("Speed", 0)
             .withWidget(BuiltInWidgets.kDial)
             .withSize(1, 1)
             .withProperties(Map.of("min", 0, "max", MAX_SPEED))
             .withPosition(0, 0)
             .getEntry();
-    private final GenericEntry currentShiftEntry = Shuffleboard.getTab("Drive")
+    private static final GenericEntry currentShiftEntry = Shuffleboard.getTab("Drive")
             .add("Target Speed", DEFAULT_SPEED)
             .withWidget(BuiltInWidgets.kNumberBar)
             .withSize(1, 1)

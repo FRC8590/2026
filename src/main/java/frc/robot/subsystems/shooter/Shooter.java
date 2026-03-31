@@ -19,11 +19,11 @@ import com.revrobotics.PersistMode;
 /* Subsystem for the shooter. */
 public class Shooter extends SubsystemBase {
 
-    private final int frontMotorID = 12;
-    private final int backMotorID = 13;
+    private static final int frontMotorID = 12;
+    private static final int backMotorID = 13;
 
-    private final SparkFlex frontMotor = new SparkFlex(frontMotorID, MotorType.kBrushless);
-    private final SparkFlex backMotor = new SparkFlex(backMotorID, MotorType.kBrushless);
+    private static final SparkFlex frontMotor = new SparkFlex(frontMotorID, MotorType.kBrushless);
+    private static final SparkFlex backMotor = new SparkFlex(backMotorID, MotorType.kBrushless);
 
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
 
@@ -41,21 +41,21 @@ public class Shooter extends SubsystemBase {
     // Max acceleration
     private double maxAcceleration = 4000; // TODO: increase
 
-    private final GenericEntry targRPMEntry = Shuffleboard
+    private static final GenericEntry targRPMEntry = Shuffleboard
             .getTab("Shooter")
             .add("Target RPM", 0)
             .withWidget(BuiltInWidgets.kDial)
             .withProperties(Map.of("min", 0, "max", SHOOTER_MAX_RPM))
             .getEntry();
 
-    private final GenericEntry currRPMFrontEntry = Shuffleboard
+    private static final GenericEntry currRPMFrontEntry = Shuffleboard
             .getTab("Shooter")
             .add("Front motor RPM", 0)
             .withWidget(BuiltInWidgets.kDial)
             .withProperties(Map.of("Min", 0, "Max", SHOOTER_MAX_RPM))
             .getEntry();
 
-    private final GenericEntry currRPMBackEntry = Shuffleboard
+    private static final GenericEntry currRPMBackEntry = Shuffleboard
             .getTab("Shooter")
             .add("Back motor RPM", 0)
             .withWidget(BuiltInWidgets.kDial)

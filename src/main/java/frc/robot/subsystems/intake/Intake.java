@@ -23,11 +23,11 @@ public class Intake extends SubsystemBase {
      * @see 100:15 ratio, subject to change
      */
 
-    private final int pivotMotorID = 9;
-    private final int intakeMotorID = 10;
+    private static final int pivotMotorID = 9;
+    private static final int intakeMotorID = 10;
 
-    private final SparkMax pivotMotor = new SparkMax(pivotMotorID, MotorType.kBrushless);
-    private final SparkMax intakeMotor = new SparkMax(intakeMotorID, MotorType.kBrushless);
+    private static final SparkMax pivotMotor = new SparkMax(pivotMotorID, MotorType.kBrushless);
+    private static final SparkMax intakeMotor = new SparkMax(intakeMotorID, MotorType.kBrushless);
 
     private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
     private final SparkMaxConfig pivotConfig = new SparkMaxConfig();
@@ -49,15 +49,15 @@ public class Intake extends SubsystemBase {
     private double goalDownRadians = -0.2; // Riley TODO: Originaly -0.1; if not tested, revert back!
     private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
 
-    private final GenericEntry intakeEntry = Shuffleboard
+    private static final GenericEntry intakeEntry = Shuffleboard
             .getTab("Intake")
             .add("Position", 0)
             .getEntry();
-    private final GenericEntry pivotAngleEntry = Shuffleboard
+    private static final GenericEntry pivotAngleEntry = Shuffleboard
             .getTab("Intake")
             .add("Pivot Angle", 0)
             .getEntry();
-    private final GenericEntry pivotMotorRPMEntry = Shuffleboard
+    private static final GenericEntry pivotMotorRPMEntry = Shuffleboard
             .getTab("Intake")
             .add("Pivot Motor RPM", 0)
             .getEntry();

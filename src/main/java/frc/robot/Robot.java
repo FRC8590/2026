@@ -26,7 +26,7 @@ public class Robot extends TimedRobot {
     private static Robot instance;
 
     private Command m_autonomousCommand;
-    private GenericEntry isRedAllianceEntry = Shuffleboard
+    private static GenericEntry isRedAllianceEntry = Shuffleboard
             .getTab("Console")
             .add("On red alliance?", false)
             .getEntry();

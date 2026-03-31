@@ -68,10 +68,19 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
     public void reboot() {
         // Unregister the old instance from the scheduler so it
         // doesn't keep running its default command / periodic.
+        System.err.println("Rebooting " + getName());
+        T newSystem;
+        try {
+            newSystem = systemSupplier.get();
+        } catch (Exception e) {
+            System.err.println("Reboot of " + getName() + " failed");
+            e.printStackTrace();
+            return;
+        }
         if (cachedSystem != null) {
             CommandScheduler.getInstance().unregisterSubsystem(cachedSystem);
         }
-        cachedSystem = systemSupplier.get();
+        cachedSystem = newSystem;
         enable();
     }
 

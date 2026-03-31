@@ -14,13 +14,13 @@ import com.revrobotics.PersistMode;
 
 /* Subsystem for the belt. */
 public class Belt extends SubsystemBase {
-    private final int beltMotorID = 11;
+    private static final int beltMotorID = 11;
 
-    private final SparkMax beltMotor = new SparkMax(beltMotorID, MotorType.kBrushless);
+    private static final SparkMax beltMotor = new SparkMax(beltMotorID, MotorType.kBrushless);
 
     private final SparkMaxConfig beltMotorConfig = new SparkMaxConfig();
 
-    private final GenericEntry beltEntry = Shuffleboard.getTab("Shooter")
+    private static final GenericEntry beltEntry = Shuffleboard.getTab("Shooter")
             .add("Belt motor RPM", 0)
             .getEntry();
 
