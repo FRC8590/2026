@@ -234,6 +234,10 @@ public class RobotContainer {
         }
     }
 
+    public static int getHubAprilTag() {
+        return isRedAlliance() ? 10 : 26;
+    }
+
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *

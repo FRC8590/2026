@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
 
@@ -30,7 +31,6 @@ public class ShootOnMove extends Command {
     private final AtomicReference<Double> rotationOverride = new AtomicReference<>(0.0);
     private final PIDController rotationPID = new PIDController(1.5, 0.0, 0.0);
 
-    private static final int TARGET_ID = 26;
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
 
@@ -74,7 +74,7 @@ public class ShootOnMove extends Command {
         }
         var drive = driveOpt.get();
 
-        var tagPoseOpt = visionService.getTagFieldPose(TARGET_ID);
+        var tagPoseOpt = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
         if (tagPoseOpt.isEmpty()) {
             return;
         }

@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.drive.Swerve;
 import lib.woodsonrobotics.SystemWrapper;
@@ -16,7 +17,6 @@ public class AimAtTarget extends Command {
     private final VisionService visionService;
     private final PIDController rotationPID;
     private Rotation2d desiredRotation;
-    private static final int TARGET_ID = 26;
 
     public AimAtTarget(VisionService vision, SystemWrapper<? extends Swerve> drive) {
         visionService = vision;
@@ -34,7 +34,7 @@ public class AimAtTarget extends Command {
             return;
         }
 
-        var tagPoseOpt = visionService.getTagFieldPose(TARGET_ID);
+        var tagPoseOpt = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
         if (tagPoseOpt.isEmpty()) {
             return;
         }
