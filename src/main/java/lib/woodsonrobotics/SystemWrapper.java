@@ -7,8 +7,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +26,18 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
     public SystemWrapper(String name, Supplier<T> supplier) {
         setName(name);
         this.systemSupplier = supplier;
+        SmartDashboard.putData("Systems/" + name + "/Toggle",
+                Commands.runOnce(this::toggleEnabled).withName("Toggle"));
+        SmartDashboard.putData("Systems/" + name + "/Reboot", Commands.runOnce(this::reboot).withName("Reboot"));
+        SmartDashboard.putBoolean("Systems/" + getName() + "/Status", true);
+    }
+
+    public void toggleEnabled() {
+        if (isEnabled) {
+            disable();
+        } else {
+            enable();
+        }
     }
 
     /*
@@ -58,15 +72,18 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
             CommandScheduler.getInstance().unregisterSubsystem(cachedSystem);
         }
         cachedSystem = systemSupplier.get();
+        enable();
     }
 
     /* Disable the system. */
     public void disable() {
+        System.out.println("Disabled system " + getName());
         isEnabled = false;
         if (cachedSystem != null) {
             CommandScheduler.getInstance().unregisterSubsystem(cachedSystem);
         }
         cachedSystem = null;
+        SmartDashboard.putBoolean("Systems/" + getName() + "/Status", false);
     }
 
     /*
@@ -75,7 +92,9 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
      * called, this function will effectively do nothing.
      */
     public void enable() {
+        System.out.println("Enabled system " + getName());
         isEnabled = true;
+        SmartDashboard.putBoolean("Systems/" + getName() + "/Status", true);
         // cachedSystem will be lazily created on next getSystem() call
     }
 

@@ -32,6 +32,8 @@ import frc.robot.commands.RunIntake;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
+import frc.robot.commands.shooter.SetShooterSpeed;
+import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.vision.VisionService;
@@ -220,10 +222,10 @@ public class RobotContainer {
         driverXbox.a().whileTrue(new Unjam(belt, indexer));
 
         // driverXbox.rightBumper().whileTrue(new StableShoot(shooter, belt, indexer));
-        // driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision,
-        // drive));
-        // driverXbox.rightBumper().onFalse(new SetShooterSpeed(shooter, 0));
-        driverXbox.rightBumper().whileTrue(shootOnMove);
+        driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision,
+                drive));
+        driverXbox.rightBumper().onFalse(new SetShooterSpeed(shooter, 0));
+        // driverXbox.rightBumper().whileTrue(shootOnMove);
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
 
