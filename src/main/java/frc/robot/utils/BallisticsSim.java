@@ -31,7 +31,7 @@ public class BallisticsSim {
     public static final double maxTargetingVelocity = 0.5;
     public static final double firingSolutionDerivativeStep = 0.001;
     public static final double firingSolutionErrorNudge = Math.toRadians(1);
-    public static final double firingSolutionMaxTime = 1;
+    public static final double firingSolutionMaxTime = 0.1;
     public static final boolean verbose = false;
     // ----------------
 
@@ -220,7 +220,7 @@ public class BallisticsSim {
         // I'm using this integrator because it's what's used in all the examples, but
         // if there are any recommendations for other integrators that would be better
         // for this use case, I would appreciate them
-        FirstOrderIntegrator integrator = new DormandPrince853Integrator(1.0e-8, 100.0, 1.0e-10, 1.0e-10);
+        FirstOrderIntegrator integrator = new DormandPrince853Integrator(1.0e-3, 100.0, 1.0e-6, 1.0e-6);
         FirstOrderDifferentialEquations ode = new BallisticsODE();
         integrator.addEventHandler(mainEventHandler, 0.1, 1.0e-6, 100);
         // integrator.addEventHandler(backupEventHandler, 0.1, 1.0e-6, 100);
