@@ -161,6 +161,11 @@ public class RobotContainer {
         return alliance.get() == DriverStation.Alliance.Red;
     }
 
+    // Peter: I think my controller is bad and sends inverted values, so
+    // I added this. We need to make sure this is disabled before we go to
+    // matches.
+    private static boolean invertDrive = true;
+
     /**
      * Riley: Looks like another Joseff special over here. Appears to return 1 or -1
      * to invert controlls for red vs blue alliance
@@ -169,9 +174,9 @@ public class RobotContainer {
      */
     private static int getSide() {
         if (isRedAlliance()) {
-            return 1;
+            return invertDrive ? 1 : -1;
         } else {
-            return -1;
+            return invertDrive ? -1 : 1;
         }
     }
 
@@ -222,8 +227,8 @@ public class RobotContainer {
 
         Command driveFieldOrientedAngularVelocitySim = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
-                        () -> -driverXbox.getLeftY() * getSide() * scaleFactor,
-                        () -> -driverXbox.getLeftX() * getSide() * scaleFactor)
+                        () -> driverXbox.getLeftY() * getSide() * scaleFactor,
+                        () -> driverXbox.getLeftX() * getSide() * scaleFactor)
                         .withControllerRotationAxis(() -> shootOnMove.isScheduled()
                                 ? shootOnMove.getRotationOverride().get() // command overrides rotation
                                 : -driverXbox.getRightX() * 0.72 * scaleFactor) // driver controls rotation

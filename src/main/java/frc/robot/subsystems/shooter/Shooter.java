@@ -147,7 +147,8 @@ public class Shooter extends SubsystemBase {
         // Use the sim's exact RPM<->velocity model: 6000 RPM = 20 m/s
         double rpm = v0 * 6000.0 / 20.0;
 
-        return Math.min(rpm, SHOOTER_MAX_RPM);
+        // We arbitrarily add 100 to account for some slight undershooting
+        return Math.min(rpm + 100, SHOOTER_MAX_RPM);
     }
 
     /**

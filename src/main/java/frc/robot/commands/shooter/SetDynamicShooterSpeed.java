@@ -3,6 +3,7 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
 
 import lib.woodsonrobotics.SystemWrapper;
@@ -31,8 +32,7 @@ public class SetDynamicShooterSpeed extends Command {
             return;
         }
 
-        int primaryId = 26;
-        var tagPoseOpt = visionService.getTagFieldPose(primaryId);
+        var tagPoseOpt = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
         if (tagPoseOpt.isEmpty()) {
             return;
         }
