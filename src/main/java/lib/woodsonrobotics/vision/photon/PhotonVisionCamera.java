@@ -97,6 +97,7 @@ public class PhotonVisionCamera extends Camera {
             if (visionEst.isPresent()) {
                 return Optional.of(new PhotonEstimatedPose(visionEst.get()));
             }
+            resultsList.clear();
         } finally {
             resultsLock.unlock();
         }
@@ -189,6 +190,7 @@ public class PhotonVisionCamera extends Camera {
                     }
                 }
             }
+            resultsList.clear();
         } finally {
             resultsLock.unlock();
         }
