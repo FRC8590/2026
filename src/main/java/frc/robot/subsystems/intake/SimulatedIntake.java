@@ -10,6 +10,10 @@ import lib.woodsonrobotics.SystemWrapper;
 public class SimulatedIntake extends Intake {
     private IntakeSimulation intakeSimulation;
 
+    public IntakeSimulation getIntakeSimulation() {
+        return intakeSimulation;
+    }
+
     public SimulatedIntake(SystemWrapper<SimulatedSwerve> swerve) {
         super();
 

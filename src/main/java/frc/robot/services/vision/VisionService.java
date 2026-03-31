@@ -9,12 +9,10 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.Robot;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import lib.woodsonrobotics.vision.Camera;
 import lib.woodsonrobotics.vision.EstimatedPose;
 import lib.woodsonrobotics.vision.TrackedAprilTag;
-import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 import swervelib.SwerveDrive;
 
 public class VisionService {
@@ -52,10 +50,6 @@ public class VisionService {
      * @param swerveDrive {@link SwerveDrive} instance.
      */
     public void updateSwerveEstimation(SwerveDrive swerveDrive) {
-        // TODO: Peter: This is really hacky
-        if (Robot.isSimulation() && swerveDrive.getSimulationDriveTrainPose().isPresent()) {
-            SimulatedPhotonVisionCamera.visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
-        }
         for (Camera camera : allCameras) {
             Optional<EstimatedPose> estimatedPose = camera.getEstimatedGlobalPose();
 

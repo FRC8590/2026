@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.io.File;
-import java.util.Arrays;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -38,6 +37,7 @@ import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
+import frc.robot.services.vision.SimulatedPhotonVisionService;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.Belt;
 import frc.robot.subsystems.Indexer;
@@ -51,7 +51,6 @@ import swervelib.SwerveInputStream;
 import lib.woodsonrobotics.SystemWrapper;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
-import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -113,10 +112,7 @@ public class RobotContainer {
             shooter = new SystemWrapper<>("shooter", () -> new Shooter());
             intake = new SystemWrapper<>("intake", () -> new Intake());
         } else {
-            SimulatedPhotonVisionCamera[] simulated = Arrays.stream(ALL_CAMERAS)
-                    .map(SimulatedPhotonVisionCamera::new)
-                    .toArray(SimulatedPhotonVisionCamera[]::new);
-            vision = new VisionService(simulated);
+            vision = new SimulatedPhotonVisionService(ALL_CAMERAS);
             SystemWrapper<SimulatedSwerve> simulatedDrive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
             drive = simulatedDrive;

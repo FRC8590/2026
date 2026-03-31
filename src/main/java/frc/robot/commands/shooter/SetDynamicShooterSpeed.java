@@ -5,7 +5,6 @@ import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
-
 import lib.woodsonrobotics.SystemWrapper;
 
 /* Set the shooter speed based on the distance to the hub.
