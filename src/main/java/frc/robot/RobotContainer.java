@@ -112,21 +112,21 @@ public class RobotContainer {
      */
     public RobotContainer() {
         // These don't have simulation variants
-        belt = new SystemWrapper<>("belt", () -> new Belt());
-        indexer = new SystemWrapper<>("indexer", () -> new Indexer());
+        belt = new SystemWrapper<>("belt", Belt::new);
+        indexer = new SystemWrapper<>("indexer", Indexer::new);
         if (Robot.isReal()) {
             vision = new VisionService(ALL_CAMERAS);
             drive = new SystemWrapper<>("drive", () -> new Swerve(
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
-            shooter = new SystemWrapper<>("shooter", () -> new Shooter());
-            intake = new SystemWrapper<>("intake", () -> new Intake());
+            shooter = new SystemWrapper<>("shooter", Shooter::new);
+            intake = new SystemWrapper<>("intake", Intake::new);
             simulation = null;
         } else {
             vision = new SimulatedPhotonVisionService(ALL_CAMERAS);
             SystemWrapper<SimulatedSwerve> simulatedDrive = new SystemWrapper<>("drive", () -> new SimulatedSwerve(
                     new File(Filesystem.getDeployDirectory(), "swerve/neo"), vision));
             drive = simulatedDrive;
-            shooter = new SystemWrapper<>("shooter", () -> new SimulatedShooter());
+            shooter = new SystemWrapper<>("shooter", SimulatedShooter::new);
             SystemWrapper<SimulatedIntake> simulatedIntake = new SystemWrapper<>("intake",
                     () -> new SimulatedIntake(simulatedDrive));
             intake = simulatedIntake;

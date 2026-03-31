@@ -21,13 +21,16 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
     private boolean isEnabled = true;
 
     /**
-     * TODO: Riley: Peter, you need to add descriptions to these parameters, i dont know what they mean
      * Wrapper class around a subsystem.
      * 
      * This allows subsystems to be rebooted or disabled.
      * 
-     * @param name
-     * @param supplier
+     * @param name     The name of the subsystem, as it will appear in
+     *                 SmartDashboard.
+     * @param supplier A supplier function that constructs the given subsystem. For
+     *                 example, this could look like (() -> new MySubsystem(vision))
+     *                 or Intake::new. This supplier will be invoked to construct
+     *                 the subsystem.
      */
     public SystemWrapper(String name, Supplier<T> supplier) {
         setName(name);
