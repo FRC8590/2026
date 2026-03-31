@@ -49,6 +49,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.SimulatedShooter;
 import swervelib.SwerveInputStream;
 import lib.woodsonrobotics.SystemWrapper;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
 import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 
@@ -187,7 +188,7 @@ public class RobotContainer {
      */
     public void rebootAllSystems() {
         try {
-            System.out.println("FULL SUBSYSTEM REBOOT!");
+            DriveNotifier.informWarning("FULL SUBSYSTEM REBOOT!");
             CommandScheduler.getInstance().cancelAll();
             // Drive is currently not rebootable :(
             // drive.reboot();
@@ -196,7 +197,7 @@ public class RobotContainer {
             indexer.reboot();
             intake.reboot();
         } catch (Exception e) {
-            System.err.println("Full reboot failed");
+            DriveNotifier.internalError("rebootAllSystems", "Full reboot failed");
             e.printStackTrace();
         }
     }

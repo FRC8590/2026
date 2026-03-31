@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
 /* Wrapper class around a subsystem.
  * 
@@ -68,12 +69,12 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
     public void reboot() {
         // Unregister the old instance from the scheduler so it
         // doesn't keep running its default command / periodic.
-        System.err.println("Rebooting " + getName());
+        DriveNotifier.informWarning("Rebooting " + getName());
         T newSystem;
         try {
             newSystem = systemSupplier.get();
         } catch (Exception e) {
-            System.err.println("Reboot of " + getName() + " failed");
+            DriveNotifier.internalError("reboot", "Reboot of " + getName() + " failed");
             e.printStackTrace();
             return;
         }
@@ -86,7 +87,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
 
     /* Disable the system. */
     public void disable() {
-        System.out.println("Disabled system " + getName());
+        DriveNotifier.inform("Disabled system " + getName());
         isEnabled = false;
         if (cachedSystem != null) {
             CommandScheduler.getInstance().unregisterSubsystem(cachedSystem);
@@ -101,7 +102,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
      * called, this function will effectively do nothing.
      */
     public void enable() {
-        System.out.println("Enabled system " + getName());
+        DriveNotifier.inform("Enabled system " + getName());
         isEnabled = true;
         SmartDashboard.putBoolean("Systems/" + getName() + "/Status", true);
         // cachedSystem will be lazily created on next getSystem() call

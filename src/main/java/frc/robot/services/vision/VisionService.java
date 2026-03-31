@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Robot;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import lib.woodsonrobotics.vision.Camera;
 import lib.woodsonrobotics.vision.EstimatedPose;
 import lib.woodsonrobotics.vision.TrackedAprilTag;
@@ -38,7 +39,7 @@ public class VisionService {
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
-                    System.err.println("Interrupted vision thread");
+                    DriveNotifier.internalError("startVisionThread", "Vision thread was interrupted");
                 }
             }
         }).start();
