@@ -7,11 +7,13 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.utils.BallisticsSim;
 import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
@@ -38,6 +40,8 @@ public class ShootOnMove extends Command {
     private static final double RPM_TO_SPEED = 20.0 / 6000.0;
     private static final double SPEED_TO_RPM = 6000.0 / 20.0;
 
+    private static final double SHOOTER_TO_HUB_HEIGHT = 1.83 - Units.feetToMeters(18.73/12);
+
     public ShootOnMove(SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
             VisionService vision) {
@@ -62,10 +66,6 @@ public class ShootOnMove extends Command {
         rotationOverride.set(0.0);
     }
 
-    // Peter: This is vibecoded math shit that I don't understand.
-    // It only somewhat works.
-    // Ideally, we should use the ballistics simulation, but it doesn't
-    // seem reliable enough at the moment to be used here.
     @Override
     public void execute() {
         var driveOpt = driveSystem.get();
@@ -92,33 +92,12 @@ public class ShootOnMove extends Command {
                 fieldSpeeds.vxMetersPerSecond,
                 fieldSpeeds.vyMetersPerSecond);
 
-        Translation2d toHubUnit = toHub.div(distance);
+        Translation2d firingSolution = BallisticsSim.firingSolution(new Translation3d(toHub.getX(), SHOOTER_TO_HUB_HEIGHT, toHub.getY()), robotVel, 0.01, null);
 
-        Translation2d perpUnit = new Translation2d(-toHubUnit.getY(), toHubUnit.getX());
-
-        double velocityTowardHub = robotVel.getX() * toHubUnit.getX()
-                + robotVel.getY() * toHubUnit.getY();
-        double perpendicularVel = robotVel.getX() * perpUnit.getX()
-                + robotVel.getY() * perpUnit.getY();
-
-        double baseRPM = Shooter.distanceToRPM(distance);
-        double baseBallSpeed = baseRPM * RPM_TO_SPEED;
-
-        double adjustedBallSpeed = baseBallSpeed - velocityTowardHub;
-        adjustedBallSpeed = Math.max(0, adjustedBallSpeed);
-        double adjustedRPM = Math.min(adjustedBallSpeed * SPEED_TO_RPM, Shooter.SHOOTER_MAX_RPM);
-
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(adjustedRPM));
-
-        double leadAngleRadians = Math.asin(
-                Math.max(-1.0, Math.min(1.0, perpendicularVel / Math.max(baseBallSpeed, 0.1))));
-
-        double hubAngle = Math.atan2(toHub.getY(), toHub.getX());
-
-        Rotation2d desiredHeading = new Rotation2d(hubAngle + leadAngleRadians);
-
+        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(firingSolution.getX() * SPEED_TO_RPM));
+        
         double currentAngle = robotPose.getRotation().getRadians();
-        double rotationSpeed = rotationPID.calculate(currentAngle, desiredHeading.getRadians());
+        double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(firingSolution.getY()));
         double clampedRotation = Math.max(-3.0, Math.min(3.0, rotationSpeed));
         rotationOverride.set(clampedRotation);
     }
