@@ -10,7 +10,7 @@ import frc.robot.subsystems.feeder.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
-/*
+/**
  * Shoot fuel into the hub.
  * 
  * This will first align the robot to the hub, then set the

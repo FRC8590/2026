@@ -7,7 +7,7 @@ import frc.robot.subsystems.feeder.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
-/*
+/**
  * Shoot fuel into the hub from a preset distance.
  * 
  * This does no alignment and always sets the shooter to a hardcoded

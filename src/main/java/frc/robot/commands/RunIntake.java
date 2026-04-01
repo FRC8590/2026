@@ -4,7 +4,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.Intake;
 import lib.woodsonrobotics.SystemWrapper;
 
-/* Bring the intake down and run the intake wheels.
+/**
+ * Bring the intake down and run the intake wheels.
  *
  * When the command is finished, the wheels will stop
  * and the intake will be brought back up.

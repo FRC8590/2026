@@ -5,7 +5,7 @@ import frc.robot.subsystems.feeder.Belt;
 import frc.robot.subsystems.feeder.Indexer;
 import lib.woodsonrobotics.SystemWrapper;
 
-/*
+/**
  * Unjam the feeder.
  * 
  * This runs both the belt and indexer in reverse in hopes that any
@@ -13,7 +13,7 @@ import lib.woodsonrobotics.SystemWrapper;
  * 
  * Both the belt and indexer will be stopped when this is finished.
  * 
-*/
+ */
 public class Unjam extends Command {
     private final SystemWrapper<Belt> beltSystem;
     private final SystemWrapper<Indexer> indexerSystem;

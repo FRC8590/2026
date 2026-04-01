@@ -17,7 +17,7 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 
 public class SimulatedSwerve extends Swerve {
-    /*
+    /**
      * Field containing the simulated pose based on YagSL.
      * This is for use in AdvantageScope, and doesn't work when the robot
      * isn't in simulation mode. Use the "Estimated Pose" (based on vision)

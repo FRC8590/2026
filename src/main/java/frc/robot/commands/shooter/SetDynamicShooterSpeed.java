@@ -7,7 +7,8 @@ import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
 
-/* Set the shooter speed based on the distance to the hub.
+/**
+ * Set the shooter speed based on the distance to the hub.
  * 
  * This does not run the feeder.
  */

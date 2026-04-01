@@ -5,7 +5,7 @@ import frc.robot.subsystems.feeder.Belt;
 import frc.robot.subsystems.feeder.Indexer;
 import lib.woodsonrobotics.SystemWrapper;
 
-/*
+/**
  * Feed fuel into the shooter.
  * 
  * This will run both the belt and indexer at a preset speed.

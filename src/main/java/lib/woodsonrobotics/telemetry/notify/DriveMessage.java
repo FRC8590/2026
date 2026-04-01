@@ -6,9 +6,17 @@ import lib.woodsonrobotics.telemetry.elastic.Elastic;
 import lib.woodsonrobotics.telemetry.elastic.Elastic.Notification;
 import lib.woodsonrobotics.telemetry.elastic.Elastic.NotificationLevel;
 
-/* A message to the drive team. */
+/**
+ * A message to the drive team.
+ * 
+ * @param title   The title to be displayed as part of the message.
+ * @param message The description to be displayed as part of the message.
+ * @param type    The type of the message.
+ */
 public record DriveMessage(String title, String message, DriveMessageType type) {
-    /* Publish the message to Elastic. */
+    /**
+     * Publish the message to Elastic.
+     */
     private void publishToElastic() {
         NotificationLevel level;
         switch (type) {
@@ -29,6 +37,9 @@ public record DriveMessage(String title, String message, DriveMessageType type) 
         Elastic.sendNotification(notification);
     }
 
+    /**
+     * Get the message as a single string.
+     */
     private String messageAsString() {
         String typeString;
 
@@ -44,6 +55,10 @@ public record DriveMessage(String title, String message, DriveMessageType type) 
 
     }
 
+    /**
+     * Publish the message as a string to the console, either in standard output or
+     * standard error.
+     */
     private void publishToConsole() {
         PrintStream stream;
 
@@ -56,7 +71,9 @@ public record DriveMessage(String title, String message, DriveMessageType type) 
         stream.println(messageAsString());
     }
 
-    /* Publish the message to relevant dashboards. */
+    /**
+     * Publish the message to relevant dashboards.
+     */
     public void publish() {
         publishToElastic();
         publishToConsole();

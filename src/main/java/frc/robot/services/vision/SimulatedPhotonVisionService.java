@@ -8,8 +8,10 @@ import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
 import lib.woodsonrobotics.vision.photon.SimulatedPhotonVisionCamera;
 import swervelib.SwerveDrive;
 
-/* The service for vision simulations. Unlike VisionService,
- * which uses the generic Camera API, this only works with PhotonVision! */
+/**
+ * The service for vision simulations. Unlike VisionService,
+ * which uses the generic Camera API, this only works with PhotonVision!
+ */
 public class SimulatedPhotonVisionService extends VisionService {
     public static final VisionSystemSim photonVisionSim = new VisionSystemSim("main");
 

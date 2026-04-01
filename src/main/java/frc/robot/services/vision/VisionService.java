@@ -15,7 +15,9 @@ import lib.woodsonrobotics.vision.EstimatedPose;
 import lib.woodsonrobotics.vision.TrackedAprilTag;
 import swervelib.SwerveDrive;
 
-/* A generic vision service. */
+/**
+ * A generic vision service.
+ */
 public class VisionService {
     public final List<Camera> allCameras;
 
@@ -27,7 +29,9 @@ public class VisionService {
         allCameras = Arrays.asList(camerasList);
     }
 
-    /* Start the refresh thread. */
+    /**
+     * Start the refresh thread.
+     */
     public void startVisionThread() {
         new Thread(() -> {
             while (true) {

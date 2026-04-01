@@ -4,8 +4,10 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
-/* A countdown displayed in Shuffleboard.
- * step() must be called periodically to advance it. */
+/**
+ * A countdown displayed in Shuffleboard.
+ * step() must be called periodically to advance it.
+ */
 public class ConsoleCountdown {
     private Timer timer = new Timer();
     private double waitTime = -1;
@@ -19,7 +21,9 @@ public class ConsoleCountdown {
                 .getEntry();
     }
 
-    /* Start the countdown for a given amount of time. */
+    /**
+     * Start the countdown for a given amount of time.
+     */
     public void start(long waitTime) {
         this.waitTime = waitTime;
         lastPublishedSecond = -1;
@@ -28,12 +32,14 @@ public class ConsoleCountdown {
         shuffleboardEntry.setInteger(waitTime);
     }
 
-    /* Stop the countdown. */
+    /**
+     * Stop the countdown.
+     */
     public void stop() {
         timer.stop();
     }
 
-    /*
+    /**
      * Advance the countdown.
      * 
      * @return The remaining time on the countdown, which may be zero.

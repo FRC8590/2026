@@ -12,6 +12,9 @@ import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.drive.Swerve;
 import lib.woodsonrobotics.SystemWrapper;
 
+/**
+ * Aim at the hub based on vision.
+ */
 public class AimAtTarget extends Command {
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
