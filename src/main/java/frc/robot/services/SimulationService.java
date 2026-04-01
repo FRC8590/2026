@@ -129,6 +129,7 @@ public class SimulationService {
         var shooterRPM = shooter.getGoalRPM();
         long currentTime = System.currentTimeMillis();
 
+        System.out.println("shooterRPM: " + shooterRPM + ", belt: " + beltOpt.get().getSpeed());
         if (shooterRPM > 0
                 && (beltOpt.get().getSpeed() > 0)
                 && (indexerOpt.get().getSpeed() > 0)

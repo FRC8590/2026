@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -36,7 +37,7 @@ import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
 import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
-import frc.robot.commands.shooter.ShootOnMove;
+import frc.robot.commands.shooter.ShootWithRotationOverride;
 import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.SimulationService;
 import frc.robot.services.vision.SimulatedPhotonVisionService;
@@ -234,7 +235,7 @@ public class RobotContainer {
                         .deadband(deadband)
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
-        ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, vision);
+        ShootWithRotationOverride shootOnMove = new ShootWithRotationOverride(shooter, drive, vision);
 
         Command driveFieldOrientedAngularVelocitySim = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
@@ -270,6 +271,8 @@ public class RobotContainer {
         // driverXbox.rightBumper().whileTrue(shootOnMove);
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
+
+        driverXbox.b().whileTrue(shootOnMove);
 
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
