@@ -36,7 +36,10 @@ public class ShootOnMove extends ParallelDeadlineGroup {
                 shootCommand,
                 new SequentialCommandGroup(
                         new PrintCommand("hello"),
-                        new WaitUntilCommand(() -> shooter.get().map(Shooter::atRPM).orElse(false)),
+                        new WaitUntilCommand(() -> shooter.get()
+                                .map(Shooter::atRPM)
+                                .orElse(false))
+                                .withTimeout(1.0),
                         new Feed(belt, indexer)));
         internalShootCommand = shootCommand;
     }

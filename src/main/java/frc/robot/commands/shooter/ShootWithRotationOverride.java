@@ -43,6 +43,19 @@ public class ShootWithRotationOverride extends Command {
 
     private static final double SHOOTER_TO_HUB_HEIGHT = 1.83 - Units.feetToMeters(18.73 / 12);
 
+    private Thread solverThread;
+
+    // This is volatile to ensure sequential memory ordering.
+    private volatile Double lastSolverAngleRadians = null;
+
+    // Latest valid solution from the solver thread
+    // x = speed m/s, y = heading degrees
+    private final AtomicReference<Translation2d> latestSolution = new AtomicReference<>(null);
+
+    // Inputs snapshot written by execute(), read by solver thread
+    private final AtomicReference<Translation3d> latestTarget = new AtomicReference<>(null);
+    private final AtomicReference<Translation2d> latestRobotVel = new AtomicReference<>(null);
+
     public ShootWithRotationOverride(SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
             VisionService vision) {
@@ -65,6 +78,37 @@ public class ShootWithRotationOverride extends Command {
         rotationPID.enableContinuousInput(-Math.PI, Math.PI);
         rotationPID.setTolerance(Units.degreesToRadians(1.5));
         rotationOverride.set(0.0);
+        solverThread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                Translation3d target = latestTarget.get();
+                Translation2d vel = latestRobotVel.get();
+
+                if (target != null && vel != null) {
+                    try {
+                        Translation2d solution = BallisticsSim.firingSolution(
+                                target, vel, 0.01, lastSolverAngleRadians);
+
+                        if (solution.getX() >= 0) {
+                            lastSolverAngleRadians = Math.toRadians(solution.getY());
+                            latestSolution.set(solution);
+                        }
+                        // If -1, just keep last solution — don't update
+                    } catch (Exception e) {
+                        DriveNotifier.internalError("ShootWithRotationOverride",
+                                "firingSolution threw: " + e.getMessage());
+                    }
+                }
+
+                // Small sleep so the thread doesn't spin between solves
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }, "ShootOnMove-Solver");
+        solverThread.setDaemon(true);
+        solverThread.start();
     }
 
     @Override
@@ -89,24 +133,22 @@ public class ShootWithRotationOverride extends Command {
 
         ChassisSpeeds fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
                 drive.getRobotVelocity(), robotPose.getRotation());
-        Translation2d robotVel = new Translation2d(
+        latestTarget.set(new Translation3d(toHub.getX(), SHOOTER_TO_HUB_HEIGHT, toHub.getY()));
+        latestRobotVel.set(new Translation2d(
                 fieldSpeeds.vxMetersPerSecond,
-                fieldSpeeds.vyMetersPerSecond);
+                fieldSpeeds.vyMetersPerSecond));
 
-        Translation2d firingSolution;
-        try {
-            firingSolution = BallisticsSim.firingSolution(
-                    new Translation3d(toHub.getX(), SHOOTER_TO_HUB_HEIGHT, toHub.getY()), robotVel, 0.01, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            DriveNotifier.internalError("ShootWithRotationOverride", "firingSolution threw exception");
+        Translation2d solution = latestSolution.get();
+        if (solution == null) {
+            // No solution yet
             return;
         }
 
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(firingSolution.getX() * SPEED_TO_RPM));
+        double rpm = Math.min(solution.getX() * SPEED_TO_RPM, Shooter.SHOOTER_MAX_RPM);
+        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
 
         double currentAngle = robotPose.getRotation().getRadians();
-        double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(firingSolution.getY()));
+        double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(solution.getY()));
         double clampedRotation = Math.max(-3.0, Math.min(3.0, rotationSpeed));
         rotationOverride.set(clampedRotation);
     }
@@ -118,6 +160,9 @@ public class ShootWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        if (solverThread != null) {
+            solverThread.interrupt();
+        }
         rotationOverride.set(0.0);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
