@@ -11,20 +11,18 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
-import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.utils.BallisticsSim;
+import frc.robot.RobotContainer;
+import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
 /**
- * Run and rotate the shooter while moving.
+ * Shoot at the hub while the robot is moving.
  *
- * Uses the ballistics simulation to compute the correct heading and RPM,
- * accounting for robot velocity and drag.
- *
+ * Uses geometric velocity compensation to adjust heading and RPM.
  * The driver retains full control of translation.
  * Rotation is overridden via a supplier wired into the teleop drive command.
  */
@@ -36,19 +34,14 @@ public class ShootWithRotationOverride extends Command {
     private final AtomicReference<Double> rotationOverride = new AtomicReference<>(0.0);
     private final PIDController rotationPID = new PIDController(1.5, 0.0, 0.0);
 
-    // Warm-start: reuse last solution angle as initial guess for the solver
-    private Double lastSolverAngleRadians = null;
-
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
-    private static final double ACCURACY_MARGIN = 0.05;
-    private static final double SHOOTER_HEIGHT_METERS = 0.61;
-    private static final double HUB_HEIGHT_METERS = 1.83;
-    private static final Translation2d SHOOTER_OFFSET = new Translation2d(0.2, 0.0);
 
-    // Sim fuel speed model: 6000 RPM = 20 m/s
-    // We need to update this with the actual physics
+    // Sim ball speed model: 6000 RPM = 20 m/s
+    private static final double RPM_TO_SPEED = 20.0 / 6000.0;
     private static final double SPEED_TO_RPM = 6000.0 / 20.0;
+
+    private static final double SHOOTER_TO_HUB_HEIGHT = 1.83 - Units.feetToMeters(18.73 / 12);
 
     public ShootWithRotationOverride(SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
@@ -56,6 +49,9 @@ public class ShootWithRotationOverride extends Command {
         shooterSystem = shooter;
         driveSystem = drive;
         visionService = vision;
+        // We intentionally don't add the drive system as a requirement here,
+        // because we want the drive commands to *not* be cancelled once we add
+        // the rotation override.
         addRequirements(shooter);
     }
 
@@ -69,7 +65,6 @@ public class ShootWithRotationOverride extends Command {
         rotationPID.enableContinuousInput(-Math.PI, Math.PI);
         rotationPID.setTolerance(Units.degreesToRadians(1.5));
         rotationOverride.set(0.0);
-        lastSolverAngleRadians = null;
     }
 
     @Override
@@ -79,63 +74,39 @@ public class ShootWithRotationOverride extends Command {
             return;
         }
         var drive = driveOpt.get();
+
         var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
 
         Pose2d robotPose = drive.getPose();
+        Translation2d hubPos = tagPose.getTranslation();
 
-        // Shooter exit point in field space
-        Translation2d shooterFieldPos = robotPose.getTranslation()
-                .plus(SHOOTER_OFFSET.rotateBy(robotPose.getRotation()));
-
-        // X and Z are horizontal components, Y is vertical rise
-        Translation2d hubXY = tagPose.getTranslation().minus(shooterFieldPos);
-        double distance = hubXY.getNorm();
+        Translation2d toHub = hubPos.minus(robotPose.getTranslation());
+        double distance = toHub.getNorm();
 
         if (distance < MIN_DISTANCE || distance > MAX_DISTANCE) {
             return;
         }
 
-        Translation3d relativeTarget = new Translation3d(
-                hubXY.getX(),
-                HUB_HEIGHT_METERS - SHOOTER_HEIGHT_METERS,
-                hubXY.getY());
-
-        // This is a *field-relative* robot velocity
         ChassisSpeeds fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
                 drive.getRobotVelocity(), robotPose.getRotation());
-        Translation2d robotVelocity = new Translation2d(
+        Translation2d robotVel = new Translation2d(
                 fieldSpeeds.vxMetersPerSecond,
                 fieldSpeeds.vyMetersPerSecond);
 
-        Translation2d solution;
+        Translation2d firingSolution;
         try {
-            solution = BallisticsSim.firingSolution(
-                    relativeTarget, robotVelocity, ACCURACY_MARGIN,
-                    lastSolverAngleRadians);
+            firingSolution = BallisticsSim.firingSolution(
+                    new Translation3d(toHub.getX(), SHOOTER_TO_HUB_HEIGHT, toHub.getY()), robotVel, 0.01, null);
         } catch (Exception e) {
             e.printStackTrace();
-            DriveNotifier.internalError("ShootWithRotationOverride", "Solver threw error");
+            DriveNotifier.internalError("ShootWithRotationOverride", "firingSolution threw exception");
             return;
         }
 
-        if (solution.getX() < 0) {
-            // Solver timed out.
-            // TODO: Peter or Isaac: We should use an Optional<> here, not a -1 sentinel.
-            return;
-        }
+        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(firingSolution.getX() * SPEED_TO_RPM));
 
-        // We cache angle for warm-starting next frame. This improves
-        // performance.
-        lastSolverAngleRadians = Math.toRadians(solution.getY());
-
-        // solution.getX() = required ball speed in m/s
-        // solution.getY() = absolute field heading in degrees
-        double rpm = Math.min(solution.getX() * SPEED_TO_RPM, Shooter.SHOOTER_MAX_RPM);
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
-
-        Rotation2d desiredHeading = Rotation2d.fromDegrees(solution.getY());
         double currentAngle = robotPose.getRotation().getRadians();
-        double rotationSpeed = rotationPID.calculate(currentAngle, desiredHeading.getRadians());
+        double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(firingSolution.getY()));
         double clampedRotation = Math.max(-3.0, Math.min(3.0, rotationSpeed));
         rotationOverride.set(clampedRotation);
     }
@@ -147,6 +118,7 @@ public class ShootWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("done");
         rotationOverride.set(0.0);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
