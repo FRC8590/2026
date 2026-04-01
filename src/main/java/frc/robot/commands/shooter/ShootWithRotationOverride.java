@@ -79,35 +79,43 @@ public class ShootWithRotationOverride extends Command {
         rotationPID.setTolerance(Units.degreesToRadians(1.5));
         rotationOverride.set(0.0);
         solverThread = new Thread(() -> {
+            Translation3d lastSolvedTarget = null;
+            Translation2d lastSolvedVel = null;
+
             while (!Thread.currentThread().isInterrupted()) {
-                Translation3d target = latestTarget.get();
-                Translation2d vel = latestRobotVel.get();
-
-                if (target != null && vel != null) {
-                    try {
-                        Translation2d solution = BallisticsSim.firingSolution(
-                                target, vel, 0.01, lastSolverAngleRadians);
-
-                        if (solution.getX() >= 0) {
-                            lastSolverAngleRadians = Math.toRadians(solution.getY());
-                            latestSolution.set(solution);
-                        }
-                        // If -1, just keep last solution — don't update
-                    } catch (Exception e) {
-                        DriveNotifier.internalError("ShootWithRotationOverride",
-                                "firingSolution threw: " + e.getMessage());
-                    }
-                }
-
-                // Small sleep so the thread doesn't spin between solves
                 try {
-                    Thread.sleep(5);
+                    Translation3d target = latestTarget.get();
+                    Translation2d vel = latestRobotVel.get();
+
+                    if (target != null && vel != null) {
+                        // Only solve if inputs have changed meaningfully
+                        boolean shouldSolve = lastSolvedTarget == null
+                                || target.minus(lastSolvedTarget).getNorm() > 0.05
+                                || vel.minus(lastSolvedVel).getNorm() > 0.1;
+
+                        if (shouldSolve) {
+                            lastSolvedTarget = target;
+                            lastSolvedVel = vel;
+
+                            Translation2d solution = BallisticsSim.firingSolution(
+                                    target, vel, 0.05, lastSolverAngleRadians);
+
+                            if (solution.getX() >= 0) {
+                                lastSolverAngleRadians = Math.toRadians(solution.getY());
+                                latestSolution.set(solution);
+                            }
+                        }
+                    }
+
+                    Thread.sleep(20);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    DriveNotifier.internalError("ShootWithRotationOverride",
+                            "firingSolution threw: " + e.getMessage());
                 }
             }
-        }, "ShootOnMove-Solver");
-        solverThread.setDaemon(true);
+        }, "SOTM-Solver");
         solverThread.start();
     }
 

@@ -20,7 +20,7 @@ public class BallisticsSim {
     public static final int findSpeedMaxIterations = 100;
     public static final double findSpeedMaxSpeed = 100;
     public static final double maxTargetingVelocity = 0.5;
-    public static final double firingSolutionDerivativeStep = 0.001;
+    public static final double firingSolutionDerivativeStep = 0.01;
     public static final double firingSolutionErrorNudge = Math.toRadians(1);
     public static final double firingSolutionMaxTime = 0.05; // 50ms max
     // If the robot is moving slower than this, firingSolution will just return the
@@ -334,16 +334,32 @@ public class BallisticsSim {
     public static resultOfCheck checkFiringSolution(double currentGuess, Translation3d target,
             Translation2d robotVelocity) {
         Translation3d transTarget = target.rotateBy(new Rotation3d(0, currentGuess, 0));
-        Translation2d target2d = new Translation2d(transTarget.getX(), transTarget.getY());
+
+        // Peter: Claude assisted with this
+        // Always use the horizontal magnitude as the X axis for the 2D simulation.
+        // The integrator requires targetX > 0 — if transTarget.getX() is negative
+        // the ball travels away from the target and the integrator hangs.
+        double horizontalDist = Math.hypot(transTarget.getX(), transTarget.getZ());
+        if (horizontalDist < 0.01) {
+            return new resultOfCheck(Double.MAX_VALUE, -1);
+        }
+        Translation2d target2d = new Translation2d(horizontalDist, transTarget.getY());
+
         Translation2d transVel = robotVelocity.rotateBy(new Rotation2d(-currentGuess));
-        Translation3d transVel3d = new Translation3d(transVel.getX(), 0, transVel.getY());
-        double speed = findSpeed(target2d, 0.01, new Translation3d(transVel.getX(), 0, transVel.getY()));
+        // Project robot velocity onto the direction toward the target
+        double velTowardTarget = transVel.getX() * (transTarget.getX() / horizontalDist)
+                + transVel.getY() * (transTarget.getZ() / horizontalDist);
+        Translation3d transVel3d = new Translation3d(velTowardTarget, 0, 0);
+
+        double speed = findSpeed(target2d, 0.01, transVel3d);
         BallisticsSimResult3D simResult = ODESimulate(
-                transVel3d.plus(new Translation3d(Math.cos(Math.toRadians(shooterAngle)) * speed,
+                transVel3d.plus(new Translation3d(
+                        Math.cos(Math.toRadians(shooterAngle)) * speed,
                         Math.sin(Math.toRadians(shooterAngle)) * speed, 0)),
-                transTarget.getX());
-        double error = simResult.endPos.getDistance(transTarget);
-        return (new resultOfCheck(error, speed));
+                horizontalDist);
+        double error = simResult.endPos.getDistance(
+                new Translation3d(horizontalDist, transTarget.getY(), 0));
+        return new resultOfCheck(error, speed);
     }
 
     /**
@@ -379,7 +395,13 @@ public class BallisticsSim {
         } else {
             int findSpeedErrs = 0;
             boolean timedOut = false;
+            int iterations = 0;
+
             while (Math.abs(currentResult.error) > accuracyMargin && !timedOut) {
+                if (++iterations > 5) {
+                    System.err.println("firingSolution: iteration cap reached");
+                    break;
+                }
                 // Use Newton's method to find the correct angle
 
                 // System.out.println("Slope");
