@@ -405,7 +405,7 @@ public class BallisticsSim {
                 System.err.println("firingSolution timed out");
                 return (new Translation2d(-1, -1));
             } else {
-                return (new Translation2d(currentResult.speed, Math.toDegrees(currentGuess)));
+                return (new Translation2d(currentResult.speed, Math.toDegrees(currentGuess) % 360));
             }
         }
     }
