@@ -68,28 +68,36 @@ public class DriveUnderTrench extends Command {
         int[] tags = RobotContainer.isRedAlliance() ? RED_TAG_IDS : BLUE_TAG_IDS;
 
         // Find the nearest tag
-        int targetTagId = findNearestTag(tags, robotPose);
+        NearestTag nearestTag = findNearestTag(tags, robotPose);
 
-        var exitTagPose = visionService.getTagFieldPose(targetTagId);
-
-        // First, we pathfind to right before the trench, which lets us stay
-        // in line with it. Then, our pathfind towards the trench will go straight
-        // through. This prevents us from getting stuck on the bump. We could
-        // avoid this by using a navmesh in PathPlanner, but I don't know how
-        // to do that. Maybe Riley can figure it out.
-        Pose2d alignPose = offsetAlongFacing(exitTagPose, ALIGN_OFFSET_METERS);
-        Pose2d goalPose = offsetAlongFacing(exitTagPose, EXIT_OFFSET_METERS);
-
-        pathfindCommand = AutoBuilder.pathfindToPose(
-                alignPose,
+        var targetTagPose = visionService.getTagFieldPose(nearestTag.tagId);
+        Pose2d goalPose = offsetAlongFacing(targetTagPose, EXIT_OFFSET_METERS);
+        Command driveThroughCommand = AutoBuilder.pathfindToPose(
+                goalPose,
                 new PathConstraints(MAX_VELOCITY, MAX_VELOCITY,
                         Units.degreesToRadians(270), Units.degreesToRadians(360)),
-                MAX_VELOCITY) // Nonzero end velocity so it flows into the next command
-                .andThen(AutoBuilder.pathfindToPose(
-                        goalPose,
-                        new PathConstraints(MAX_VELOCITY, MAX_VELOCITY,
-                                Units.degreesToRadians(270), Units.degreesToRadians(360)),
-                        0.0));
+                0.0);
+
+        if (nearestTag.distance < 1.0) {
+            // If we're closer then 1m, then there's no need to align.
+            pathfindCommand = driveThroughCommand;
+        } else {
+
+            // First, we pathfind to right before the trench, which lets us stay
+            // in line with it. Then, our pathfind towards the trench will go straight
+            // through. This prevents us from getting stuck on the bump. We could
+            // avoid this by using a navmesh in PathPlanner, but I don't know how
+            // to do that. Maybe Riley can figure it out.
+            Pose2d alignPose = offsetAlongFacing(targetTagPose, ALIGN_OFFSET_METERS);
+
+            Command alignCommand = AutoBuilder.pathfindToPose(
+                    alignPose,
+                    new PathConstraints(MAX_VELOCITY, MAX_VELOCITY,
+                            Units.degreesToRadians(270), Units.degreesToRadians(360)),
+                    MAX_VELOCITY); // Nonzero end velocity so it flows into the next command
+            pathfindCommand = alignCommand.andThen(driveThroughCommand);
+        }
+
         pathfindCommand.initialize();
     }
 
@@ -110,10 +118,13 @@ public class DriveUnderTrench extends Command {
             pathfindCommand.end(interrupted);
     }
 
+    private record NearestTag(int tagId, double distance) {
+    };
+
     /**
      * Find the nearest trench tag.
      */
-    private int findNearestTag(int[] tagIds, Pose2d robotPose) {
+    private NearestTag findNearestTag(int[] tagIds, Pose2d robotPose) {
         double bestDistance = Double.MAX_VALUE;
         int bestTag = -1;
 
@@ -128,7 +139,7 @@ public class DriveUnderTrench extends Command {
         }
 
         assert (bestTag != -1);
-        return bestTag;
+        return new NearestTag(bestTag, bestDistance);
     }
 
     /**
