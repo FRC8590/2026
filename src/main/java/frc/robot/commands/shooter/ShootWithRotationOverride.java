@@ -118,7 +118,6 @@ public class ShootWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("done");
         rotationOverride.set(0.0);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }

@@ -37,6 +37,7 @@ import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
 import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
+import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.ShootWithRotationOverride;
 import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.SimulationService;
@@ -227,30 +228,20 @@ public class RobotContainer {
      * Flight joysticks}.
      */
     private void configureBindings() {
+        ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, belt, indexer, vision);
+
         Command driveFieldOrientedAnglularVelocity = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
                         () -> driverXbox.getLeftY() * getSide() * scaleFactor,
                         () -> driverXbox.getLeftX() * getSide() * scaleFactor)
-                        .withControllerRotationAxis(() -> -driverXbox.getRightX() * 0.72 * scaleFactor)
+                        .withControllerRotationAxis(() -> shootOnMove.isScheduled()
+                                ? shootOnMove.getRotationOverride().get() // SOTM overrides rotation
+                                : -driverXbox.getRightX() * 0.72 * scaleFactor)
                         .deadband(deadband)
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
-        ShootWithRotationOverride shootOnMove = new ShootWithRotationOverride(shooter, drive, vision);
 
-        Command driveFieldOrientedAngularVelocitySim = drive
-                .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
-                        () -> driverXbox.getLeftY() * getSide() * scaleFactor,
-                        () -> driverXbox.getLeftX() * getSide() * scaleFactor)
-                        .withControllerRotationAxis(() -> shootOnMove.isScheduled()
-                                ? shootOnMove.getRotationOverride().get() // command overrides rotation
-                                : -driverXbox.getRightX() * 0.72 * scaleFactor) // driver controls rotation
-                                                                                // .deadband(deadband)
-                        .robotRelative(false)
-                        .allianceRelativeControl(false)));
-        drive.setDefaultCommand(
-                RobotBase.isSimulation()
-                        ? driveFieldOrientedAngularVelocitySim
-                        : driveFieldOrientedAnglularVelocity);
+        drive.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
         driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
         driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
