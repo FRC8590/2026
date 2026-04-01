@@ -87,7 +87,7 @@ public class DriveUnderTrench extends Command {
                 MAX_VELOCITY) // Nonzero end velocity so it flows into the next command
                 .andThen(AutoBuilder.pathfindToPose(
                         goalPose,
-                        new PathConstraints(MAX_VELOCITY, 2.0,
+                        new PathConstraints(MAX_VELOCITY, MAX_VELOCITY,
                                 Units.degreesToRadians(270), Units.degreesToRadians(360)),
                         0.0));
         pathfindCommand.initialize();
