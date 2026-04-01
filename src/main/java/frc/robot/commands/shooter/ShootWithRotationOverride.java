@@ -31,8 +31,9 @@ public class ShootWithRotationOverride extends Command {
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
 
-    private final AtomicReference<Double> rotationOverride = new AtomicReference<>(0.0);
-    private final PIDController rotationPID = new PIDController(1.5, 0.0, 0.0);
+    // "null" acts a sentinel for "inactive"
+    private final AtomicReference<Double> rotationOverride = new AtomicReference<>(null);
+    private final PIDController rotationPID = new PIDController(4.0, 0.0, 0.15);
 
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
@@ -77,7 +78,7 @@ public class ShootWithRotationOverride extends Command {
         rotationPID.reset();
         rotationPID.enableContinuousInput(-Math.PI, Math.PI);
         rotationPID.setTolerance(Units.degreesToRadians(1.5));
-        rotationOverride.set(0.0);
+        rotationOverride.set(null);
         solverThread = new Thread(() -> {
             Translation3d lastSolvedTarget = null;
             Translation2d lastSolvedVel = null;
@@ -125,8 +126,8 @@ public class ShootWithRotationOverride extends Command {
         if (driveOpt.isEmpty()) {
             return;
         }
-        var drive = driveOpt.get();
 
+        var drive = driveOpt.get();
         var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
 
         Pose2d robotPose = drive.getPose();
@@ -149,6 +150,7 @@ public class ShootWithRotationOverride extends Command {
         Translation2d solution = latestSolution.get();
         if (solution == null) {
             // No solution yet
+            rotationOverride.set(0.0);
             return;
         }
 
@@ -157,8 +159,7 @@ public class ShootWithRotationOverride extends Command {
 
         double currentAngle = robotPose.getRotation().getRadians();
         double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(solution.getY()));
-        double clampedRotation = Math.max(-3.0, Math.min(3.0, rotationSpeed));
-        rotationOverride.set(clampedRotation);
+        rotationOverride.set(rotationSpeed);
     }
 
     @Override
@@ -168,10 +169,10 @@ public class ShootWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        rotationOverride.set(null);
         if (solverThread != null) {
             solverThread.interrupt();
         }
-        rotationOverride.set(0.0);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
 }

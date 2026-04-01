@@ -234,10 +234,17 @@ public class RobotContainer {
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
                         () -> driverXbox.getLeftY() * getSide() * scaleFactor,
                         () -> driverXbox.getLeftX() * getSide() * scaleFactor)
-                        .withControllerRotationAxis(() -> shootOnMove.isScheduled()
-                                ? shootOnMove.getRotationOverride().get() // SOTM overrides rotation
-                                : -driverXbox.getRightX() * 0.72 * scaleFactor)
-                        .deadband(deadband)
+                        // We have to apply the deadband manually, because the small
+                        // adjustments from the SOTM command will be ignored otherwise.
+                        .withControllerRotationAxis(() -> {
+                            Double override = shootOnMove.getRotationOverride().get();
+                            if (override != null) {
+                                return override;
+                            }
+
+                            double stick = -driverXbox.getRightX();
+                            return (Math.abs(stick) < deadband) ? 0.0 : stick * 0.72 * scaleFactor;
+                        })
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
 
