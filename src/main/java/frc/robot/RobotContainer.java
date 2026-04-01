@@ -29,6 +29,7 @@ import java.io.File;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.AimAtTarget;
+import frc.robot.commands.DriveUnderTrench;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
@@ -272,6 +273,8 @@ public class RobotContainer {
 
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
+
+        driverXbox.start().whileTrue(new DriveUnderTrench(drive, vision));
 
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);

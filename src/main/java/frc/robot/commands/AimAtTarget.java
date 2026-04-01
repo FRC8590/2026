@@ -34,13 +34,9 @@ public class AimAtTarget extends Command {
             return;
         }
 
-        var tagPoseOpt = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
-        if (tagPoseOpt.isEmpty()) {
-            return;
-        }
-
+        var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
         Pose2d robotPose = driveOpt.get().getPose();
-        Translation2d toTag = tagPoseOpt.get().getTranslation()
+        Translation2d toTag = tagPose.getTranslation()
                 .minus(robotPose.getTranslation());
 
         // This is the angle from the robot to the tag in field space.

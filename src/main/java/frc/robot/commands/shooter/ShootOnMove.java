@@ -74,13 +74,10 @@ public class ShootOnMove extends Command {
         }
         var drive = driveOpt.get();
 
-        var tagPoseOpt = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
-        if (tagPoseOpt.isEmpty()) {
-            return;
-        }
+        var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
 
         Pose2d robotPose = drive.getPose();
-        Translation2d hubPos = tagPoseOpt.get().getTranslation();
+        Translation2d hubPos = tagPose.getTranslation();
 
         Translation2d toHub = hubPos.minus(robotPose.getTranslation());
         double distance = toHub.getNorm();

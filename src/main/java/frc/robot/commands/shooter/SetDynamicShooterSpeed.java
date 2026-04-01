@@ -31,13 +31,10 @@ public class SetDynamicShooterSpeed extends Command {
             return;
         }
 
-        var tagPoseOpt = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
-        if (tagPoseOpt.isEmpty()) {
-            return;
-        }
+        var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
 
         double distanceMeters = drive.get().getPose().getTranslation()
-                .getDistance(tagPoseOpt.get().getTranslation());
+                .getDistance(tagPose.getTranslation());
         double rpm = Shooter.distanceToRPM(distanceMeters);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
     }
