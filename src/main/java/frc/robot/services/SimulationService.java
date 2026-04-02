@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
@@ -42,6 +44,7 @@ public class SimulationService {
     }
 
     private void addFuelProjectile(Swerve swerve, double rpm, double yValue) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         var robotSimulationWorldPose = swerve.getPose();
         var chassisSpeedsFieldRelative = swerve.getFieldVelocity();
         // This is taken from the MapleSim docs
@@ -80,13 +83,14 @@ public class SimulationService {
                     // We add an arbitrary random number to it, because game pieces
                     // that spawn on top of each other in MapleSim are a little weird.
                     SimulatedArena.getInstance().addGamePiece(
-                            new RebuiltFuelOnField(new Translation2d(10 + (Math.random() - 0.5) * 0.4,
-                                    5 + (Math.random() - 0.5) * 0.4)));
+                            new RebuiltFuelOnField(new Translation2d(random.nextDouble(10.8, 10.9),
+                                    random.nextDouble(3, 4.5))));
                 });
 
         fuelOnFly
                 // Configure the fuel projectile to be "on the field" upon touching the
                 // ground
+
                 .enableBecomesGamePieceOnFieldAfterTouchGround();
 
         // Add the projectile to the simulated arena
