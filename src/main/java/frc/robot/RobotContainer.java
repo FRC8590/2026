@@ -29,10 +29,11 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.AimAtTarget;
 import frc.robot.commands.DriveUnderTrench;
-import frc.robot.commands.RunIntake;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
+import frc.robot.commands.intake.GoToHubFromNeutralZone;
+import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
@@ -273,6 +274,8 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
 
         driverXbox.start().whileTrue(new DriveUnderTrench(drive, vision));
+
+        driverXbox.leftBumper().whileTrue(new GoToHubFromNeutralZone(drive, vision));
 
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);
