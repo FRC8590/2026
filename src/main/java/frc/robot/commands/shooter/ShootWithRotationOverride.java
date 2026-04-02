@@ -33,7 +33,7 @@ public class ShootWithRotationOverride extends Command {
 
     // "null" acts a sentinel for "inactive"
     private final AtomicReference<Double> rotationOverride = new AtomicReference<>(null);
-    private final PIDController rotationPID = new PIDController(4.0, 0.0, 0.15);
+    private final PIDController rotationPID = new PIDController(1.5, 0.0, 0);
 
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
@@ -84,40 +84,62 @@ public class ShootWithRotationOverride extends Command {
             Translation2d lastSolvedVel = null;
 
             while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Translation3d target = latestTarget.get();
-                    Translation2d vel = latestRobotVel.get();
+                Translation3d target = latestTarget.get();
+                Translation2d vel = latestRobotVel.get();
 
-                    if (target != null && vel != null) {
-                        // Only solve if inputs have changed meaningfully
-                        boolean shouldSolve = lastSolvedTarget == null
-                                || target.minus(lastSolvedTarget).getNorm() > 0.05
-                                || vel.minus(lastSolvedVel).getNorm() > 0.1;
+                if (target == null || vel == null) {
+                    System.out.println("Solver: waiting for inputs, target=" + target + " vel=" + vel);
+                } else {
+                    System.out.println("Solver: running with target=" + target + " vel=" + vel);
+                }
 
-                        if (shouldSolve) {
+                if (target != null && vel != null) {
+                    // Only solve if inputs have changed meaningfully
+                    boolean shouldSolve = lastSolvedTarget == null
+                            || target.minus(lastSolvedTarget).getNorm() > 0.05
+                            || vel.minus(lastSolvedVel).getNorm() > 0.1;
+
+                    if (shouldSolve) {
+
+                        // Before calling firingSolution:
+                        Double warmStart = lastSolverAngleRadians;
+
+                        // If target has changed significantly, cold-start to force full re-solve
+                        if (lastSolvedTarget != null &&
+                                target.minus(lastSolvedTarget).getNorm() > 0.1) {
+                            warmStart = null; // force cold start
+                        }
+
+                        Translation2d solution;
+                        try {
+                            solution = BallisticsSim.firingSolution(
+                                    target, vel, 0.01, warmStart);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            DriveNotifier.internalError("ShootWithRotationOverride",
+                                    "firingSolution threw: " + e.getMessage());
+                            continue;
+                        }
+
+                        if (solution.getX() >= 0) {
+                            lastSolverAngleRadians = Math.toRadians(solution.getY());
                             lastSolvedTarget = target;
                             lastSolvedVel = vel;
-
-                            Translation2d solution = BallisticsSim.firingSolution(
-                                    target, vel, 0.05, lastSolverAngleRadians);
-
-                            if (solution.getX() >= 0) {
-                                lastSolverAngleRadians = Math.toRadians(solution.getY());
-                                latestSolution.set(solution);
-                            }
+                            latestSolution.set(solution);
                         }
                     }
+                }
 
+                try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (Exception e) {
-                    DriveNotifier.internalError("ShootWithRotationOverride",
-                            "firingSolution threw: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
                 }
             }
         }, "SOTM-Solver");
         solverThread.start();
+
     }
 
     @Override
@@ -159,6 +181,10 @@ public class ShootWithRotationOverride extends Command {
 
         double currentAngle = robotPose.getRotation().getRadians();
         double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(solution.getY()));
+        System.out.println("vel being set: " + fieldSpeeds.vxMetersPerSecond + ", " + fieldSpeeds.vyMetersPerSecond);
+        System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
+                + ", solution.getY(): " + solution.getY());
+        // drive.drive(new ChassisSpeeds(1, 1, rotationSpeed));
         rotationOverride.set(rotationSpeed);
     }
 
