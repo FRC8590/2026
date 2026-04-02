@@ -204,4 +204,36 @@ public class VisionService {
 
         throw new RuntimeException("Tag " + tagId + " does not exist");
     }
+
+    public record NearestTag(int tagId, double distance, Pose2d tagPose) {
+    };
+
+    /**
+     * Find the nearest of a given set of tags.
+     * 
+     * @param tagIds    The tag IDs to look for.
+     * @param robotPose The current pose of the robot.
+     * 
+     * @return The ID and distance of the tag taht was closest.
+     */
+    public NearestTag findNearestTag(int[] tagIds, Pose2d robotPose) {
+        double bestDistance = Double.MAX_VALUE;
+        int bestTag = -1;
+        Pose2d bestTagPose = null;
+
+        for (int tagId : tagIds) {
+            var pose = getTagFieldPose(tagId);
+            double distance = robotPose.getTranslation()
+                    .getDistance(pose.getTranslation());
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestTag = tagId;
+                bestTagPose = pose;
+            }
+        }
+
+        assert (bestTag != -1);
+        assert (bestTagPose != null);
+        return new NearestTag(bestTag, bestDistance, bestTagPose);
+    }
 }
