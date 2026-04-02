@@ -3,6 +3,8 @@ package frc.robot.commands.shooter;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,7 +35,7 @@ public class ShootWithRotationOverride extends Command {
 
     // "null" acts a sentinel for "inactive"
     private final AtomicReference<Double> rotationOverride = new AtomicReference<>(null);
-    private final PIDController rotationPID = new PIDController(1.5, 0.0, 0);
+    private final PIDController rotationPID = new PIDController(3.0, 0.0, 0);
 
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
@@ -110,10 +112,27 @@ public class ShootWithRotationOverride extends Command {
                             warmStart = null; // force cold start
                         }
 
+                        // Skip the solve if robot speed is too high for the ballistics to handle
+                        if (vel.getNorm() > 2.5) {
+                            // Fall back to simple geometric aim to just point at the hub
+                            double hubAngle = Math.atan2(target.getZ(), target.getX());
+                            double speed = /* use distanceToRPM logic */ Shooter.distanceToRPM(
+                                    Math.hypot(target.getX(), target.getZ())) * 20.0 / 6000.0;
+                            latestSolution.set(new Translation2d(speed, Math.toDegrees(hubAngle)));
+                            lastSolvedTarget = target;
+                            lastSolvedVel = vel;
+                            continue;
+                        }
+
                         Translation2d solution;
                         try {
                             solution = BallisticsSim.firingSolution(
                                     target, vel, 0.01, warmStart);
+                        } catch (NumberIsTooSmallException e) {
+                            // TODO: Peter: The ballistics simulation should fail cleanly
+                            // if the target is impossible.
+                            shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
+                            continue;
                         } catch (Exception e) {
                             e.printStackTrace();
                             DriveNotifier.internalError("ShootWithRotationOverride",
@@ -184,6 +203,10 @@ public class ShootWithRotationOverride extends Command {
         System.out.println("vel being set: " + fieldSpeeds.vxMetersPerSecond + ", " + fieldSpeeds.vyMetersPerSecond);
         System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
                 + ", solution.getY(): " + solution.getY());
+        System.out.println("heading check: robotHeading=" + Math.toDegrees(currentAngle)
+                + " solutionAngle=" + solution.getY()
+                + " hubAngle=" + Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX()))
+                + " toHub=" + toHub);
         // drive.drive(new ChassisSpeeds(1, 1, rotationSpeed));
         rotationOverride.set(rotationSpeed);
     }
