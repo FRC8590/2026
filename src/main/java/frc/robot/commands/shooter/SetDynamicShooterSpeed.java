@@ -22,7 +22,12 @@ public class SetDynamicShooterSpeed extends Command {
         shooterSystem = shooter;
         driveSystem = drive;
         visionService = vision;
-        addRequirements(shooter, drive);
+        // We intentionally don't add the drive system here, because we use
+        // this in a parallel command group with AimAtTarget, which also
+        // requires the drive system. It's fine here because we only need
+        // the drive system for the distance to the hub, which doesn't
+        // change while AimAtTarget is running.
+        addRequirements(shooter);
     }
 
     @Override
