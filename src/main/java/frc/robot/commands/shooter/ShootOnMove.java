@@ -36,10 +36,7 @@ public class ShootOnMove extends ParallelDeadlineGroup {
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> {
                             boolean rpmReady = shooter.get().map(Shooter::atRPM).orElse(false);
-                            Double override = shootCommand.getRotationOverride().get();
-                            // Also wait until rotation PID is within tolerance.
-                            // rotationOverride near zero means we're on target.
-                            boolean headingReady = override == null || Math.abs(override) < 0.05;
+                            boolean headingReady = shootCommand.isHeadingAligned();
                             return rpmReady && headingReady;
                         }).withTimeout(2.0),
                         new Feed(belt, indexer)));

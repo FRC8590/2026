@@ -7,7 +7,6 @@ import org.apache.commons.math3.exception.NumberIsTooSmallException;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -75,6 +74,10 @@ public class ShootWithRotationOverride extends Command {
         return rotationOverride::get;
     }
 
+    public boolean isHeadingAligned() {
+        return rotationPID.atSetpoint();
+    }
+
     @Override
     public void initialize() {
         rotationPID.reset();
@@ -102,8 +105,6 @@ public class ShootWithRotationOverride extends Command {
                             || vel.minus(lastSolvedVel).getNorm() > 0.1;
 
                     if (shouldSolve) {
-
-                        // Before calling firingSolution:
                         Double warmStart = lastSolverAngleRadians;
 
                         // If target has changed significantly, cold-start to force full re-solve
@@ -199,16 +200,9 @@ public class ShootWithRotationOverride extends Command {
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
 
         double currentAngle = robotPose.getRotation().getRadians();
+        double maxOmega = driveOpt.get().getSwerveDrive().getMaximumChassisAngularVelocity();
         double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(solution.getY()));
-        System.out.println("vel being set: " + fieldSpeeds.vxMetersPerSecond + ", " + fieldSpeeds.vyMetersPerSecond);
-        System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
-                + ", solution.getY(): " + solution.getY());
-        System.out.println("heading check: robotHeading=" + Math.toDegrees(currentAngle)
-                + " solutionAngle=" + solution.getY()
-                + " hubAngle=" + Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX()))
-                + " toHub=" + toHub);
-        // drive.drive(new ChassisSpeeds(1, 1, rotationSpeed));
-        rotationOverride.set(rotationSpeed);
+        rotationOverride.set(rotationSpeed / maxOmega);
     }
 
     @Override
