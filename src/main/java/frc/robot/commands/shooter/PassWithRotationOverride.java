@@ -42,11 +42,14 @@ public class PassWithRotationOverride extends Command {
 
     // How far from the outpost (toward field center) to place the landing zone
     // (meters)
-    private static final double LANDING_OFFSET_METERS = 2.0;
+    private static final double LANDING_OFFSET_X = 3.5;
+    // How far from the output (toward alliance wall) to place the landing zone
+    // (meters)
+    private static final double LANDING_OFFSET_Y = 3.5;
 
     private static final double MIN_PASS_DISTANCE = 3.0;
-    private static final double MAX_PASS_DISTANCE = 14.0;
-    private static final double MAX_LEAD_RAD = Math.toRadians(25);
+    private static final double MAX_PASS_DISTANCE = 16.0;
+    private static final double MAX_LEAD_RAD = Math.toRadians(80);
 
     public PassWithRotationOverride(
             SystemWrapper<Shooter> shooter,
@@ -75,8 +78,9 @@ public class PassWithRotationOverride extends Command {
 
         driveSystem.get().ifPresent(swerve -> {
             maxAngularVelocity = swerve.getSwerveDrive().getMaximumChassisAngularVelocity();
-            if (maxAngularVelocity <= 0)
+            if (maxAngularVelocity <= 0) {
                 maxAngularVelocity = 6.28;
+            }
         });
     }
 
@@ -174,7 +178,7 @@ public class PassWithRotationOverride extends Command {
         // X~=16.5)
         double dir = RobotContainer.isRedAlliance() ? -1.0 : 1.0;
         return new Translation2d(
-                outpostPos.getX() + dir * LANDING_OFFSET_METERS,
-                outpostPos.getY());
+                outpostPos.getX() + dir * LANDING_OFFSET_X,
+                outpostPos.getY() + dir * LANDING_OFFSET_Y);
     }
 }

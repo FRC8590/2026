@@ -38,7 +38,7 @@ public class Pass extends ParallelDeadlineGroup {
                             boolean rpmReady = shooter.get().map(Shooter::atRPM).orElse(false);
                             boolean headingReady = passCommand.isHeadingAligned();
                             return rpmReady && headingReady;
-                        }).withTimeout(2.0),
+                        }).withTimeout(4.0),
                         new Feed(belt, indexer)));
         internalPassCommand = passCommand;
     }
