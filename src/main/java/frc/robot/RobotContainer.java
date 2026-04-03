@@ -70,19 +70,19 @@ public class RobotContainer {
             .loadField(AprilTagFields.k2026RebuiltAndymark);
 
     private final PhotonVisionCamera[] ALL_CAMERAS = {
-            // Cam mounted on the fron of the shooter (above the battory)
+            // Cam mounted on the front of the shooter (above the battory)
             PhotonVisionCamera.newArduCamera("front", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
-                            Units.inchesToMeters(0), // X-Positive -> Forward
-                            Units.inchesToMeters(0), // Y-Positive -> Left
-                            Units.inchesToMeters(0)), // Z-Positive -> Up
+                            Units.inchesToMeters(12.50), // X-Positive -> Forward
+                            Units.inchesToMeters(0.00), // Y-Positive -> Left
+                            Units.inchesToMeters(12.55)),// Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 0))),
-            // TBD
+            // Camera moutned on the side of the shooter facing backwards
             PhotonVisionCamera.newArduCamera("rear", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
-                            Units.inchesToMeters(0), // X-Positive -> Forward
-                            Units.inchesToMeters(0), // Y-Positive -> Left
-                            Units.inchesToMeters(0)), // Z-Positive -> Up
+                            Units.inchesToMeters(0.033), // X-Positive -> Forward
+                            Units.inchesToMeters(7.006), // Y-Positive -> Left
+                            Units.inchesToMeters(18.451)),// Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 180)))
     };
 
