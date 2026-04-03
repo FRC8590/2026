@@ -126,6 +126,12 @@ public class Robot extends TimedRobot {
         m_robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+        m_robotContainer.intake.ifEnabled(intake -> {
+            if (!intake.isHomed()) {
+                CommandScheduler.getInstance().schedule(intake.homeCommand());
+            }
+        });
+
         // schedule the autonomous command (example)
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);

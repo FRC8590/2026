@@ -39,6 +39,7 @@ public class SimulatedIntake extends Intake {
     @Override
     public void run() {
         super.run();
+        // TODO: Peter: We should check if the intake is extended here
         if (intakeSimulation != null) {
             intakeSimulation.startIntake();
         }
