@@ -11,9 +11,7 @@ import lib.woodsonrobotics.SystemWrapper;
  * the fuel lies!
  */
 public class GoToHubFromNeutralZone extends PathfinderCommand {
-    private final SystemWrapper<? extends Swerve> driveSystem;
-    private final VisionService visionService;
-
+    // IDs for AprilTags on the hub facing the neutral zone
     private static int[] NEUTRAL_ZONE_TAG_IDS = { 4, 3, 19, 20 };
 
     // How far before the tag to go (meters)
@@ -21,6 +19,9 @@ public class GoToHubFromNeutralZone extends PathfinderCommand {
 
     // Speed of the robot for driving (in meters per second)
     private static final double MAX_VELOCITY = 6.0;
+
+    private final SystemWrapper<? extends Swerve> driveSystem;
+    private final VisionService visionService;
 
     public GoToHubFromNeutralZone(SystemWrapper<? extends Swerve> drive, VisionService vision) {
         super(MAX_VELOCITY, 5.0);

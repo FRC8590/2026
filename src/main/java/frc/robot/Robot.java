@@ -34,7 +34,7 @@ public class Robot extends TimedRobot {
 
     private Timer disabledTimer;
 
-    private final double wheelLockTime = 10.0;
+    private final double WHEEL_LOCK_TIME = 10.0;
 
     // Rebuilt-specific; time until the hub switches
     private ConsoleCountdown allianceShiftCountdown = new ConsoleCountdown("Time until shift");
@@ -110,7 +110,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        if (disabledTimer.hasElapsed(wheelLockTime)) {
+        if (disabledTimer.hasElapsed(WHEEL_LOCK_TIME)) {
             disabledTimer.stop();
         }
         m_robotContainer.resetAndStop();
