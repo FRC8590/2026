@@ -89,12 +89,6 @@ public class ShootWithRotationOverride extends Command {
                 Translation3d target = latestTarget.get();
                 Translation2d vel = latestRobotVel.get();
 
-                if (target == null || vel == null) {
-                    System.out.println("Solver: waiting for inputs, target=" + target + " vel=" + vel);
-                } else {
-                    System.out.println("Solver: running with target=" + target + " vel=" + vel);
-                }
-
                 if (target != null && vel != null) {
                     // Only solve if inputs have changed meaningfully
                     boolean shouldSolve = lastSolvedTarget == null
@@ -204,7 +198,8 @@ public class ShootWithRotationOverride extends Command {
         System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
                 + ", solution.getY(): " + solution.getY());
         SmartDashboard.putNumber("Ballistics Target Angle", solution.getY());
-        SmartDashboard.putNumber("Ballistics Angle Offset", Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX())) - solution.getY());
+        SmartDashboard.putNumber("Ballistics Angle Offset",
+                Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX())) - solution.getY());
 
         // drive.drive(new ChassisSpeeds(1, 1, rotationSpeed));
         rotationOverrideService.setOverride(rotationSpeed / maxOmega);

@@ -37,10 +37,10 @@ public class PassWithRotationOverride extends Command {
 
     // How far from the outpost (toward field center) to place the landing zone
     // (meters)
-    private static final double LANDING_OFFSET_X = 3.5;
+    private static final double LANDING_OFFSET_X = 3.0;
     // How far from the output (toward alliance wall) to place the landing zone
     // (meters)
-    private static final double LANDING_OFFSET_Y = 3.5;
+    private static final double LANDING_OFFSET_Y = 2.5;
 
     private static final double MIN_PASS_DISTANCE = 3.0;
     private static final double MAX_PASS_DISTANCE = 16.0;
