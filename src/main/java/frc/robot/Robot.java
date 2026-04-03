@@ -59,19 +59,19 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
 
-        m_robotContainer = new RobotContainer();
+        robotContainer = new RobotContainer();
 
         // Create a timer to disable motor brake a few seconds after disable. This will
         // let the robot stop
         // immediately when disabled, but then also let it be pushed more
         disabledTimer = new Timer();
 
-        m_robotContainer.drive.ifEnabled(swerve -> {
+        robotContainer.drive.ifEnabled(swerve -> {
             swerve.replaceSwerveModuleFeedforward(.0002, 2.8, 0);
             swerve.setupPathPlanner();
         });
 
-        m_robotContainer.vision.startVisionThread();
+        robotContainer.vision.startVisionThread();
     }
 
     /**
@@ -113,7 +113,7 @@ public class Robot extends TimedRobot {
         if (disabledTimer.hasElapsed(WHEEL_LOCK_TIME)) {
             disabledTimer.stop();
         }
-        m_robotContainer.resetAndStop();
+        robotContainer.resetAndStop();
     }
 
     /**
@@ -123,18 +123,18 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         isRedAllianceEntry.setBoolean(RobotContainer.isRedAlliance());
-        m_robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
-        m_robotContainer.intake.ifEnabled(intake -> {
+        robotContainer.intake.ifEnabled(intake -> {
             if (!intake.isHomed()) {
                 CommandScheduler.getInstance().schedule(intake.homeCommand());
             }
         });
 
         // schedule the autonomous command (example)
-        if (m_autonomousCommand != null) {
-            CommandScheduler.getInstance().schedule(m_autonomousCommand);
+        if (autonomousCommand != null) {
+            CommandScheduler.getInstance().schedule(autonomousCommand);
         }
 
         allianceShiftCountdown.start(20);
@@ -158,9 +158,9 @@ public class Robot extends TimedRobot {
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        if (m_autonomousCommand != null) {
+        if (autonomousCommand != null) {
             DriveNotifier.inform("Cancelling auto command");
-            m_autonomousCommand.cancel();
+            autonomousCommand.cancel();
         }
 
         timeUntilEnd.start(140);
@@ -190,7 +190,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationInit() {
-        m_robotContainer.simulation.simulationInit();
+        robotContainer.simulation.simulationInit();
     }
 
     /**
@@ -198,6 +198,6 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationPeriodic() {
-        m_robotContainer.simulation.simulationPeriodic();
+        robotContainer.simulation.simulationPeriodic();
     }
 }

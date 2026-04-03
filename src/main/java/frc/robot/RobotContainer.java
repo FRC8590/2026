@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -34,6 +35,7 @@ import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
 import frc.robot.commands.intake.GoToHubFromNeutralZone;
 import frc.robot.commands.intake.RunIntake;
+import frc.robot.commands.shooter.Pass;
 import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
@@ -229,6 +231,7 @@ public class RobotContainer {
      */
     private void configureBindings() {
         ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, belt, indexer, vision);
+        Pass passCommand = new Pass(shooter, drive, belt, indexer, vision);
 
         Command driveFieldOrientedAngularVelocity = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
@@ -237,9 +240,14 @@ public class RobotContainer {
                         // We have to apply the deadband manually, because the small
                         // adjustments from the SOTM command will be ignored otherwise.
                         .withControllerRotationAxis(() -> {
-                            Double override = shootOnMove.getRotationOverride().get();
-                            if (override != null) {
-                                return override;
+                            Double shootOverride = shootOnMove.getRotationOverride().get();
+                            if (shootOverride != null) {
+                                return shootOverride;
+                            }
+
+                            Double passOverride = passCommand.getRotationOverride().get();
+                            if (passOverride != null) {
+                                return passOverride;
                             }
 
                             double stick = -driverXbox.getRightX();
@@ -271,6 +279,8 @@ public class RobotContainer {
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
 
         driverXbox.b().whileTrue(shootOnMove);
+
+        driverXbox.x().whileTrue(passCommand);
 
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
