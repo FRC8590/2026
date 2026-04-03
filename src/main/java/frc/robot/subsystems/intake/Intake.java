@@ -7,8 +7,10 @@ import edu.wpi.first.networktables.GenericEntry;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
@@ -21,7 +23,7 @@ public class Intake extends SubsystemBase {
 
     // TODO: Update these to match the actual CAN IDs
     private static final int PINION_MOTOR_ID = 9;
-    private static final int INTAKE_MOTOR_ID = 10;
+    private static final int INTAKE_MOTOR_ID = 15;
 
     /**
      * Drives the rack.
@@ -30,10 +32,10 @@ public class Intake extends SubsystemBase {
     /**
      * Spins the intake wheels.
      */
-    private static final SparkMax intakeMotor = new SparkMax(INTAKE_MOTOR_ID, MotorType.kBrushless);
+    private static final SparkFlex intakeMotor = new SparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless);
 
     private final SparkMaxConfig pinionConfig = new SparkMaxConfig();
-    private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
+    private final SparkFlexConfig intakeConfig = new SparkFlexConfig();
 
     private final RelativeEncoder pinionEncoder;
 
@@ -160,7 +162,7 @@ public class Intake extends SubsystemBase {
 
     /** Run the intake wheels. */
     public void run() {
-        intakeMotor.set(0.8);
+        intakeMotor.set(1); // ~6800 RPM :)
     }
 
     /** Stop the intake wheels. */
