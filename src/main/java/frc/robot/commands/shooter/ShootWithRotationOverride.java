@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
@@ -184,6 +185,9 @@ public class ShootWithRotationOverride extends Command {
         System.out.println("vel being set: " + fieldSpeeds.vxMetersPerSecond + ", " + fieldSpeeds.vyMetersPerSecond);
         System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
                 + ", solution.getY(): " + solution.getY());
+        SmartDashboard.putNumber("Ballistics Target Angle", solution.getY());
+        SmartDashboard.putNumber("Ballistics Angle Offset", Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX())) - solution.getY());
+
         // drive.drive(new ChassisSpeeds(1, 1, rotationSpeed));
         rotationOverride.set(rotationSpeed);
     }
