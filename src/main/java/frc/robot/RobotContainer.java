@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -21,7 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -31,14 +29,14 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.AimAtTarget;
 import frc.robot.commands.DriveUnderTrench;
-import frc.robot.commands.RunIntake;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
+import frc.robot.commands.intake.GoToHubFromNeutralZone;
+import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
-import frc.robot.commands.shooter.ShootWithRotationOverride;
 import frc.robot.commands.shooter.StableShoot;
 import frc.robot.services.SimulationService;
 import frc.robot.services.vision.SimulatedPhotonVisionService;
@@ -69,17 +67,19 @@ public class RobotContainer {
             .loadField(AprilTagFields.k2026RebuiltAndymark);
 
     private final PhotonVisionCamera[] ALL_CAMERAS = {
+            // Cam mounted on the fron of the shooter (above the battory)
             PhotonVisionCamera.newArduCamera("front", fieldLayout, new Transform3d(
                     new Translation3d(
-                            Units.inchesToMeters(0),
-                            Units.inchesToMeters(24),
-                            Units.inchesToMeters(0)),
+                            Units.inchesToMeters(0), // X-Positive -> Forward
+                            Units.inchesToMeters(0), // Y-Positive -> Left
+                            Units.inchesToMeters(0)), // Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 0))),
+            // TBD
             PhotonVisionCamera.newArduCamera("rear", fieldLayout, new Transform3d(
                     new Translation3d(
-                            Units.inchesToMeters(0),
-                            Units.inchesToMeters(24),
-                            Units.inchesToMeters(0)),
+                            Units.inchesToMeters(0), // X-Positive -> Forward
+                            Units.inchesToMeters(0), // Y-Positive -> Left
+                            Units.inchesToMeters(0)), // Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 180)))
     };
 
@@ -230,18 +230,25 @@ public class RobotContainer {
     private void configureBindings() {
         ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, belt, indexer, vision);
 
-        Command driveFieldOrientedAnglularVelocity = drive
+        Command driveFieldOrientedAngularVelocity = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
                         () -> driverXbox.getLeftY() * getSide() * scaleFactor,
                         () -> driverXbox.getLeftX() * getSide() * scaleFactor)
-                        .withControllerRotationAxis(() -> shootOnMove.isScheduled()
-                                ? shootOnMove.getRotationOverride().get() // SOTM overrides rotation
-                                : -driverXbox.getRightX() * 0.72 * scaleFactor)
-                        .deadband(deadband)
+                        // We have to apply the deadband manually, because the small
+                        // adjustments from the SOTM command will be ignored otherwise.
+                        .withControllerRotationAxis(() -> {
+                            Double override = shootOnMove.getRotationOverride().get();
+                            if (override != null) {
+                                return override;
+                            }
+
+                            double stick = -driverXbox.getRightX();
+                            return (Math.abs(stick) < deadband) ? 0.0 : stick * 0.72 * scaleFactor;
+                        })
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
 
-        drive.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        drive.setDefaultCommand(driveFieldOrientedAngularVelocity);
 
         driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
         driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
@@ -269,6 +276,8 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
 
         driverXbox.start().whileTrue(new DriveUnderTrench(drive, vision));
+
+        driverXbox.leftBumper().whileTrue(new GoToHubFromNeutralZone(drive, vision));
 
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);

@@ -23,8 +23,9 @@ public class Shoot extends SequentialCommandGroup {
     public Shoot(SystemWrapper<Shooter> shooter, SystemWrapper<Belt> belt,
             SystemWrapper<Indexer> indexer, VisionService vision, SystemWrapper<? extends Swerve> drive) {
         addCommands(
-                new AimAtTarget(vision, drive),
-                new SetDynamicShooterSpeed(shooter, drive, vision),
+                new ParallelCommandGroup(
+                        new AimAtTarget(vision, drive),
+                        new SetDynamicShooterSpeed(shooter, drive, vision)),
                 new Feed(belt, indexer));
     }
 

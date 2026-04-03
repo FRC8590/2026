@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.Intake;
@@ -21,7 +21,7 @@ public class RunIntake extends Command {
     @Override
     public void execute() {
         intakeSystem.ifEnabled(intake -> {
-            intake.down();
+            intake.extend();
             intake.run();
         });
     }
@@ -29,7 +29,7 @@ public class RunIntake extends Command {
     @Override
     public void end(boolean interrupted) {
         intakeSystem.ifEnabled(intake -> {
-            intake.up();
+            intake.retract();
             intake.stop();
         });
     }

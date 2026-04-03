@@ -20,15 +20,14 @@ import com.revrobotics.PersistMode;
 /* Subsystem for the shooter. */
 public class Shooter extends SubsystemBase {
 
-    private static final int frontMotorID = 12;
-    private static final int backMotorID = 13;
+    private static final int FRONT_MOTOR_ID = 12;
+    private static final int BACK_MOTOR_ID = 13;
+    public static final double SHOOTER_MAX_RPM = 6784;
 
-    private static final SparkFlex frontMotor = new SparkFlex(frontMotorID, MotorType.kBrushless);
-    private static final SparkFlex backMotor = new SparkFlex(backMotorID, MotorType.kBrushless);
+    private static final SparkFlex frontMotor = new SparkFlex(FRONT_MOTOR_ID, MotorType.kBrushless);
+    private static final SparkFlex backMotor = new SparkFlex(BACK_MOTOR_ID, MotorType.kBrushless);
 
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
-
-    public static final double SHOOTER_MAX_RPM = 6784;
 
     private double goalRPM = 0;
 

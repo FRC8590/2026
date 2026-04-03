@@ -3,7 +3,6 @@ package frc.robot.commands.shooter;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.feeder.Feed;
@@ -35,8 +34,11 @@ public class ShootOnMove extends ParallelDeadlineGroup {
         super(
                 shootCommand,
                 new SequentialCommandGroup(
-                        new PrintCommand("hello"),
-                        new WaitUntilCommand(() -> shooter.get().map(Shooter::atRPM).orElse(false)),
+                        new WaitUntilCommand(() -> {
+                            boolean rpmReady = shooter.get().map(Shooter::atRPM).orElse(false);
+                            boolean headingReady = shootCommand.isHeadingAligned();
+                            return rpmReady && headingReady;
+                        }).withTimeout(2.0),
                         new Feed(belt, indexer)));
         internalShootCommand = shootCommand;
     }

@@ -3,9 +3,10 @@ package frc.robot.commands.shooter;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -31,8 +32,9 @@ public class ShootWithRotationOverride extends Command {
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
 
-    private final AtomicReference<Double> rotationOverride = new AtomicReference<>(0.0);
-    private final PIDController rotationPID = new PIDController(1.5, 0.0, 0.0);
+    // "null" acts a sentinel for "inactive"
+    private final AtomicReference<Double> rotationOverride = new AtomicReference<>(null);
+    private final PIDController rotationPID = new PIDController(3.0, 0.0, 0);
 
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
@@ -42,6 +44,19 @@ public class ShootWithRotationOverride extends Command {
     private static final double SPEED_TO_RPM = 6000.0 / 20.0;
 
     private static final double SHOOTER_TO_HUB_HEIGHT = 1.83 - Units.feetToMeters(18.73 / 12);
+
+    private Thread solverThread;
+
+    // This is volatile to ensure sequential memory ordering.
+    private volatile Double lastSolverAngleRadians = null;
+
+    // Latest valid solution from the solver thread
+    // x = speed m/s, y = heading degrees
+    private final AtomicReference<Translation2d> latestSolution = new AtomicReference<>(null);
+
+    // Inputs snapshot written by execute(), read by solver thread
+    private final AtomicReference<Translation3d> latestTarget = new AtomicReference<>(null);
+    private final AtomicReference<Translation2d> latestRobotVel = new AtomicReference<>(null);
 
     public ShootWithRotationOverride(SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
@@ -59,12 +74,92 @@ public class ShootWithRotationOverride extends Command {
         return rotationOverride::get;
     }
 
+    public boolean isHeadingAligned() {
+        return rotationPID.atSetpoint();
+    }
+
     @Override
     public void initialize() {
         rotationPID.reset();
         rotationPID.enableContinuousInput(-Math.PI, Math.PI);
         rotationPID.setTolerance(Units.degreesToRadians(1.5));
-        rotationOverride.set(0.0);
+        rotationOverride.set(null);
+        solverThread = new Thread(() -> {
+            Translation3d lastSolvedTarget = null;
+            Translation2d lastSolvedVel = null;
+
+            while (!Thread.currentThread().isInterrupted()) {
+                Translation3d target = latestTarget.get();
+                Translation2d vel = latestRobotVel.get();
+
+                if (target == null || vel == null) {
+                    System.out.println("Solver: waiting for inputs, target=" + target + " vel=" + vel);
+                } else {
+                    System.out.println("Solver: running with target=" + target + " vel=" + vel);
+                }
+
+                if (target != null && vel != null) {
+                    // Only solve if inputs have changed meaningfully
+                    boolean shouldSolve = lastSolvedTarget == null
+                            || target.minus(lastSolvedTarget).getNorm() > 0.05
+                            || vel.minus(lastSolvedVel).getNorm() > 0.1;
+
+                    if (shouldSolve) {
+                        Double warmStart = lastSolverAngleRadians;
+
+                        // If target has changed significantly, cold-start to force full re-solve
+                        if (lastSolvedTarget != null &&
+                                target.minus(lastSolvedTarget).getNorm() > 0.1) {
+                            warmStart = null; // force cold start
+                        }
+
+                        // Skip the solve if robot speed is too high for the ballistics to handle
+                        if (vel.getNorm() > 2.5) {
+                            // Fall back to simple geometric aim to just point at the hub
+                            double hubAngle = Math.atan2(target.getZ(), target.getX());
+                            double speed = /* use distanceToRPM logic */ Shooter.distanceToRPM(
+                                    Math.hypot(target.getX(), target.getZ())) * 20.0 / 6000.0;
+                            latestSolution.set(new Translation2d(speed, Math.toDegrees(hubAngle)));
+                            lastSolvedTarget = target;
+                            lastSolvedVel = vel;
+                            continue;
+                        }
+
+                        Translation2d solution;
+                        try {
+                            solution = BallisticsSim.firingSolution(
+                                    target, vel, 0.01, warmStart);
+                        } catch (NumberIsTooSmallException e) {
+                            // TODO: Peter: The ballistics simulation should fail cleanly
+                            // if the target is impossible.
+                            shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
+                            continue;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            DriveNotifier.internalError("ShootWithRotationOverride",
+                                    "firingSolution threw: " + e.getMessage());
+                            continue;
+                        }
+
+                        if (solution.getX() >= 0) {
+                            lastSolverAngleRadians = Math.toRadians(solution.getY());
+                            lastSolvedTarget = target;
+                            lastSolvedVel = vel;
+                            latestSolution.set(solution);
+                        }
+                    }
+                }
+
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }, "SOTM-Solver");
+        solverThread.start();
+
     }
 
     @Override
@@ -73,8 +168,8 @@ public class ShootWithRotationOverride extends Command {
         if (driveOpt.isEmpty()) {
             return;
         }
-        var drive = driveOpt.get();
 
+        var drive = driveOpt.get();
         var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
 
         Pose2d robotPose = drive.getPose();
@@ -89,26 +184,25 @@ public class ShootWithRotationOverride extends Command {
 
         ChassisSpeeds fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
                 drive.getRobotVelocity(), robotPose.getRotation());
-        Translation2d robotVel = new Translation2d(
+        latestTarget.set(new Translation3d(toHub.getX(), SHOOTER_TO_HUB_HEIGHT, toHub.getY()));
+        latestRobotVel.set(new Translation2d(
                 fieldSpeeds.vxMetersPerSecond,
-                fieldSpeeds.vyMetersPerSecond);
+                fieldSpeeds.vyMetersPerSecond));
 
-        Translation2d firingSolution;
-        try {
-            firingSolution = BallisticsSim.firingSolution(
-                    new Translation3d(toHub.getX(), SHOOTER_TO_HUB_HEIGHT, toHub.getY()), robotVel, 0.01, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            DriveNotifier.internalError("ShootWithRotationOverride", "firingSolution threw exception");
+        Translation2d solution = latestSolution.get();
+        if (solution == null) {
+            // No solution yet
+            rotationOverride.set(0.0);
             return;
         }
 
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(firingSolution.getX() * SPEED_TO_RPM));
+        double rpm = Math.min(solution.getX() * SPEED_TO_RPM, Shooter.SHOOTER_MAX_RPM);
+        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
 
         double currentAngle = robotPose.getRotation().getRadians();
-        double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(firingSolution.getY()));
-        double clampedRotation = Math.max(-3.0, Math.min(3.0, rotationSpeed));
-        rotationOverride.set(clampedRotation);
+        double maxOmega = driveOpt.get().getSwerveDrive().getMaximumChassisAngularVelocity();
+        double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(solution.getY()));
+        rotationOverride.set(rotationSpeed / maxOmega);
     }
 
     @Override
@@ -118,7 +212,10 @@ public class ShootWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        rotationOverride.set(0.0);
+        rotationOverride.set(null);
+        if (solverThread != null) {
+            solverThread.interrupt();
+        }
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
 }

@@ -13,12 +13,18 @@ import swervelib.SwerveDrive;
  * which uses the generic Camera API, this only works with PhotonVision!
  */
 public class SimulatedPhotonVisionService extends VisionService {
-    public static final VisionSystemSim photonVisionSim = new VisionSystemSim("main");
+    public final VisionSystemSim photonVisionSim;
 
     public SimulatedPhotonVisionService(PhotonVisionCamera[] camerasArray) {
+        this(camerasArray, new VisionSystemSim("main"));
+    }
+
+    private SimulatedPhotonVisionService(PhotonVisionCamera[] camerasArray, VisionSystemSim sim) {
         super(Arrays.stream(camerasArray)
-                .map(camera -> new SimulatedPhotonVisionCamera(camera, photonVisionSim))
+                .map(camera -> new SimulatedPhotonVisionCamera(camera, sim))
                 .toArray(SimulatedPhotonVisionCamera[]::new));
+
+        photonVisionSim = sim;
     }
 
     public void updateSwerveEstimation(SwerveDrive swerveDrive) {

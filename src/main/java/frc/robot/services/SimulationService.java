@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
@@ -12,8 +14,10 @@ import org.ironmaple.utils.FieldMirroringUtils;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.feeder.Belt;
 import frc.robot.subsystems.feeder.Indexer;
@@ -27,6 +31,11 @@ public class SimulationService {
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final SystemWrapper<Belt> beltSystem;
     private final SystemWrapper<Indexer> indexerSystem;
+    private int simulatedScore;
+    private final GenericEntry simulatedScoreEntry = Shuffleboard
+            .getTab("Console")
+            .add("Simulated Score", 0)
+            .getEntry();
 
     private final StructArrayPublisher<Pose3d> fuelPosePublisher = NetworkTableInstance.getDefault()
             .getStructArrayTopic("Fuel poses", Pose3d.struct)
@@ -42,6 +51,7 @@ public class SimulationService {
     }
 
     private void addFuelProjectile(Swerve swerve, double rpm, double yValue) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         var robotSimulationWorldPose = swerve.getPose();
         var chassisSpeedsFieldRelative = swerve.getFieldVelocity();
         // This is taken from the MapleSim docs
@@ -76,17 +86,20 @@ public class SimulationService {
                 // Set a callback to run when the fuel hits the target
                 .withHitTargetCallBack(() -> {
                     System.out.println("Hit hub, +1 point!");
+                    simulatedScore += 1;
+                    simulatedScoreEntry.setInteger(simulatedScore);
                     // This is roughly in the neutral zone.
                     // We add an arbitrary random number to it, because game pieces
                     // that spawn on top of each other in MapleSim are a little weird.
                     SimulatedArena.getInstance().addGamePiece(
-                            new RebuiltFuelOnField(new Translation2d(10 + (Math.random() - 0.5) * 0.4,
-                                    5 + (Math.random() - 0.5) * 0.4)));
+                            new RebuiltFuelOnField(new Translation2d(random.nextDouble(10.8, 10.9),
+                                    random.nextDouble(3, 4.5))));
                 });
 
         fuelOnFly
                 // Configure the fuel projectile to be "on the field" upon touching the
                 // ground
+
                 .enableBecomesGamePieceOnFieldAfterTouchGround();
 
         // Add the projectile to the simulated arena
@@ -134,14 +147,17 @@ public class SimulationService {
                 && (indexerOpt.get().getSpeed() > 0)
                 && (currentTime - lastSentFuel >= 200)) {
             var intakeSimulation = intake.getIntakeSimulation();
-            if (intakeSimulation.obtainGamePieceFromIntake()) {
-                driveSystem.ifEnabled(drive -> {
-                    // TODO: Peter: We should get this to precisely match our CAD
+            driveSystem.ifEnabled(drive -> {
+                // TODO: Peter: We should get this to precisely match our CAD
+                if (intakeSimulation.obtainGamePieceFromIntake()) {
                     addFuelProjectile(drive, shooterRPM, -0.1);
+                }
+                if (intakeSimulation.obtainGamePieceFromIntake()) {
                     addFuelProjectile(drive, shooterRPM, 0.1);
-                    lastSentFuel = currentTime;
-                });
-            }
+                }
+                lastSentFuel = currentTime;
+            });
+
         }
 
         Pose3d[] fuelPoses = SimulatedArena.getInstance()
