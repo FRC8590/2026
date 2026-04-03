@@ -14,9 +14,9 @@ import com.revrobotics.PersistMode;
 
 /* Subsystem for the belt. */
 public class Belt extends SubsystemBase {
-    private static final int beltMotorID = 11;
+    private static final int BELT_MOTOR_ID = 11;
 
-    private static final SparkMax beltMotor = new SparkMax(beltMotorID, MotorType.kBrushless);
+    private static final SparkMax beltMotor = new SparkMax(BELT_MOTOR_ID, MotorType.kBrushless);
 
     private final SparkMaxConfig beltMotorConfig = new SparkMaxConfig();
 

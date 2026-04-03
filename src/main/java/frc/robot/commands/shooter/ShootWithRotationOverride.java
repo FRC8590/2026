@@ -1,11 +1,11 @@
 package frc.robot.commands.shooter;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,6 +16,7 @@ import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.utils.BallisticsSim;
 import frc.robot.RobotContainer;
+import frc.robot.services.RotationOverrideService;
 import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
@@ -31,10 +32,9 @@ public class ShootWithRotationOverride extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
+    private final RotationOverrideService rotationOverrideService;
 
-    // "null" acts a sentinel for "inactive"
-    private final AtomicReference<Double> rotationOverride = new AtomicReference<>(null);
-    private final PIDController rotationPID = new PIDController(1.5, 0.0, 0);
+    private final PIDController rotationPID = new PIDController(3.0, 0.0, 0);
 
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
@@ -60,18 +60,19 @@ public class ShootWithRotationOverride extends Command {
 
     public ShootWithRotationOverride(SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
-            VisionService vision) {
+            VisionService vision, RotationOverrideService rotationOverride) {
         shooterSystem = shooter;
         driveSystem = drive;
         visionService = vision;
+        rotationOverrideService = rotationOverride;
         // We intentionally don't add the drive system as a requirement here,
         // because we want the drive commands to *not* be cancelled once we add
         // the rotation override.
         addRequirements(shooter);
     }
 
-    public Supplier<Double> getRotationOverride() {
-        return rotationOverride::get;
+    public boolean isHeadingAligned() {
+        return rotationPID.atSetpoint();
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ShootWithRotationOverride extends Command {
         rotationPID.reset();
         rotationPID.enableContinuousInput(-Math.PI, Math.PI);
         rotationPID.setTolerance(Units.degreesToRadians(1.5));
-        rotationOverride.set(null);
+        rotationOverrideService.clearOverride();
         solverThread = new Thread(() -> {
             Translation3d lastSolvedTarget = null;
             Translation2d lastSolvedVel = null;
@@ -101,8 +102,6 @@ public class ShootWithRotationOverride extends Command {
                             || vel.minus(lastSolvedVel).getNorm() > 0.1;
 
                     if (shouldSolve) {
-
-                        // Before calling firingSolution:
                         Double warmStart = lastSolverAngleRadians;
 
                         // If target has changed significantly, cold-start to force full re-solve
@@ -111,10 +110,27 @@ public class ShootWithRotationOverride extends Command {
                             warmStart = null; // force cold start
                         }
 
+                        // Skip the solve if robot speed is too high for the ballistics to handle
+                        if (vel.getNorm() > 2.5) {
+                            // Fall back to simple geometric aim to just point at the hub
+                            double hubAngle = Math.atan2(target.getZ(), target.getX());
+                            double speed = /* use distanceToRPM logic */ Shooter.distanceToRPM(
+                                    Math.hypot(target.getX(), target.getZ())) * 20.0 / 6000.0;
+                            latestSolution.set(new Translation2d(speed, Math.toDegrees(hubAngle)));
+                            lastSolvedTarget = target;
+                            lastSolvedVel = vel;
+                            continue;
+                        }
+
                         Translation2d solution;
                         try {
                             solution = BallisticsSim.firingSolution(
                                     target, vel, 0.01, warmStart);
+                        } catch (NumberIsTooSmallException e) {
+                            // TODO: Peter: The ballistics simulation should fail cleanly
+                            // if the target is impossible.
+                            shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
+                            continue;
                         } catch (Exception e) {
                             e.printStackTrace();
                             DriveNotifier.internalError("ShootWithRotationOverride",
@@ -173,7 +189,7 @@ public class ShootWithRotationOverride extends Command {
         Translation2d solution = latestSolution.get();
         if (solution == null) {
             // No solution yet
-            rotationOverride.set(0.0);
+            rotationOverrideService.setOverride(0.0);
             return;
         }
 
@@ -181,7 +197,9 @@ public class ShootWithRotationOverride extends Command {
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
 
         double currentAngle = robotPose.getRotation().getRadians();
+        double maxOmega = driveOpt.get().getSwerveDrive().getMaximumChassisAngularVelocity();
         double rotationSpeed = rotationPID.calculate(currentAngle, Math.toRadians(solution.getY()));
+        rotationOverrideService.setOverride(rotationSpeed / maxOmega);
         System.out.println("vel being set: " + fieldSpeeds.vxMetersPerSecond + ", " + fieldSpeeds.vyMetersPerSecond);
         System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
                 + ", solution.getY(): " + solution.getY());
@@ -189,7 +207,7 @@ public class ShootWithRotationOverride extends Command {
         SmartDashboard.putNumber("Ballistics Angle Offset", Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX())) - solution.getY());
 
         // drive.drive(new ChassisSpeeds(1, 1, rotationSpeed));
-        rotationOverride.set(rotationSpeed);
+        rotationOverrideService.setOverride(rotationSpeed / maxOmega);
     }
 
     @Override
@@ -199,7 +217,7 @@ public class ShootWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        rotationOverride.set(null);
+        rotationOverrideService.clearOverride();
         if (solverThread != null) {
             solverThread.interrupt();
         }

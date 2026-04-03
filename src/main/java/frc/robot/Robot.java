@@ -24,20 +24,21 @@ public class Robot extends TimedRobot {
 
     private static Robot instance;
 
-    private Command m_autonomousCommand;
+    private Command autonomousCommand;
     private static GenericEntry isRedAllianceEntry = Shuffleboard
             .getTab("Console")
             .add("On red alliance?", false)
             .getEntry();
 
-    public RobotContainer m_robotContainer;
+    public RobotContainer robotContainer;
 
     private Timer disabledTimer;
 
-    private final double wheelLockTime = 10.0;
+    private final double WHEEL_LOCK_TIME = 10.0;
 
     // Rebuilt-specific; time until the hub switches
     private ConsoleCountdown allianceShiftCountdown = new ConsoleCountdown("Time until shift");
+    private int allianceShiftCounter = 0;
     private ConsoleCountdown timeUntilEnd = new ConsoleCountdown("Time until end");
 
     public Robot() {
@@ -58,19 +59,19 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
 
-        m_robotContainer = new RobotContainer();
+        robotContainer = new RobotContainer();
 
         // Create a timer to disable motor brake a few seconds after disable. This will
         // let the robot stop
         // immediately when disabled, but then also let it be pushed more
         disabledTimer = new Timer();
 
-        m_robotContainer.drive.ifEnabled(swerve -> {
+        robotContainer.drive.ifEnabled(swerve -> {
             swerve.replaceSwerveModuleFeedforward(.0002, 2.8, 0);
             swerve.setupPathPlanner();
         });
 
-        m_robotContainer.vision.startVisionThread();
+        robotContainer.vision.startVisionThread();
     }
 
     /**
@@ -109,10 +110,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        if (disabledTimer.hasElapsed(wheelLockTime)) {
+        if (disabledTimer.hasElapsed(WHEEL_LOCK_TIME)) {
             disabledTimer.stop();
         }
-        m_robotContainer.resetAndStop();
+        robotContainer.resetAndStop();
     }
 
     /**
@@ -122,15 +123,22 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         isRedAllianceEntry.setBoolean(RobotContainer.isRedAlliance());
-        m_robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
+        autonomousCommand = robotContainer.getAutonomousCommand();
+
+        robotContainer.intake.ifEnabled(intake -> {
+            if (!intake.isHomed()) {
+                CommandScheduler.getInstance().schedule(intake.homeCommand());
+            }
+        });
 
         // schedule the autonomous command (example)
-        if (m_autonomousCommand != null) {
-            CommandScheduler.getInstance().schedule(m_autonomousCommand);
+        if (autonomousCommand != null) {
+            CommandScheduler.getInstance().schedule(autonomousCommand);
         }
 
-        timeUntilEnd.start(20);
+        allianceShiftCountdown.start(20);
+        timeUntilEnd.start(160);
     }
 
     /**
@@ -150,13 +158,13 @@ public class Robot extends TimedRobot {
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        if (m_autonomousCommand != null) {
+        if (autonomousCommand != null) {
             DriveNotifier.inform("Cancelling auto command");
-            m_autonomousCommand.cancel();
+            autonomousCommand.cancel();
         }
 
-        allianceShiftCountdown.start(10);
-        timeUntilEnd.start(140 /* 2:20 minutes */);
+        timeUntilEnd.start(140);
+        allianceShiftCountdown.start(10); // Transition shift
     }
 
     /**
@@ -166,7 +174,11 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         double remainingTime = allianceShiftCountdown.step();
         if (remainingTime <= 0) {
-            allianceShiftCountdown.start(25);
+            if (++allianceShiftCounter > 4) {
+                allianceShiftCountdown.start(30);
+            } else {
+                allianceShiftCountdown.start(25);
+            }
         }
 
         timeUntilEnd.step();
@@ -177,7 +189,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationInit() {
-        m_robotContainer.simulation.simulationInit();
+        robotContainer.simulation.simulationInit();
     }
 
     /**
@@ -185,6 +197,6 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationPeriodic() {
-        m_robotContainer.simulation.simulationPeriodic();
+        robotContainer.simulation.simulationPeriodic();
     }
 }

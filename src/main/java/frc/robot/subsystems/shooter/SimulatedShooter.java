@@ -15,7 +15,6 @@ public class SimulatedShooter extends Shooter {
 
     @Override
     public boolean atRPM() {
-        System.out.println(System.currentTimeMillis() - timeSetGoalRPM);
         return super.atRPM()
                 // Half a second of speed-up time
                 || (System.currentTimeMillis() - timeSetGoalRPM) >= 500;

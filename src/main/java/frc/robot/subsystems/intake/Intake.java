@@ -1,154 +1,193 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.networktables.GenericEntry;
 
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 
-/* Subsystem for the intake wheels and intake pivot. */
+/**
+ * Subsystem for a rack-and-pinion intake.
+ */
 public class Intake extends SubsystemBase {
+
+    // TODO: Update these to match the actual CAN IDs
+    private static final int PINION_MOTOR_ID = 9;
+    private static final int INTAKE_MOTOR_ID = 15;
+
     /**
-     * This refers to how many rotations the pivotMotor must do
-     * before intake does a (hypithetical) full rotation
-     * 
-     * @see 100:15 ratio, subject to change
+     * Drives the rack.
      */
+    private static final SparkMax pinionMotor = new SparkMax(PINION_MOTOR_ID, MotorType.kBrushless);
+    /**
+     * Spins the intake wheels.
+     */
+    private static final SparkFlex intakeMotor = new SparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless);
 
-    private static final int pivotMotorID = 9;
-    private static final int intakeMotorID = 10;
+    private final SparkMaxConfig pinionConfig = new SparkMaxConfig();
+    private final SparkFlexConfig intakeConfig = new SparkFlexConfig();
 
-    private static final SparkMax pivotMotor = new SparkMax(pivotMotorID, MotorType.kBrushless);
-    private static final SparkMax intakeMotor = new SparkMax(intakeMotorID, MotorType.kBrushless);
+    private final RelativeEncoder pinionEncoder;
 
-    private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
-    private final SparkMaxConfig pivotConfig = new SparkMaxConfig();
+    // TODO: Measure and update this value!
+    private static final double MAX_EXTENSION_ROTATIONS = 3.0;
+    private static final double MIN_EXTENSION_ROTATIONS = 0.0;
 
-    /** Relative Encoder */
-    private final RelativeEncoder encoder;
+    // TODO: Measure and update these values!
+    private static final double RETRACTED_POSITION = 0.2;
+    private static final double EXTENDED_POSITION = 2.8;
 
-    /** PID */
-    private double p = 0.55; // Riley TODO: Originaly 0.4; if not tested, revert back!
-    private double i = 0;
-    private double d = 0;
+    private static final double kP = 0.55;
+    private static final double kI = 0.0;
+    private static final double kD = 0.0;
 
-    /** FeedForward */
-    private double kv = 0.1;
-    private double kcos = 0.5; // Riley TODO: Originaly 0.45; if not tested, revert back!
-    private double kcosratio = 1;
-    // also kcos messing things up
-    private double goalUpRadians = 0.72;
-    private double goalDownRadians = -0.2; // Riley TODO: Originaly -0.1; if not tested, revert back!
-    private double setPoint = 0.7; // up position is ~0.7, but 0.5 to prevent it trying to go into the hopper,
+    private static final double CRUISE_VELOCITY = 120; // RPM
+    private static final double MAX_ACCELERATION = 20; // RPM/s
+    private static final double ALLOWED_ERROR = 0.5; // rotations
 
-    private static final GenericEntry intakeEntry = Shuffleboard
+    // When the motor stalls against the hard stop, current exceeds this.
+    // Adjust if the intake homes too early (lower) or too late (higher)
+    private static final double HOMING_CURRENT_THRESHOLD = 15.0; // amps
+    // Speed to retract during homing (negative = retract direction).
+    private static final double HOMING_SPEED = -0.1;
+
+    private boolean isHomed = false;
+    private double setPoint = 0.0;
+
+    private static final GenericEntry positionEntry = Shuffleboard
             .getTab("Intake")
-            .add("Position", 0)
+            .add("Rack position", 0)
             .getEntry();
-    private static final GenericEntry pivotAngleEntry = Shuffleboard
+    private static final GenericEntry setpointEntry = Shuffleboard
             .getTab("Intake")
-            .add("Pivot Angle", 0)
+            .add("Setpoint", 0)
             .getEntry();
-    private static final GenericEntry pivotMotorRPMEntry = Shuffleboard
+    private static final GenericEntry currentEntry = Shuffleboard
             .getTab("Intake")
-            .add("Pivot Motor RPM", 0)
+            .add("Pinion current", 0)
+            .getEntry();
+    private static final GenericEntry homedEntry = Shuffleboard
+            .getTab("Intake")
+            .add("Homed", false)
             .getEntry();
 
     public Intake() {
-        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        // configure intake motor
         intakeConfig
                 .inverted(true)
                 .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(20)
                 .closedLoopRampRate(0.001);
-        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
 
-        // configure pivot motor
-        pivotConfig
-                .inverted(true)
-                .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(60)
-                .closedLoopRampRate(0.001).closedLoop
-                .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder); // slot 0
-        // configure PID for the closed loop controller
-        pivotConfig.closedLoop
-                .pid(p, i, d).feedForward
-                .kV(kv)
-                .kCos(kcos)
-                .kCosRatio(kcosratio);
-        // .kS(ks)
-        // .kA(ka)
-        // .kG(0)
-        // configure constrainsts(?) for maxMotion
-        pivotConfig.closedLoop.maxMotion
-                // Set MAXMotion parameters for position control. We don't need to pass
-                // a closed loop slot, as it will default to slot 0.
-                .cruiseVelocity(120)
-                .maxAcceleration(20)
-                .allowedProfileError(1);
-        // configure encoder
-        pivotConfig.alternateEncoder
-                .setSparkMaxDataPortConfig();
+        pinionConfig
+                .inverted(false) // TODO: Set based on which direction extends
+                .idleMode(IdleMode.kBrake) // Peter: I think we want brake to hold the position
+                .smartCurrentLimit(40);
 
-        pivotMotor.configure(pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        pinionConfig.closedLoop
+                .pid(kP, kI, kD);
+        pinionConfig.closedLoop.maxMotion
+                .cruiseVelocity(CRUISE_VELOCITY)
+                .maxAcceleration(MAX_ACCELERATION)
+                .allowedProfileError(ALLOWED_ERROR);
 
-        encoder = pivotMotor.getAlternateEncoder();
-        encoder.setPosition(0.744); // zero encoder, such that the down position is 0 and the up position is 0.7
+        pinionConfig.softLimit
+                .forwardSoftLimitEnabled(true)
+                .forwardSoftLimit(MAX_EXTENSION_ROTATIONS)
+                .reverseSoftLimitEnabled(true)
+                .reverseSoftLimit(MIN_EXTENSION_ROTATIONS);
+
+        pinionMotor.configure(pinionConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
+        pinionEncoder = pinionMotor.getEncoder();
     }
 
-    /**
-     * Set the intake up or down
-     * 
-     * @param pointSet rotation, in radians at the encoder, that the pivot motor
-     *                 should go to. 0 is down, 0.5 is up, starts at 0.744 when all
-     *                 the way back
-     */
-    private void setGoal(double pointSet) {
-        setPoint = pointSet;
-        intakeEntry.setDouble(setPoint);
+    public Command homeCommand() {
+        return run(() -> {
+            // Drive slowly toward retracted hard stop
+            pinionMotor.set(HOMING_SPEED);
+        })
+                .until(() -> {
+                    // TODO: We might need to sample this?
+                    return pinionMotor.getOutputCurrent() > HOMING_CURRENT_THRESHOLD;
+                })
+                // Might need adjusting. We use a timeout as a safety net.
+                .withTimeout(1.5)
+                .finallyDo((interrupted) -> {
+                    pinionMotor.set(0);
+                    if (!interrupted) {
+                        // We hit the hard stop; zero the encoder here
+                        pinionEncoder.setPosition(0.0);
+                        isHomed = true;
+                        homedEntry.setBoolean(true);
+                    }
+                });
     }
 
-    /* Move the intake up. */
-    public void up() {
-        setGoal(goalUpRadians);
+    /** Whether the intake has been homed since the last enable. */
+    public boolean isHomed() {
+        return isHomed;
     }
 
-    /* Move the intake down. */
-    public void down() {
-        setGoal(goalDownRadians);
+    /** Extend the intake to the deployed position. */
+    public void extend() {
+        if (!isHomed) {
+            // We should probably throw an exception rather than silently fail
+            return;
+        }
+        setPoint = EXTENDED_POSITION;
+        setpointEntry.setDouble(setPoint);
     }
 
-    /* Run the intake wheels. */
+    /** Retract the intake to the stowed position. */
+    public void retract() {
+        if (!isHomed) {
+            return;
+        }
+        setPoint = RETRACTED_POSITION;
+        setpointEntry.setDouble(setPoint);
+    }
+
+    /** Run the intake wheels. */
     public void run() {
-        intakeMotor.set(0.8);
+        intakeMotor.set(1); // ~6800 RPM :)
     }
 
-    /* Stop the intake wheels. */
+    /** Stop the intake wheels. */
     public void stop() {
         intakeMotor.set(0);
+    }
+
+    /** Get the current position in motor rotations from home. */
+    public double getPosition() {
+        return pinionEncoder.getPosition();
     }
 
     private int telemetryCounter = 0;
 
     @Override
     public void periodic() {
+        if (isHomed) {
+            pinionMotor.getClosedLoopController().setSetpoint(
+                    setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+        }
+
         if (++telemetryCounter >= 10) {
-            pivotAngleEntry.setDouble(encoder.getPosition());
-            pivotMotorRPMEntry.setDouble(pivotMotor.getEncoder().getVelocity() / 6);
+            positionEntry.setDouble(pinionEncoder.getPosition());
+            currentEntry.setDouble(pinionMotor.getOutputCurrent());
             telemetryCounter = 0;
         }
-        pivotMotor.getClosedLoopController().setSetpoint(setPoint,
-                SparkBase.ControlType.kMAXMotionPositionControl);
     }
 }
