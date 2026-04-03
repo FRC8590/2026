@@ -228,7 +228,7 @@ public class RobotContainer {
     private void configureBindings() {
         ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, belt, indexer, vision);
 
-        Command driveFieldOrientedAnglularVelocity = drive
+        Command driveFieldOrientedAngularVelocity = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
                         () -> driverXbox.getLeftY() * getSide() * scaleFactor,
                         () -> driverXbox.getLeftX() * getSide() * scaleFactor)
@@ -246,7 +246,7 @@ public class RobotContainer {
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
 
-        drive.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        drive.setDefaultCommand(driveFieldOrientedAngularVelocity);
 
         driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
         driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
