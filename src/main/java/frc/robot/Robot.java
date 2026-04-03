@@ -174,7 +174,6 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         double remainingTime = allianceShiftCountdown.step();
         if (remainingTime <= 0) {
-            System.out.println("Alliance shift counter: " + allianceShiftCounter);
             if (++allianceShiftCounter > 4) {
                 allianceShiftCountdown.start(30);
             } else {

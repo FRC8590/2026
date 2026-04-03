@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Common interface to override the robot's rotation while driving.
  */
 public class RotationOverrideService {
-    private AtomicReference<Double> rotationOverride;
+    private AtomicReference<Double> rotationOverride = new AtomicReference<>();
 
     /**
      * Set the rotation override.
