@@ -38,12 +38,12 @@ public class Intake extends SubsystemBase {
     private final RelativeEncoder pinionEncoder;
 
     // TODO: Measure and update this value!
-    private static final double MAX_EXTENSION_ROTATIONS = 10.0;
+    private static final double MAX_EXTENSION_ROTATIONS = 3.0;
     private static final double MIN_EXTENSION_ROTATIONS = 0.0;
 
     // TODO: Measure and update these values!
     private static final double RETRACTED_POSITION = 0.2;
-    private static final double EXTENDED_POSITION = 9.5;
+    private static final double EXTENDED_POSITION = 2.8;
 
     private static final double kP = 0.55;
     private static final double kI = 0.0;
