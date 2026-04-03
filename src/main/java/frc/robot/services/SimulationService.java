@@ -138,14 +138,17 @@ public class SimulationService {
                 && (indexerOpt.get().getSpeed() > 0)
                 && (currentTime - lastSentFuel >= 200)) {
             var intakeSimulation = intake.getIntakeSimulation();
-            if (intakeSimulation.obtainGamePieceFromIntake()) {
-                driveSystem.ifEnabled(drive -> {
-                    // TODO: Peter: We should get this to precisely match our CAD
+            driveSystem.ifEnabled(drive -> {
+                // TODO: Peter: We should get this to precisely match our CAD
+                if (intakeSimulation.obtainGamePieceFromIntake()) {
                     addFuelProjectile(drive, shooterRPM, -0.1);
+                }
+                if (intakeSimulation.obtainGamePieceFromIntake()) {
                     addFuelProjectile(drive, shooterRPM, 0.1);
-                    lastSentFuel = currentTime;
-                });
-            }
+                }
+                lastSentFuel = currentTime;
+            });
+
         }
 
         Pose3d[] fuelPoses = SimulatedArena.getInstance()
