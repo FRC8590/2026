@@ -63,19 +63,19 @@ import lib.woodsonrobotics.vision.photon.PhotonVisionCamera;
  * trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout
+    public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFieldLayout
             .loadField(AprilTagFields.k2026RebuiltAndymark);
 
     private final PhotonVisionCamera[] ALL_CAMERAS = {
             // Cam mounted on the fron of the shooter (above the battory)
-            PhotonVisionCamera.newArduCamera("front", fieldLayout, new Transform3d(
+            PhotonVisionCamera.newArduCamera("front", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
                             Units.inchesToMeters(0), // X-Positive -> Forward
                             Units.inchesToMeters(0), // Y-Positive -> Left
                             Units.inchesToMeters(0)), // Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 0))),
             // TBD
-            PhotonVisionCamera.newArduCamera("rear", fieldLayout, new Transform3d(
+            PhotonVisionCamera.newArduCamera("rear", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
                             Units.inchesToMeters(0), // X-Positive -> Forward
                             Units.inchesToMeters(0), // Y-Positive -> Left
@@ -301,5 +301,4 @@ public class RobotContainer {
     public void resetAndStop() {
         drive.ifEnabled(swerve -> swerve.drive(new Translation2d(), 0, false));
     }
-
 }
