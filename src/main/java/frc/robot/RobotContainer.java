@@ -40,6 +40,7 @@ import frc.robot.commands.shooter.SetShooterSpeed;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.ShootOnMove;
 import frc.robot.commands.shooter.StableShoot;
+import frc.robot.services.RotationOverrideService;
 import frc.robot.services.SimulationService;
 import frc.robot.services.vision.SimulatedPhotonVisionService;
 import frc.robot.services.vision.VisionService;
@@ -88,6 +89,7 @@ public class RobotContainer {
     // Services -- these are essentially non-rebootable background systems
     public final VisionService vision;
     public final SimulationService simulation;
+    public final RotationOverrideService rotationOverride;
 
     // All of the subsystems. These are wrapped with SystemWrapper<> to allow
     // rebooting and disabling.
@@ -119,6 +121,8 @@ public class RobotContainer {
         // These don't have simulation variants
         belt = new SystemWrapper<>("belt", Belt::new);
         indexer = new SystemWrapper<>("indexer", Indexer::new);
+        rotationOverride = new RotationOverrideService();
+
         if (Robot.isReal()) {
             vision = new VisionService(ALL_CAMERAS);
             drive = new SystemWrapper<>("drive", () -> new Swerve(
@@ -230,9 +234,6 @@ public class RobotContainer {
      * Flight joysticks}.
      */
     private void configureBindings() {
-        ShootOnMove shootOnMove = new ShootOnMove(shooter, drive, belt, indexer, vision);
-        Pass passCommand = new Pass(shooter, drive, belt, indexer, vision);
-
         Command driveFieldOrientedAngularVelocity = drive
                 .command(swerve -> swerve.driveFieldOriented(SwerveInputStream.of(swerve.getSwerveDrive(),
                         () -> driverXbox.getLeftY() * getSide() * scaleFactor,
@@ -240,14 +241,9 @@ public class RobotContainer {
                         // We have to apply the deadband manually, because the small
                         // adjustments from the SOTM command will be ignored otherwise.
                         .withControllerRotationAxis(() -> {
-                            Double shootOverride = shootOnMove.getRotationOverride().get();
-                            if (shootOverride != null) {
-                                return shootOverride;
-                            }
-
-                            Double passOverride = passCommand.getRotationOverride().get();
-                            if (passOverride != null) {
-                                return passOverride;
+                            var overrideOpt = rotationOverride.getOverride();
+                            if (overrideOpt.isPresent()) {
+                                return overrideOpt.get();
                             }
 
                             double stick = -driverXbox.getRightX();
@@ -278,9 +274,9 @@ public class RobotContainer {
 
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
 
-        driverXbox.b().whileTrue(shootOnMove);
+        driverXbox.b().whileTrue(new ShootOnMove(shooter, drive, belt, indexer, vision, rotationOverride));
 
-        driverXbox.x().whileTrue(passCommand);
+        driverXbox.x().whileTrue(new Pass(shooter, drive, belt, indexer, vision, rotationOverride));
 
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));

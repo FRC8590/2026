@@ -1,8 +1,5 @@
 package frc.robot.commands.shooter;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,11 +9,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.RobotContainer;
+import frc.robot.services.RotationOverrideService;
 import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
-
-// TODO: Peter: We should unify some of the rotation override code with the
-// SOTM command. Perhaps we want a RotationOverride service?
 
 /**
  * Lob fuel from the neutral zone or opposing side to a landing zone in our
@@ -26,8 +21,8 @@ public class PassWithRotationOverride extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
+    public final RotationOverrideService rotationOverrideService;
 
-    private final AtomicReference<Double> rotationOverride = new AtomicReference<>(null);
     private final PIDController rotationPID = new PIDController(5.0, 0.0, 0.15);
 
     private static final double SPEED_TO_RPM = 6000.0 / 20.0;
@@ -54,15 +49,13 @@ public class PassWithRotationOverride extends Command {
     public PassWithRotationOverride(
             SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
-            VisionService vision) {
+            VisionService vision,
+            RotationOverrideService rotationOverride) {
         shooterSystem = shooter;
         driveSystem = drive;
         visionService = vision;
+        rotationOverrideService = rotationOverride;
         addRequirements(shooter);
-    }
-
-    public Supplier<Double> getRotationOverride() {
-        return rotationOverride::get;
     }
 
     public boolean isHeadingAligned() {
@@ -74,7 +67,7 @@ public class PassWithRotationOverride extends Command {
         rotationPID.reset();
         rotationPID.enableContinuousInput(-Math.PI, Math.PI);
         rotationPID.setTolerance(Units.degreesToRadians(3.0));
-        rotationOverride.set(null);
+        rotationOverrideService.clearOverride();
 
         driveSystem.get().ifPresent(swerve -> {
             maxAngularVelocity = swerve.getSwerveDrive().getMaximumChassisAngularVelocity();
@@ -98,7 +91,7 @@ public class PassWithRotationOverride extends Command {
         double distance = toTarget.getNorm();
 
         if (distance < MIN_PASS_DISTANCE || distance > MAX_PASS_DISTANCE) {
-            rotationOverride.set(0.0);
+            rotationOverrideService.setOverride(0.0);
             return;
         }
 
@@ -127,13 +120,13 @@ public class PassWithRotationOverride extends Command {
         double discriminant = b * b - 4 * a * c;
 
         if (discriminant < 0) {
-            rotationOverride.set(0.0);
+            rotationOverrideService.setOverride(0.0);
             return;
         }
 
         double launchSpeed = (-b + Math.sqrt(discriminant)) / (2 * a);
         if (launchSpeed <= 0) {
-            rotationOverride.set(0.0);
+            rotationOverrideService.setOverride(0.0);
             return;
         }
 
@@ -151,7 +144,7 @@ public class PassWithRotationOverride extends Command {
         double currentHeadingRad = robotPose.getRotation().getRadians();
         double pidOutput = rotationPID.calculate(currentHeadingRad, desiredHeadingRad);
         double normalized = Math.max(-1.0, Math.min(1.0, pidOutput / maxAngularVelocity));
-        rotationOverride.set(normalized);
+        rotationOverrideService.setOverride(normalized);
     }
 
     @Override
@@ -161,7 +154,7 @@ public class PassWithRotationOverride extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        rotationOverride.set(null);
+        rotationOverrideService.clearOverride();
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(0));
     }
 
