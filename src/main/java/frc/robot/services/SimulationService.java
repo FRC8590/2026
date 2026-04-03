@@ -14,8 +14,10 @@ import org.ironmaple.utils.FieldMirroringUtils;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.feeder.Belt;
 import frc.robot.subsystems.feeder.Indexer;
@@ -29,6 +31,11 @@ public class SimulationService {
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final SystemWrapper<Belt> beltSystem;
     private final SystemWrapper<Indexer> indexerSystem;
+    private int simulatedScore;
+    private final GenericEntry simulatedScoreEntry = Shuffleboard
+            .getTab("Console")
+            .add("Simulated Score", 0)
+            .getEntry();
 
     private final StructArrayPublisher<Pose3d> fuelPosePublisher = NetworkTableInstance.getDefault()
             .getStructArrayTopic("Fuel poses", Pose3d.struct)
@@ -79,6 +86,8 @@ public class SimulationService {
                 // Set a callback to run when the fuel hits the target
                 .withHitTargetCallBack(() -> {
                     System.out.println("Hit hub, +1 point!");
+                    simulatedScore += 1;
+                    simulatedScoreEntry.setInteger(simulatedScore);
                     // This is roughly in the neutral zone.
                     // We add an arbitrary random number to it, because game pieces
                     // that spawn on top of each other in MapleSim are a little weird.

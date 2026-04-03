@@ -38,6 +38,7 @@ public class Robot extends TimedRobot {
 
     // Rebuilt-specific; time until the hub switches
     private ConsoleCountdown allianceShiftCountdown = new ConsoleCountdown("Time until shift");
+    private int allianceShiftCounter = 0;
     private ConsoleCountdown timeUntilEnd = new ConsoleCountdown("Time until end");
 
     public Robot() {
@@ -130,7 +131,8 @@ public class Robot extends TimedRobot {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
 
-        timeUntilEnd.start(20);
+        allianceShiftCountdown.start(20);
+        timeUntilEnd.start(160);
     }
 
     /**
@@ -155,8 +157,8 @@ public class Robot extends TimedRobot {
             m_autonomousCommand.cancel();
         }
 
-        allianceShiftCountdown.start(10);
-        timeUntilEnd.start(140 /* 2:20 minutes */);
+        timeUntilEnd.start(140);
+        allianceShiftCountdown.start(10); // Transition shift
     }
 
     /**
@@ -166,7 +168,12 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         double remainingTime = allianceShiftCountdown.step();
         if (remainingTime <= 0) {
-            allianceShiftCountdown.start(25);
+            System.out.println("Alliance shift counter: " + allianceShiftCounter);
+            if (++allianceShiftCounter > 4) {
+                allianceShiftCountdown.start(30);
+            } else {
+                allianceShiftCountdown.start(25);
+            }
         }
 
         timeUntilEnd.step();
