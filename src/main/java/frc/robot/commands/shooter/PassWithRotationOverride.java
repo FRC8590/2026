@@ -43,7 +43,6 @@ public class PassWithRotationOverride extends Command {
     private static final double LANDING_OFFSET_Y = 2.5;
 
     private static final double MIN_PASS_DISTANCE = 3.0;
-    private static final double MAX_PASS_DISTANCE = 16.0;
     private static final double MAX_LEAD_RAD = Math.toRadians(80);
 
     public PassWithRotationOverride(
@@ -90,7 +89,7 @@ public class PassWithRotationOverride extends Command {
         Translation2d toTarget = landingZone.minus(robotPose.getTranslation());
         double distance = toTarget.getNorm();
 
-        if (distance < MIN_PASS_DISTANCE || distance > MAX_PASS_DISTANCE) {
+        if (distance < MIN_PASS_DISTANCE) {
             rotationOverrideService.setOverride(0.0);
             return;
         }
