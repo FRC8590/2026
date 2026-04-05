@@ -1,7 +1,6 @@
 package frc.robot.commands.shooter.stable;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.AimAtTarget;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.services.vision.VisionService;
 import frc.robot.subsystems.drive.Swerve;
@@ -18,7 +17,6 @@ public class StableShoot extends SequentialCommandGroup {
             SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer, SystemWrapper<? extends Swerve> drive, VisionService vision) {
         addCommands(
                 new DriveToHub(vision),
-                new AimAtTarget(vision, drive),
                 new SetShooterSpeed(shooter, 2000),
                 new Feed(belt, indexer));
     }
