@@ -84,7 +84,7 @@ public class DriveUnderTrench extends SequentialCommandGroup {
 
             // If we're closer then 1m, then there's no need to align.
             if (nearestTag.distance() > 1.0) {
-                Pose2d goalPose = PathfinderCommand.offsetAlongFacing(nearestTag.tagPose(), ALIGN_OFFSET_METERS);
+                Pose2d goalPose = PathfinderCommand.offsetAlong(nearestTag.tagPose(), ALIGN_OFFSET_METERS, 0);
                 initializeWithGoalPose(goalPose);
             }
         }
@@ -104,7 +104,7 @@ public class DriveUnderTrench extends SequentialCommandGroup {
 
             var nearestTag = nearestTagOpt.get();
 
-            Pose2d goalPose = PathfinderCommand.offsetAlongFacing(nearestTag.tagPose(), EXIT_OFFSET_METERS);
+            Pose2d goalPose = PathfinderCommand.offsetAlong(nearestTag.tagPose(), EXIT_OFFSET_METERS, 0);
             initializeWithGoalPose(goalPose);
         }
     }

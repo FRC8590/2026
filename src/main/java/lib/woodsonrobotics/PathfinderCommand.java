@@ -62,15 +62,25 @@ public abstract class PathfinderCommand extends Command {
     }
 
     /**
+     * Computes a goal pose offset from a tag pose.
+     * The robot heading is set to match the direction of travel (same as tag
+     * facing + offsetDegrees).
+     */
+    public static Pose2d offsetAlong(Pose2d tagPose, double offsetMeters, double offsetDegrees) {
+        Rotation2d facing = tagPose.getRotation();
+        Translation2d offset = new Translation2d(
+                offsetMeters * Math.cos(facing.getRadians()),
+                offsetMeters * Math.sin(facing.getRadians()));
+        Rotation2d robotHeading = facing.plus(Rotation2d.fromDegrees(offsetDegrees));
+        return new Pose2d(tagPose.getTranslation().plus(offset), robotHeading);
+    }
+
+    /**
      * Computes a goal pose offset from a tag pose along the tag's facing direction.
      * The robot heading is set to match the direction of travel (same as tag
      * facing).
      */
     public static Pose2d offsetAlongFacing(Pose2d tagPose, double offsetMeters) {
-        Rotation2d facing = tagPose.getRotation();
-        Translation2d offset = new Translation2d(
-                offsetMeters * Math.cos(facing.getRadians()),
-                offsetMeters * Math.sin(facing.getRadians()));
-        return new Pose2d(tagPose.getTranslation().plus(offset), facing);
+        return offsetAlong(tagPose, offsetMeters, 180);
     }
 }

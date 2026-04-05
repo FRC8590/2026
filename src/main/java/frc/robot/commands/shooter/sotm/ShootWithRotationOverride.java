@@ -1,4 +1,4 @@
-package frc.robot.commands.shooter;
+package frc.robot.commands.shooter.sotm;
 
 import java.util.concurrent.atomic.AtomicReference;
 
