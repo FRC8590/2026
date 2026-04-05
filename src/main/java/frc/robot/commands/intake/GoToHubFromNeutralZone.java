@@ -40,7 +40,7 @@ public class GoToHubFromNeutralZone extends PathfinderCommand {
 
         Pose2d robotPose = drive.getPose();
         var nearestTag = visionService.findNearestTag(NEUTRAL_ZONE_TAG_IDS, robotPose);
-        var goalPose = PathfinderCommand.offsetAlongFacing(nearestTag.tagPose(), HUB_OFFSET_METERS);
+        var goalPose = PathfinderCommand.offsetAlong(nearestTag.tagPose(), HUB_OFFSET_METERS, 0);
         initializeWithGoalPose(goalPose);
     }
 }

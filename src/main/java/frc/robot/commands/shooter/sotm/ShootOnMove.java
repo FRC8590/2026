@@ -1,6 +1,4 @@
-package frc.robot.commands.shooter;
-
-import java.util.function.Supplier;
+package frc.robot.commands.shooter.sotm;
 
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -14,31 +12,30 @@ import frc.robot.subsystems.feeder.Indexer;
 import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
-public class Pass extends ParallelDeadlineGroup {
+public class ShootOnMove extends ParallelDeadlineGroup {
 
-    public Pass(
+    public ShootOnMove(
             SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive,
             SystemWrapper<Belt> belt,
             SystemWrapper<Indexer> indexer,
-            VisionService vision,
-            RotationOverrideService rotationOverride) {
+            VisionService vision, RotationOverrideService rotationOverride) {
 
         // We have to do this stupid trick because Java doesn't let me
         // create a variable before calling super().
-        this(new PassWithRotationOverride(shooter, drive, vision, rotationOverride), shooter, belt, indexer);
+        this(new ShootWithRotationOverride(shooter, drive, vision, rotationOverride), shooter, belt, indexer);
     }
 
-    private Pass(PassWithRotationOverride passCommand, SystemWrapper<Shooter> shooter,
+    private ShootOnMove(ShootWithRotationOverride shootCommand, SystemWrapper<Shooter> shooter,
             SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer) {
         super(
-                passCommand,
+                shootCommand,
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> {
                             boolean rpmReady = shooter.get().map(Shooter::atRPM).orElse(false);
-                            boolean headingReady = passCommand.isHeadingAligned();
+                            boolean headingReady = shootCommand.isHeadingAligned();
                             return rpmReady && headingReady;
-                        }).withTimeout(4.0),
+                        }).withTimeout(2.0),
                         new Feed(belt, indexer)));
     }
 }

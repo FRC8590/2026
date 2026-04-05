@@ -1,4 +1,4 @@
-package frc.robot.commands.shooter;
+package frc.robot.commands.shooter.standard;
 
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.AimAtTarget;
