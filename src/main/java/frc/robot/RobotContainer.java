@@ -278,6 +278,7 @@ public class RobotContainer {
         // TODO: Peter: Do we need this? Shooter commands will align on their own
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
         driverXbox.b().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
+        driverXbox.b().onFalse(new SetShooterSpeed(shooter, 0));
         driverXbox.x().whileTrue(new Pass(shooter, drive, belt, indexer, vision, rotationOverride));
 
         // Reboot
