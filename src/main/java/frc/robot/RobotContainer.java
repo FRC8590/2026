@@ -76,14 +76,14 @@ public class RobotContainer {
                             Units.inchesToMeters(11.50), // X-Positive -> Forward
                             Units.inchesToMeters(-2.00), // Y-Positive -> Left
                             Units.inchesToMeters(12.55)),// Z-Positive -> Up
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), 0))),
+                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), Units.degreesToRadians(180)))),
             // Camera moutned on the side of the shooter facing backwards
             PhotonVisionCamera.newArduCamera("rear", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
                             Units.inchesToMeters(0.033), // X-Positive -> Forward
                             Units.inchesToMeters(7.006), // Y-Positive -> Left
                             Units.inchesToMeters(18.451)),// Z-Positive -> Up
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), 180)))
+                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), 0)))
     };
 
     // Services -- these are essentially non-rebootable background systems
