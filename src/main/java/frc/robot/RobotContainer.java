@@ -73,8 +73,8 @@ public class RobotContainer {
             // Cam mounted on the front of the shooter (above the battory)
             PhotonVisionCamera.newArduCamera("front", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
-                            Units.inchesToMeters(12.50), // X-Positive -> Forward
-                            Units.inchesToMeters(0.00), // Y-Positive -> Left
+                            Units.inchesToMeters(11.50), // X-Positive -> Forward
+                            Units.inchesToMeters(-2.00), // Y-Positive -> Left
                             Units.inchesToMeters(12.55)),// Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), 0))),
             // Camera moutned on the side of the shooter facing backwards
