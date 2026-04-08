@@ -22,7 +22,10 @@ public class Shooter extends SubsystemBase {
 
     private static final int FRONT_MOTOR_ID = 12;
     private static final int BACK_MOTOR_ID = 13;
+
     public static final double SHOOTER_MAX_RPM = 6784;
+    public static final double RPM_PER_MPS = 318.48;
+    public static final double RPM_OFFSET = 93.88;
 
     private static final SparkFlex frontMotor = new SparkFlex(FRONT_MOTOR_ID, MotorType.kBrushless);
     private static final SparkFlex backMotor = new SparkFlex(BACK_MOTOR_ID, MotorType.kBrushless);
@@ -145,11 +148,8 @@ public class Shooter extends SubsystemBase {
                 / (2 * cosA * cosA * denominator);
         double v0 = Math.sqrt(v0Squared);
 
-        // Use the sim's exact RPM<->velocity model: 6000 RPM = 20 m/s
-        double rpm = v0 * 6000.0 / 20.0;
-
-        // We arbitrarily add 50 to account for some slight undershooting
-        return Math.min(rpm + 50, SHOOTER_MAX_RPM);
+        double rpm = v0 * RPM_PER_MPS + RPM_OFFSET;
+        return Math.min(rpm, SHOOTER_MAX_RPM);
     }
 
     /**

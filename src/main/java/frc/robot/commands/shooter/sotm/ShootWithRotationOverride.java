@@ -39,10 +39,6 @@ public class ShootWithRotationOverride extends Command {
     private static final double MIN_DISTANCE = 0.75;
     private static final double MAX_DISTANCE = 6.0;
 
-    // Sim ball speed model: 6000 RPM = 20 m/s
-    private static final double RPM_TO_SPEED = 20.0 / 6000.0;
-    private static final double SPEED_TO_RPM = 6000.0 / 20.0;
-
     private static final double SHOOTER_TO_HUB_HEIGHT = 1.83 - Units.feetToMeters(18.73 / 12);
 
     private Thread solverThread;
@@ -187,7 +183,9 @@ public class ShootWithRotationOverride extends Command {
             return;
         }
 
-        double rpm = Math.min(solution.getX() * SPEED_TO_RPM, Shooter.SHOOTER_MAX_RPM);
+        double rpm = Math.min(solution.getX() * Shooter.RPM_PER_MPS + Shooter.RPM_OFFSET,
+                Shooter.SHOOTER_MAX_RPM);
+
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
 
         double currentAngle = robotPose.getRotation().getRadians();

@@ -70,9 +70,8 @@ public class SimulationService {
                 // + new Rotation2d(90),
                 // Initial height of the flying fuel
                 Inches.of(16.78),
-                // The launch speed is proportional to the RPM; assumed to be 16 meters/second
-                // at 6000 RPM
-                MetersPerSecond.of(rpm / 6000 * 20),
+                // The launch speed is proportional to the RPM
+                MetersPerSecond.of((rpm - 93.88) / 318.48),
                 // The angle at which the note is launched
                 Radians.of(Math.toRadians(69)));
 

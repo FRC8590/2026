@@ -25,7 +25,6 @@ public class PassWithRotationOverride extends Command {
 
     private final PIDController rotationPID = new PIDController(5.0, 0.0, 0.15);
 
-    private static final double SPEED_TO_RPM = 6000.0 / 20.0;
     private static final double LAUNCH_ANGLE_RAD = Math.toRadians(69.0);
     private static final double G = 9.81;
 
@@ -129,7 +128,7 @@ public class PassWithRotationOverride extends Command {
             return;
         }
 
-        double rpm = Math.min(launchSpeed * SPEED_TO_RPM, Shooter.SHOOTER_MAX_RPM);
+        double rpm = Math.min(launchSpeed * Shooter.RPM_PER_MPS + Shooter.RPM_OFFSET, Shooter.SHOOTER_MAX_RPM);
         final double rpmFinal = rpm;
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpmFinal));
 
