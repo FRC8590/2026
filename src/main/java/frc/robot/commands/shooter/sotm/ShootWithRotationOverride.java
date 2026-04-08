@@ -195,7 +195,7 @@ public class ShootWithRotationOverride extends Command {
         System.out.println("vel being set: " + fieldSpeeds.vxMetersPerSecond + ", " + fieldSpeeds.vyMetersPerSecond);
         System.out.println("robot pose: " + drive.getPose() + ", rotationSpeed: " + rotationSpeed
                 + ", solution.getY(): " + solution.getY());
-        SmartDashboard.putNumber("Ballistics Target Angle", solution.getY());
+        SmartDashboard.putNumber("Ballistics Target Angle", Math.toRadians(solution.getY()));
         SmartDashboard.putNumber("Ballistics Angle Offset",
                 Math.toDegrees(Math.atan2(toHub.getY(), toHub.getX())) - solution.getY());
 
