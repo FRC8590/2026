@@ -7,7 +7,10 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -26,6 +29,9 @@ public class SimulatedSwerve extends Swerve {
     private final Field2d simField = new Field2d();
 
     private final SwerveDriveSimulation mapleSimDrive;
+
+    StructPublisher<Pose2d> fieldPosePublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("Simulated Robot Pose", Pose2d.struct).publish();
 
     public SwerveDriveSimulation getMapleSimDrive() {
         return mapleSimDrive;
@@ -55,6 +61,7 @@ public class SimulatedSwerve extends Swerve {
         swerveDrive.getSimulationDriveTrainPose()
                 .ifPresent(pose -> {
                     simField.setRobotPose(pose);
+                    fieldPosePublisher.accept(pose);
                     // Keep the org.ironmaple drivetrain in sync with YAGSL's sim
                     mapleSimDrive.setSimulationWorldPose(pose);
                 });
