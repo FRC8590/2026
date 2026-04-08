@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.RobotContainer;
+import frc.robot.commands.DriveUnderTrench;
 import frc.robot.services.RotationOverrideService;
 import frc.robot.services.vision.VisionService;
 import lib.woodsonrobotics.SystemWrapper;
@@ -37,9 +38,13 @@ public class PassWithRotationOverride extends Command {
     // How far from the outpost (toward field center) to place the landing zone
     // (meters)
     private static final double LANDING_OFFSET_X = 3.0;
+
     // How far from the output (toward alliance wall) to place the landing zone
     // (meters)
-    private static final double LANDING_OFFSET_Y = 2.5;
+    // When we're on the left side of the field
+    private static final double LANDING_OFFSET_Y_LEFT = 1.0;
+    // When we're on the right side of the field (but still relative to the outpost)
+    private static final double LANDING_OFFSET_Y_RIGHT = 5.0;
 
     private static final double MIN_PASS_DISTANCE = 3.0;
     private static final double MAX_LEAD_RAD = Math.toRadians(80);
@@ -165,11 +170,19 @@ public class PassWithRotationOverride extends Command {
         var nearest = visionService.findNearestTag(tags, robotPose);
         Translation2d outpostPos = nearest.tagPose().getTranslation();
 
+        int[] trenchTags = RobotContainer.isRedAlliance()
+                ? DriveUnderTrench.RED_EXIT_TAG_IDS
+                : DriveUnderTrench.BLUE_EXIT_TAG_IDS;
+        var nearestTrench = visionService.findNearestTag(trenchTags, robotPose);
+        double landingOffsetY = nearestTrench.tagId() == trenchTags[0]
+                ? LANDING_OFFSET_Y_LEFT
+                : LANDING_OFFSET_Y_RIGHT;
+
         // Offset toward field center: +X for blue (wall at X≈0), -X for red (wall at
         // X~=16.5)
         double dir = RobotContainer.isRedAlliance() ? -1.0 : 1.0;
         return new Translation2d(
                 outpostPos.getX() + dir * LANDING_OFFSET_X,
-                outpostPos.getY() + dir * LANDING_OFFSET_Y);
+                outpostPos.getY() + dir * landingOffsetY);
     }
 }

@@ -32,8 +32,8 @@ public class DriveUnderTrench extends SequentialCommandGroup {
     private static final int[] BLUE_ENTRY_TAG_IDS = { 23, 28 };
 
     // Trench exit tags (facing neutral zone)
-    private static final int[] RED_EXIT_TAG_IDS = { 6, 1 };
-    private static final int[] BLUE_EXIT_TAG_IDS = { 17, 22 };
+    public static final int[] RED_EXIT_TAG_IDS = { 1, 6 };
+    public static final int[] BLUE_EXIT_TAG_IDS = { 17, 22 };
 
     private final int[] RED_TAG_IDS = IntStream
             .concat(Arrays.stream(RED_ENTRY_TAG_IDS), Arrays.stream(RED_EXIT_TAG_IDS))
@@ -62,8 +62,8 @@ public class DriveUnderTrench extends SequentialCommandGroup {
 
             Pose2d robotPose = drive.getPose();
             int[] tags = RobotContainer.isRedAlliance() ? RED_TAG_IDS : BLUE_TAG_IDS;
-
             var nearestTag = visionService.findNearestTag(tags, robotPose);
+
             return Optional.of(nearestTag);
         }
     }
