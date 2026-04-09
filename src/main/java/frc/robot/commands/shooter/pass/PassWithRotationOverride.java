@@ -80,6 +80,13 @@ public class PassWithRotationOverride extends Command {
         });
     }
 
+    // Peter: Claude made this, not sure what it is, but I trust the math.
+    // Flight time coefficient for a ground-to-ground lob at 69 degrees.
+    // Derived from range equation: t = 2*sin(θ) * sqrt(d / (g*sin(2θ)))
+    // which simplifies to t ~= 0.729 * sqrt(distance) for θ=69 degrees.
+    private static final double FLIGHT_TIME_COEFFICIENT = 0.729;
+
+    // Peter: Claude assisted with the math here
     @Override
     public void execute() {
         var driveOpt = driveSystem.get();
@@ -98,46 +105,41 @@ public class PassWithRotationOverride extends Command {
             return;
         }
 
-        // Peter: Most of the math here was assisted by Claude
+        // Robot velocity in field frame
         ChassisSpeeds fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
                 drive.getRobotVelocity(), robotPose.getRotation());
         double vx = fieldSpeeds.vxMetersPerSecond;
         double vy = fieldSpeeds.vyMetersPerSecond;
 
+        // Decompose velocity relative to target direction
         double bearingRad = Math.atan2(toTarget.getY(), toTarget.getX());
         double cosBearing = Math.cos(bearingRad);
         double sinBearing = Math.sin(bearingRad);
         double vToward = vx * cosBearing + vy * sinBearing;
         double vLateral = -vx * sinBearing + vy * cosBearing;
 
-        // Ground-to-ground range with inherited horizontal velocity:
-        // distance = 2*v*sin(θ) * (v*cos(θ) + vToward) / g
-        //
-        // Rearranged: sin(2θ)*v² + 2*sin(θ)*vToward*v - distance*g = 0
-        double sinTheta = Math.sin(LAUNCH_ANGLE_RAD);
-        double sin2theta = Math.sin(2 * LAUNCH_ANGLE_RAD);
+        // The ball inherits vToward from the robot, so it travels farther
+        // than intended. Reduce the effective distance to compensate.
+        // Flight time estimate: t ~= 0.729 * sqrt(distance) (from range equation at 69
+        // degrees)
+        double flightTime = FLIGHT_TIME_COEFFICIENT * Math.sqrt(distance);
+        double effectiveDistance = distance - vToward * flightTime;
 
-        double a = sin2theta;
-        double b = 2 * sinTheta * vToward;
-        double c = -distance * G;
-        double discriminant = b * b - 4 * a * c;
-
-        if (discriminant < 0) {
+        if (effectiveDistance < 0.5) {
+            // Moving so fast toward target that no shot is needed
             rotationOverrideService.setOverride(0.0);
             return;
         }
 
-        double launchSpeed = (-b + Math.sqrt(discriminant)) / (2 * a);
-        if (launchSpeed <= 0) {
+        double rpm = Shooter.distanceToRPM(effectiveDistance);
+        if (rpm <= 0) {
             rotationOverrideService.setOverride(0.0);
             return;
         }
-
-        double rpm = Math.min(launchSpeed * Shooter.RPM_PER_MPS + Shooter.RPM_OFFSET, Shooter.SHOOTER_MAX_RPM);
         final double rpmFinal = rpm;
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpmFinal));
 
-        double flightTime = 2 * launchSpeed * sinTheta / G;
+        // Heading: compensate for lateral drift
         double lateralDrift = vLateral * flightTime;
         double leadAngle = -Math.atan2(lateralDrift, distance);
         leadAngle = Math.max(-MAX_LEAD_RAD, Math.min(MAX_LEAD_RAD, leadAngle));

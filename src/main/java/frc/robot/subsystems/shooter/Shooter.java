@@ -24,8 +24,10 @@ public class Shooter extends SubsystemBase {
     private static final int BACK_MOTOR_ID = 13;
 
     public static final double SHOOTER_MAX_RPM = 6784;
-    public static final double RPM_PER_MPS = 318.48;
-    public static final double RPM_OFFSET = 93.88;
+
+    // Model (distance only, not scoring): y = 426.11258x + 460.08048
+    public static final double RPM_PER_MPS = 426.11258;
+    public static final double RPM_OFFSET = 460.08048;
 
     private static final SparkFlex frontMotor = new SparkFlex(FRONT_MOTOR_ID, MotorType.kBrushless);
     private static final SparkFlex backMotor = new SparkFlex(BACK_MOTOR_ID, MotorType.kBrushless);
@@ -103,52 +105,11 @@ public class Shooter extends SubsystemBase {
         goalRPM = rpm;
     }
 
-    // Peter: This was written by Claude based on some rough estimates.
-    // We should get rid of this once we have an actual regression model,
-    // but until we get that chance, this is about as good as we can do.
     /**
-     * Calculates required shooter RPM for a given horizontal distance to the hub,
-     * using projectile motion physics.
-     *
-     * Assumes:
-     * Launch angle: 69 degrees
-     * Shooter height: ~0.61m (24 inches)
-     * Hub height: 1.83m (72 inches)
-     * Wheel diameter: 0.0889m (3.5 inches)
-     * Wheel slip factor: 0.9 (tune this first if readings are off)
-     *
-     * @param distanceMeters Horizontal distance from shooter to hub in meters
-     * @return Required RPM, clamped to SHOOTER_MAX_RPM
+     * Calculates required shooter RPM for a given horizontal distance.
      */
     public static double distanceToRPM(double distanceMeters) {
-        final double g = 9.81;
-        final double angleRad = Math.toRadians(69);
-        final double shooterHeight = 0.0; // sim launches from ground level
-        final double hubHeight = 1.83;
-        final double deltaY = hubHeight - shooterHeight;
-        final double MIN_DISTANCE = 0.75;
-        final double MAX_DISTANCE = 6.0;
-
-        if (distanceMeters < MIN_DISTANCE || distanceMeters > MAX_DISTANCE) {
-            DriveNotifier.operatorError("Shooting distance outside range (" + Math.round(distanceMeters) + "m)");
-            return 0;
-        }
-
-        double cosA = Math.cos(angleRad);
-        double tanA = Math.tan(angleRad);
-        double denominator = distanceMeters * tanA - deltaY;
-
-        if (denominator <= 0) {
-            DriveNotifier.internalError("distanceToRPM",
-                    "degenerate denominator at " + Math.round(distanceMeters) + "m");
-            return 0;
-        }
-
-        double v0Squared = (g * distanceMeters * distanceMeters)
-                / (2 * cosA * cosA * denominator);
-        double v0 = Math.sqrt(v0Squared);
-
-        double rpm = v0 * RPM_PER_MPS + RPM_OFFSET;
+        double rpm = (RPM_PER_MPS * distanceMeters) + RPM_OFFSET;
         return Math.min(rpm, SHOOTER_MAX_RPM);
     }
 
