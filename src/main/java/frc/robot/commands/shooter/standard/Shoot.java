@@ -26,7 +26,9 @@ public class Shoot extends SequentialCommandGroup {
                 new ParallelCommandGroup(
                         new AimAtTarget(vision, drive),
                         new SetDynamicShooterSpeed(shooter, drive, vision)),
-                new Feed(belt, indexer));
+                new Feed(belt, indexer)
+                        .finallyDo(
+                                () -> shooter.ifEnabled(shoot -> shoot.setGoalRPM(0))));
     }
 
 }

@@ -45,8 +45,9 @@ public abstract class PathfinderCommand extends Command {
 
     @Override
     public final void execute() {
-        if (pathfindCommand != null)
+        if (pathfindCommand != null) {
             pathfindCommand.execute();
+        }
     }
 
     @Override

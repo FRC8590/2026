@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -37,7 +36,6 @@ import frc.robot.commands.intake.GoToHubFromNeutralZone;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.shooter.pass.Pass;
 import frc.robot.commands.shooter.sotm.ShootOnMove;
-import frc.robot.commands.shooter.stable.SetShooterSpeed;
 import frc.robot.commands.shooter.stable.StableShoot;
 import frc.robot.commands.shooter.standard.Shoot;
 import frc.robot.services.RotationOverrideService;
@@ -273,13 +271,11 @@ public class RobotContainer {
         // Shooter
         driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision,
                 drive));
-        driverXbox.rightTrigger().onFalse(new SetShooterSpeed(shooter, 0));
         driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt, indexer, vision, rotationOverride));
 
         // TODO: Peter: Do we need this? Shooter commands will align on their own
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
         driverXbox.b().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
-        driverXbox.b().onFalse(new SetShooterSpeed(shooter, 0));
         driverXbox.x().whileTrue(new Pass(shooter, drive, belt, indexer, vision, rotationOverride));
 
         // Reboot

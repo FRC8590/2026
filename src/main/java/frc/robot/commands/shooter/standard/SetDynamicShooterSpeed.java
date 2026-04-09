@@ -1,5 +1,7 @@
 package frc.robot.commands.shooter.standard;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
@@ -16,6 +18,10 @@ public class SetDynamicShooterSpeed extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
+
+    // All the RPM values used during shooting.
+    // This is so we can log an average at the end.
+    private final ArrayList<Double> usedValues = new ArrayList<>();
 
     public SetDynamicShooterSpeed(SystemWrapper<Shooter> shooter,
             SystemWrapper<? extends Swerve> drive, VisionService vision) {
@@ -42,7 +48,15 @@ public class SetDynamicShooterSpeed extends Command {
         double distanceMeters = drive.get().getPose().getTranslation()
                 .getDistance(tagPose.getTranslation());
         double rpm = Shooter.distanceToRPM(distanceMeters);
+        usedValues.add(rpm);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        double sum = usedValues.stream().mapToDouble(Double::doubleValue).sum();
+        double average = sum / usedValues.size();
+        System.out.println("Average RPM: " + average);
     }
 
     @Override

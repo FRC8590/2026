@@ -15,13 +15,15 @@ import lib.woodsonrobotics.SystemWrapper;
  */
 public class StableShoot extends SequentialCommandGroup {
     public StableShoot(SystemWrapper<Shooter> shooter,
-            SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer, SystemWrapper<? extends Swerve> drive, VisionService vision) {
+            SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer, SystemWrapper<? extends Swerve> drive,
+            VisionService vision) {
         addCommands(
                 new ParallelCommandGroup(
-                    new DriveToHub(vision),
-                    new SetShooterSpeed(shooter, 2000)
-                ),
-                new Feed(belt, indexer));
+                        new DriveToHub(vision),
+                        new SetStableShooterSpeed(shooter)),
+                new LogHubDistance(drive, vision),
+                new Feed(belt, indexer)
+                        .finallyDo(() -> shooter.ifEnabled(shoot -> shoot.setGoalRPM(0))));
     }
 
 }
