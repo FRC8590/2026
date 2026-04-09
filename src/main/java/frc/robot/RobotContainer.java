@@ -283,7 +283,7 @@ public class RobotContainer {
         driverXbox.x().whileTrue(new Pass(shooter, drive, belt, indexer, vision, rotationOverride));
 
         // Reboot
-        // TODO: Peter: This probably don't work right now
+        // TODO: Peter: This probably doesn't work right now
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
 
