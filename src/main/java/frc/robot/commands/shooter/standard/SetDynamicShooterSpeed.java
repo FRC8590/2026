@@ -19,6 +19,10 @@ public class SetDynamicShooterSpeed extends Command {
     private final SystemWrapper<? extends Swerve> driveSystem;
     private final VisionService visionService;
 
+    // We add an arbitrary adjustment to the RPM toaccount for some
+    // undershooting. This will need tuning.
+    private static final double RPM_ADJUSTMENT = 400;
+
     // All the RPM values used during shooting.
     // This is so we can log an average at the end.
     private final ArrayList<Double> usedValues = new ArrayList<>();
@@ -47,7 +51,7 @@ public class SetDynamicShooterSpeed extends Command {
 
         double distanceMeters = drive.get().getPose().getTranslation()
                 .getDistance(tagPose.getTranslation());
-        double rpm = Shooter.distanceToRPM(distanceMeters);
+        double rpm = Shooter.distanceToRPM(distanceMeters) + RPM_ADJUSTMENT;
         usedValues.add(rpm);
         shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(rpm));
     }

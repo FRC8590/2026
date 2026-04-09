@@ -271,7 +271,8 @@ public class RobotContainer {
         // Shooter
         driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision,
                 drive));
-        driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt, indexer, vision, rotationOverride));
+        driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
+                indexer, vision, rotationOverride));
 
         // TODO: Peter: Do we need this? Shooter commands will align on their own
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
