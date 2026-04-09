@@ -54,6 +54,11 @@ public class SimulationService {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         var robotSimulationWorldPose = swerve.getPose();
         var chassisSpeedsFieldRelative = swerve.getFieldVelocity();
+        double speed = rpm > Shooter.RPM_OFFSET
+                ? Math.sqrt((rpm - Shooter.RPM_OFFSET) * 9.81
+                        / (Shooter.RPM_PER_MPS * Math.sin(Math.toRadians(138))))
+                : 0.0;
+
         // This is taken from the MapleSim docs
         RebuiltFuelOnFly fuelOnFly = new RebuiltFuelOnFly(
                 // Specify the position of the chassis when the note is launched
@@ -71,7 +76,7 @@ public class SimulationService {
                 // Initial height of the flying fuel
                 Inches.of(16.78),
                 // The launch speed is proportional to the RPM
-                MetersPerSecond.of((rpm - 93.88) / 318.48),
+                MetersPerSecond.of(speed),
                 // The angle at which the note is launched
                 Radians.of(Math.toRadians(69)));
 
