@@ -465,6 +465,8 @@ public class Swerve extends SubsystemBase {
                 }
                 if (Timer.getFPGATimestamp() - idleStartTime >= LOCK_DELAY_SECONDS) {
                     swerveDrive.lockPose();
+                } else {
+                    swerveDrive.driveFieldOriented(speeds);
                 }
             } else {
                 idleStartTime = -1;
