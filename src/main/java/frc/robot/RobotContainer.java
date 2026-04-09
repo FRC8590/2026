@@ -75,14 +75,15 @@ public class RobotContainer {
                     new Translation3d(
                             Units.inchesToMeters(11.50), // X-Positive -> Forward
                             Units.inchesToMeters(-2.00), // Y-Positive -> Left
-                            Units.inchesToMeters(12.55)),// Z-Positive -> Up
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), Units.degreesToRadians(180)))),
+                            Units.inchesToMeters(12.55)), // Z-Positive -> Up
+                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180),
+                            Units.degreesToRadians(180)))),
             // Camera moutned on the side of the shooter facing backwards
             PhotonVisionCamera.newArduCamera("rear", FIELD_LAYOUT, new Transform3d(
                     new Translation3d(
                             Units.inchesToMeters(0.033), // X-Positive -> Forward
                             Units.inchesToMeters(7.006), // Y-Positive -> Left
-                            Units.inchesToMeters(18.451)),// Z-Positive -> Up
+                            Units.inchesToMeters(18.451)), // Z-Positive -> Up
                     new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), 0)))
     };
 
@@ -285,7 +286,6 @@ public class RobotContainer {
         // TODO: Peter: This probably don't work right now
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
-
 
         // Utilities
         driverXbox.start().whileTrue(new DriveUnderTrench(drive, vision));
