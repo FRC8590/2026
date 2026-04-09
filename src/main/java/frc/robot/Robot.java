@@ -8,8 +8,10 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import lib.woodsonrobotics.telemetry.ConsoleCountdown;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
@@ -40,6 +42,8 @@ public class Robot extends TimedRobot {
     private ConsoleCountdown allianceShiftCountdown = new ConsoleCountdown("Time until shift");
     private int allianceShiftCounter = 0;
     private ConsoleCountdown timeUntilEnd = new ConsoleCountdown("Time until end");
+
+    public final CommandXboxController driverXbox = new CommandXboxController(0);
 
     public Robot() {
         instance = this;
@@ -182,6 +186,10 @@ public class Robot extends TimedRobot {
         }
 
         timeUntilEnd.step();
+        
+        // Controller Diagnostics
+        SmartDashboard.putNumberArray("Controller Values",  new Double[]{driverXbox.getLeftX(), driverXbox.getLeftY(), driverXbox.getRightX(), driverXbox.getRightY()});
+
     }
 
     /**
