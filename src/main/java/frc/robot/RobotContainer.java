@@ -164,6 +164,10 @@ public class RobotContainer {
         m_chooser.addOption("Red Left F.I.", "Red-TrBo-7Bo");
         m_chooser.addOption("Red Right Outpost", "Red-TrTo-Op-7To");
         m_chooser.addOption("Blue Left Outpost", "Blue-TrBo-Op-7Bo");
+        m_chooser.addOption("Blue Left NZ", "Blue-TrTo-Nz-7To");
+        m_chooser.addOption("Blue Right NZ", "Blue-TrBo-Nz-7Bo");
+
+        m_chooser.addOption("Blue Left shoot & depot", "Blue-TrTo-Dp-7To");
 
         NamedCommands.registerCommand("Shoot", new Shoot(shooter, belt, indexer, vision, drive));
         NamedCommands.registerCommand("Intake Extend", new ExtendIntake(intake));
