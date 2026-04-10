@@ -22,7 +22,7 @@ import com.revrobotics.RelativeEncoder;
 public class Intake extends SubsystemBase {
 
     // TODO: Update these to match the actual CAN IDs
-    private static final int PINION_MOTOR_ID = 9;
+    private static final int PINION_MOTOR_ID = 10;
     private static final int INTAKE_MOTOR_ID = 15;
 
     /**

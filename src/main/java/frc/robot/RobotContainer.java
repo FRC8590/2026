@@ -269,10 +269,9 @@ public class RobotContainer {
 
         driverXbox.leftTrigger().whileTrue(new ExtendIntake(intake));
         driverXbox.leftTrigger().onFalse(new RetractIntake(intake));
-        driverXbox.leftBumper().whileTrue(new GoToHubFromNeutralZone(drive, vision));
+        driverXbox.leftBumper().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
 
         driverXbox.povUp().whileTrue(new Feed(belt, indexer));
-        driverXbox.povLeft().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
         driverXbox.povDown().whileTrue(drive.command(Swerve::lockPose));
 
         driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision,
