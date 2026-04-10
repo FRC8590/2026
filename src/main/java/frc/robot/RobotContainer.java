@@ -33,7 +33,9 @@ import frc.robot.commands.DriveUnderTrench;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.commands.feeder.Unjam;
+import frc.robot.commands.intake.ExtendIntake;
 import frc.robot.commands.intake.GoToHubFromNeutralZone;
+import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.shooter.pass.Pass;
 import frc.robot.commands.shooter.sotm.ShootOnMove;
@@ -162,8 +164,10 @@ public class RobotContainer {
         m_chooser.addOption("Red Left F.I.", "Red-TrBo-7Bo");
         m_chooser.addOption("Red Right Outpost", "Red-TrTo-Op-7To");
         m_chooser.addOption("Blue Left Outpost", "Blue-TrBo-Op-7Bo");
-        NamedCommands.registerCommand("Shoot", new Shoot(shooter, belt, indexer, vision, drive));
 
+        NamedCommands.registerCommand("Shoot", new Shoot(shooter, belt, indexer, vision, drive));
+        NamedCommands.registerCommand("Intake Extend", new ExtendIntake(intake));
+        NamedCommands.registerCommand("Intake Retract", new RetractIntake(intake));
     }
 
     /**

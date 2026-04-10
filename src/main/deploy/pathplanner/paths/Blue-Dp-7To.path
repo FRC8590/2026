@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6,
-        "y": 7.4
+        "x": 1.25,
+        "y": 6.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1535897435897455,
-        "y": 7.0467051282051285
+        "x": 1.966308491091695,
+        "y": 5.8947140734753205
       },
       "isLocked": false,
-      "linkedName": "blue - top trench"
+      "linkedName": "blue - depot"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 5.42145
       },
       "prevControl": {
-        "x": 2.0046576923076938,
-        "y": 5.697133076923077
+        "x": 1.6413046294638407,
+        "y": 5.828895483414513
       },
       "nextControl": null,
       "isLocked": false,

@@ -7,32 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-Hb-7Md"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 3.5
-                }
-              }
-            ]
+            "pathName": "Blue-TrTo-7To"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "BeltAndIndexerStop"
+            "name": "Shoot"
           }
         }
       ]

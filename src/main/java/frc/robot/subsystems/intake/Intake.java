@@ -179,6 +179,10 @@ public class Intake extends SubsystemBase {
         return pinionEncoder.getPosition();
     }
 
+    public boolean isAtSetpoint() {
+        return pinionMotor.getClosedLoopController().isAtSetpoint();
+    }
+
     private int telemetryCounter = 0;
 
     @Override
