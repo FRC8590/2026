@@ -252,43 +252,35 @@ public class RobotContainer {
                         .robotRelative(false)
                         .allianceRelativeControl(false)));
 
-        // Drive
         drive.setDefaultCommand(driveFieldOrientedAngularVelocity);
-        driverXbox.povDown().whileTrue(drive.command(Swerve::lockPose));
+
         driverXbox.leftStick().whileTrue(new ZeroGyro(drive));
 
-        // Speed shift
         // TODO: Peter: Shaheer doesn't use these :(
         // driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
         // driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
 
-        // Intake
         driverXbox.leftTrigger().whileTrue(new RunIntake(intake));
+        driverXbox.leftBumper().whileTrue(new GoToHubFromNeutralZone(drive, vision));
 
-        // Indexer
         driverXbox.povUp().whileTrue(new Feed(belt, indexer));
-        driverXbox.a().whileTrue(new Unjam(belt, indexer));
+        driverXbox.povLeft().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
+        driverXbox.povDown().whileTrue(drive.command(Swerve::lockPose));
 
-        // Shooter
         driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision,
                 drive));
         driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
                 indexer, vision, rotationOverride));
-        driverXbox.povLeft().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
 
-        // TODO: Peter: Do we need this? Shooter commands will align on their own
+        driverXbox.a().whileTrue(new Unjam(belt, indexer));
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
         driverXbox.b().whileTrue(new DriveToHub(vision));
         driverXbox.x().whileTrue(new Pass(shooter, drive, belt, indexer, vision, rotationOverride));
 
-        // Reboot
         // TODO: Peter: This probably doesn't work right now
         driverXbox.start().and(driverXbox.leftBumper()).and(driverXbox.rightBumper())
                 .onTrue(Commands.runOnce(this::rebootAllSystems));
-
-        // Utilities
         driverXbox.start().whileTrue(new DriveUnderTrench(drive, vision));
-        driverXbox.leftBumper().whileTrue(new GoToHubFromNeutralZone(drive, vision));
 
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);
