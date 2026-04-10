@@ -36,7 +36,6 @@ import frc.robot.commands.feeder.Unjam;
 import frc.robot.commands.intake.ExtendIntake;
 import frc.robot.commands.intake.GoToHubFromNeutralZone;
 import frc.robot.commands.intake.RetractIntake;
-import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.shooter.pass.Pass;
 import frc.robot.commands.shooter.sotm.ShootOnMove;
 import frc.robot.commands.shooter.stable.StableShoot;
@@ -268,17 +267,18 @@ public class RobotContainer {
         // driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
         // driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
 
-        driverXbox.leftTrigger().whileTrue(new RunIntake(intake));
+        driverXbox.leftTrigger().whileTrue(new ExtendIntake(intake));
+        driverXbox.leftTrigger().onFalse(new RetractIntake(intake));
         driverXbox.leftBumper().whileTrue(new GoToHubFromNeutralZone(drive, vision));
 
         driverXbox.povUp().whileTrue(new Feed(belt, indexer));
         driverXbox.povLeft().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
         driverXbox.povDown().whileTrue(drive.command(Swerve::lockPose));
 
-        driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision,
+        driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision,
                 drive));
-        // driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
-        // indexer, vision, rotationOverride));
+        driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
+                indexer, vision, rotationOverride));
 
         driverXbox.a().whileTrue(new Unjam(belt, indexer));
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
