@@ -1,11 +1,13 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import lib.woodsonrobotics.math.LiveRegression;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
@@ -89,6 +91,28 @@ public class Shooter extends SubsystemBase {
 
         shooterConfig.inverted(true);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        SmartDashboard.putData("Shooter/Scoring", Commands.runOnce(this::markScore).withName("Did we score?"));
+
+    }
+
+    public double registeredRPM = -1;
+    public double registeredDistance = -1;
+
+    private void markScore() {
+        if (registeredRPM == -1 || registeredDistance == -1) {
+            DriveNotifier.operatorError("No point is set");
+            return;
+        }
+        liveRegression.addPoint(registeredDistance, registeredRPM);
+        System.out.println("Scored, new live regression: " + liveRegression);
+        if (liveRegression.isReady()) {
+            DriveNotifier.inform("Live regression is ready!");
+        }
+    }
+
+    public void registerLiveAdjustedRpmAndDistance(double rpm, double distance) {
+        registeredRPM = rpm;
+        registeredDistance = distance;
     }
 
     public double getGoalRPM() {

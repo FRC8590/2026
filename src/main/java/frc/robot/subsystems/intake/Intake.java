@@ -160,6 +160,10 @@ public class Intake extends SubsystemBase {
         setpointEntry.setDouble(setPoint);
     }
 
+    public boolean isAtPosition() {
+        return pinionMotor.getClosedLoopController().isAtSetpoint();
+    }
+
     /** Run the intake wheels. */
     public void run() {
         intakeMotor.set(1); // ~6800 RPM :)

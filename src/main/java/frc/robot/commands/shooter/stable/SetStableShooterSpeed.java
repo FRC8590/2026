@@ -65,7 +65,10 @@ public class SetStableShooterSpeed extends Command {
             lastProcessedTimestamp = currentTimestamp;
             currentTargetRPM = rpmEntry.getDouble(2000);
         }
-        shooterSystem.ifEnabled(shooter -> shooter.setGoalRPM(currentTargetRPM));
+        shooterSystem.ifEnabled(shooter -> {
+            shooter.setGoalRPM(currentTargetRPM);
+            shooter.registerLiveAdjustedRpmAndDistance(currentTargetRPM, distanceMeters);
+        });
     }
 
     @Override

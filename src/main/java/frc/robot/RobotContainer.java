@@ -267,10 +267,10 @@ public class RobotContainer {
         driverXbox.povLeft().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
         driverXbox.povDown().whileTrue(drive.command(Swerve::lockPose));
 
-        driverXbox.rightTrigger().whileTrue(new Shoot(shooter, belt, indexer, vision,
+        driverXbox.rightBumper().whileTrue(new Shoot(shooter, belt, indexer, vision,
                 drive));
-        driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
-                indexer, vision, rotationOverride));
+        // driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
+        // indexer, vision, rotationOverride));
 
         driverXbox.a().whileTrue(new Unjam(belt, indexer));
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
