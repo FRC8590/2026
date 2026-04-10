@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-TrTo-7To"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
+            "pathName": "Red-TrBo-TrBoIn"
           }
         },
         {
@@ -25,37 +19,44 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-7To-Dp"
+            "pathName": "Red-TrBoIn-Nz"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-Dp-DpIn"
+            "pathName": "Red-Nz-TrBoIv"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-DpIn-Dp"
+            "pathName": "Red-TrBoIv-7Bo"
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "Blue-Dp-7To"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 4.0
+                }
+              }
+            ]
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Blue",
+  "folder": "Red",
   "choreoAuto": false
 }

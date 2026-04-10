@@ -41,13 +41,26 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Shoot"
+                  "name": "Intake Retract"
                 }
               },
               {
-                "type": "named",
+                "type": "race",
                 "data": {
-                  "name": "Intake Retract"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 4.0
+                      }
+                    }
+                  ]
                 }
               }
             ]

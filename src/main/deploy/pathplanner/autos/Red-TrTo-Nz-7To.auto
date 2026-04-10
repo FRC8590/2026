@@ -7,7 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red-TrBo-7Bo"
+            "pathName": "Red-TrTo-TrToIn"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Extend"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red-TrToIn-Nz"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red-Nz-TrToIv"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red-TrToIv-7To"
           }
         },
         {
