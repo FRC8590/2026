@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-TrBt-7Bt"
+            "pathName": "Red-TrBo-7Bo"
           }
         },
         {
@@ -23,28 +23,40 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.5
+                  "waitTime": 3.0
                 }
               }
             ]
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Blue-7Bo-Op"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "name": "Intake Extend"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Blue-Op-7Bo"
+            "pathName": "Red-7Bo-Dp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red-Dp-DpIn"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red-DpIn-Dp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red-Dp-7Bo"
           }
         },
         {
@@ -70,6 +82,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Blue",
+  "folder": "Red",
   "choreoAuto": false
 }
