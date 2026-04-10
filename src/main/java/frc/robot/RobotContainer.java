@@ -28,6 +28,7 @@ import java.io.File;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.commands.AimAtTarget;
+import frc.robot.commands.DriveToHub;
 import frc.robot.commands.DriveUnderTrench;
 import frc.robot.commands.ZeroGyro;
 import frc.robot.commands.feeder.Feed;
@@ -258,8 +259,8 @@ public class RobotContainer {
 
         // Speed shift
         // TODO: Peter: Shaheer doesn't use these :(
-        driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
-        driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
+        // driverXbox.povRight().onTrue(drive.command(Swerve::shiftUp));
+        // driverXbox.povLeft().onTrue(drive.command(Swerve::shiftDown));
 
         // Intake
         driverXbox.leftTrigger().whileTrue(new RunIntake(intake));
@@ -273,10 +274,11 @@ public class RobotContainer {
                 drive));
         driverXbox.rightBumper().whileTrue(new ShootOnMove(shooter, drive, belt,
                 indexer, vision, rotationOverride));
+        driverXbox.povLeft().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
 
         // TODO: Peter: Do we need this? Shooter commands will align on their own
         driverXbox.y().whileTrue(new AimAtTarget(vision, drive));
-        driverXbox.b().whileTrue(new StableShoot(shooter, belt, indexer, drive, vision));
+        driverXbox.b().whileTrue(new DriveToHub(vision));
         driverXbox.x().whileTrue(new Pass(shooter, drive, belt, indexer, vision, rotationOverride));
 
         // Reboot

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lib.woodsonrobotics.math.LiveRegression;
 import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -33,6 +34,8 @@ public class Shooter extends SubsystemBase {
     private static final SparkFlex backMotor = new SparkFlex(BACK_MOTOR_ID, MotorType.kBrushless);
 
     private final SparkFlexConfig shooterConfig = new SparkFlexConfig();
+
+    private static final LiveRegression liveRegression = new LiveRegression();
 
     private double goalRPM = 0;
 
@@ -109,6 +112,9 @@ public class Shooter extends SubsystemBase {
      * Calculates required shooter RPM for a given horizontal distance.
      */
     public static double distanceToRPM(double distanceMeters) {
+        if (liveRegression.isReady()) {
+            return liveRegression.predict(distanceMeters);
+        }
         double rpm = (RPM_PER_MPS * distanceMeters) + RPM_OFFSET;
         return Math.min(rpm, SHOOTER_MAX_RPM);
     }

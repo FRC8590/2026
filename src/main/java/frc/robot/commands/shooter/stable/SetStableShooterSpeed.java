@@ -6,6 +6,9 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
+import frc.robot.services.vision.VisionService;
+import frc.robot.subsystems.drive.Swerve;
 import frc.robot.subsystems.shooter.Shooter;
 import lib.woodsonrobotics.SystemWrapper;
 
@@ -16,6 +19,8 @@ import lib.woodsonrobotics.SystemWrapper;
  */
 public class SetStableShooterSpeed extends Command {
     private final SystemWrapper<Shooter> shooterSystem;
+    private final SystemWrapper<? extends Swerve> driveSystem;
+    private final VisionService visionService;
 
     GenericEntry rpmEntry = Shuffleboard
             .getTab("Console")
@@ -26,10 +31,31 @@ public class SetStableShooterSpeed extends Command {
 
     private long lastProcessedTimestamp = 0;
     private double currentTargetRPM = 2000;
+    private double distanceMeters = -1;
 
-    public SetStableShooterSpeed(SystemWrapper<Shooter> shooter) {
+    public SetStableShooterSpeed(SystemWrapper<Shooter> shooter, SystemWrapper<? extends Swerve> drive,
+            VisionService vision) {
         shooterSystem = shooter;
-        addRequirements(shooter);
+        driveSystem = drive;
+        visionService = vision;
+        addRequirements(shooter, drive);
+    }
+
+    @Override
+    public void initialize() {
+        var driveOpt = driveSystem.get();
+        if (driveOpt.isEmpty()) {
+            return;
+        }
+
+        // This is only here because mech won't let us get an accurate model, so we
+        // have to do it during matches. Ideally, once we have a good regression model,
+        // we can remove this.
+        var drive = driveOpt.get();
+        var tagPose = visionService.getTagFieldPose(RobotContainer.getHubAprilTag());
+        distanceMeters = drive.getPose().getTranslation()
+                .getDistance(tagPose.getTranslation());
+        System.out.println("Distance to hub: " + distanceMeters);
     }
 
     @Override

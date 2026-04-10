@@ -1,6 +1,5 @@
 package frc.robot.commands.shooter.stable;
 
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.feeder.Feed;
 import frc.robot.services.vision.VisionService;
@@ -18,10 +17,7 @@ public class StableShoot extends SequentialCommandGroup {
             SystemWrapper<Belt> belt, SystemWrapper<Indexer> indexer, SystemWrapper<? extends Swerve> drive,
             VisionService vision) {
         addCommands(
-                new ParallelCommandGroup(
-                        new DriveToHub(vision),
-                        new SetStableShooterSpeed(shooter)),
-                new LogHubDistance(drive, vision),
+                new SetStableShooterSpeed(shooter, drive, vision),
                 new Feed(belt, indexer)
                         .finallyDo(() -> shooter.ifEnabled(shoot -> shoot.setGoalRPM(0))));
     }

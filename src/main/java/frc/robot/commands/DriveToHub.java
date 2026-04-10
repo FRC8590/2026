@@ -1,4 +1,4 @@
-package frc.robot.commands.shooter.stable;
+package frc.robot.commands;
 
 import frc.robot.RobotContainer;
 import frc.robot.services.vision.VisionService;
