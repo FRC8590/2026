@@ -8,8 +8,12 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import lib.woodsonrobotics.telemetry.ConsoleCountdown;
+import lib.woodsonrobotics.telemetry.notify.DriveNotifier;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -21,73 +25,28 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
 
     private static Robot instance;
-    private Command m_autonomousCommand;
-    private GenericEntry isRedAllianceEntry = Shuffleboard
+
+    private Command autonomousCommand;
+    private static GenericEntry isRedAllianceEntry = Shuffleboard
             .getTab("Console")
             .add("On red alliance?", false)
             .getEntry();
 
-    public RobotContainer m_robotContainer;
+    public RobotContainer robotContainer;
 
     private Timer disabledTimer;
 
-    private class Countdown {
-        private Timer timer;
-        private double waitTime = -1;
-        private GenericEntry shuffleboardEntry;
-        private long lastPublishedSecond = -1;
-
-        public Countdown(String name) {
-            timer = new Timer();
-            shuffleboardEntry = Shuffleboard
-                    .getTab("Console")
-                    .add(name, 0)
-                    .getEntry();
-        }
-
-        public void start(long waitTime) {
-            this.waitTime = waitTime;
-            lastPublishedSecond = -1;
-            timer.reset();
-            timer.start();
-            shuffleboardEntry.setInteger(waitTime);
-        }
-
-        public void stop() {
-            timer.stop();
-        }
-
-        public double step() {
-            double remainingTime = waitTime - timer.get();
-
-            if (remainingTime <= 0) {
-                if (lastPublishedSecond != 0) {
-                    stop();
-                    shuffleboardEntry.setInteger(0);
-                    lastPublishedSecond = 0;
-                }
-                return 0;
-            }
-
-            long secondsToDisplay = Math.round(remainingTime);
-            if (secondsToDisplay != lastPublishedSecond) {
-                shuffleboardEntry.setInteger(secondsToDisplay);
-                lastPublishedSecond = secondsToDisplay;
-            }
-
-            return remainingTime;
-        }
-    }
+    private final double WHEEL_LOCK_TIME = 10.0;
 
     // Rebuilt-specific; time until the hub switches
-    private Countdown allianceShiftCountdown;
-    private Countdown timeUntilEnd;
+    private ConsoleCountdown allianceShiftCountdown = new ConsoleCountdown("Time until shift");
+    private int allianceShiftCounter = 0;
+    private ConsoleCountdown timeUntilEnd = new ConsoleCountdown("Time until end");
+
+    public final CommandXboxController driverXbox = new CommandXboxController(0);
 
     public Robot() {
         instance = this;
-        allianceShiftCountdown = new Countdown("Time until shift");
-        timeUntilEnd = new Countdown("Time until end");
-
     }
 
     public static Robot getInstance() {
@@ -104,19 +63,19 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
 
-        m_robotContainer = new RobotContainer();
+        robotContainer = new RobotContainer();
 
         // Create a timer to disable motor brake a few seconds after disable. This will
         // let the robot stop
         // immediately when disabled, but then also let it be pushed more
         disabledTimer = new Timer();
 
-        // Constants.visionTimerOffset =
-        // Vision.Cameras.LEFT_CAM.resultsList.get(0).getTimestampSeconds();
+        robotContainer.drive.ifEnabled(swerve -> {
+            swerve.replaceSwerveModuleFeedforward(.0002, 2.8, 0);
+            swerve.setupPathPlanner();
+        });
 
-        m_robotContainer.setDriveFeedForward(.0002, 2.8, 0);
-
-        Constants.drivebase.setupPathPlanner();
+        robotContainer.vision.startVisionThread();
     }
 
     /**
@@ -139,7 +98,7 @@ public class Robot extends TimedRobot {
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
-        Constants.vision.updateVisionField();
+
     }
 
     /**
@@ -147,7 +106,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        System.out.println("Robot disabled");
+        DriveNotifier.inform("Robot disabled");
         disabledTimer.reset();
         disabledTimer.start();
 
@@ -155,10 +114,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        if (disabledTimer.hasElapsed(Constants.DRIVE_CONSTANTS.wheelLockTime())) {
+        if (disabledTimer.hasElapsed(WHEEL_LOCK_TIME)) {
             disabledTimer.stop();
         }
-        m_robotContainer.resetAndStop();
+        robotContainer.resetAndStop();
     }
 
     /**
@@ -167,20 +126,23 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        System.out.println("Robot in auto");
+        isRedAllianceEntry.setBoolean(RobotContainer.isRedAlliance());
+        robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
-        isRedAllianceEntry.setBoolean(Systems.isRedAlliance());
-        System.out.println("gyro start");
-        Constants.drivebase.zeroGyroWithAlliance();
-        System.out.println("gyro calibrated");
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        robotContainer.intake.ifEnabled(intake -> {
+            if (!intake.isHomed()) {
+                CommandScheduler.getInstance().schedule(intake.homeCommand());
+            }
+        });
 
         // schedule the autonomous command (example)
-        if (m_autonomousCommand != null) {
-            CommandScheduler.getInstance().schedule(m_autonomousCommand);
+        if (autonomousCommand != null) {
+            CommandScheduler.getInstance().schedule(autonomousCommand);
         }
 
-        timeUntilEnd.start(20);
+        allianceShiftCountdown.start(20);
+        timeUntilEnd.start(160);
     }
 
     /**
@@ -194,23 +156,19 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        System.out.println("Robot in teleop");
+        DriveNotifier.inform("Robot in teleop");
+
         // This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        System.out.println(m_autonomousCommand);
-        if (m_autonomousCommand != null) {
-            System.out.println("Cancelling auto command");
-            m_autonomousCommand.cancel();
-        } else {
-            // System.out.println("Cancelling all commands");
-            // System.out.println(CommandScheduler.getInstance());
-            // CommandScheduler.getInstance().cancelAll();
+        if (autonomousCommand != null) {
+            DriveNotifier.inform("Cancelling auto command");
+            autonomousCommand.cancel();
         }
 
-        allianceShiftCountdown.start(10);
-        timeUntilEnd.start(140 /* 2:20 minutes */);
+        timeUntilEnd.start(140);
+        allianceShiftCountdown.start(10); // Transition shift
     }
 
     /**
@@ -220,10 +178,18 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         double remainingTime = allianceShiftCountdown.step();
         if (remainingTime <= 0) {
-            allianceShiftCountdown.start(25);
+            if (++allianceShiftCounter > 4) {
+                allianceShiftCountdown.start(30);
+            } else {
+                allianceShiftCountdown.start(25);
+            }
         }
 
         timeUntilEnd.step();
+        
+        // Controller Diagnostics
+        SmartDashboard.putNumberArray("Controller Values",  new Double[]{driverXbox.getLeftX(), driverXbox.getLeftY(), driverXbox.getRightX(), driverXbox.getRightY()});
+
     }
 
     /**
@@ -231,6 +197,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationInit() {
+        robotContainer.simulation.simulationInit();
     }
 
     /**
@@ -238,5 +205,6 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void simulationPeriodic() {
+        robotContainer.simulation.simulationPeriodic();
     }
 }
