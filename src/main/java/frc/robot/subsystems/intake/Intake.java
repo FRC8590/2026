@@ -39,25 +39,23 @@ public class Intake extends SubsystemBase {
 
     private final RelativeEncoder pinionEncoder;
 
-    // TODO: Measure and update this value!
-    private static final double MAX_EXTENSION_ROTATIONS = 3.0;
-    private static final double MIN_EXTENSION_ROTATIONS = 0.0;
+    private static final double MAX_EXTENSION_ROTATIONS = 12.4;
+    private static final double MIN_EXTENSION_ROTATIONS = 0.2;
 
-    // TODO: Measure and update these values!
-    private static final double RETRACTED_POSITION = 0.2;
-    private static final double EXTENDED_POSITION = 2.8;
+    private static final double RETRACTED_POSITION = 0.26;
+    private static final double EXTENDED_POSITION = 12.35;
 
-    private static final double kP = 0.55;
+    private static final double kP = 5.0;
     private static final double kI = 0.0;
-    private static final double kD = 0.0;
+    private static final double kD = 0.005;
 
-    private static final double CRUISE_VELOCITY = 120; // RPM
-    private static final double MAX_ACCELERATION = 20; // RPM/s
-    private static final double ALLOWED_ERROR = 0.5; // rotations
+    private static final double CRUISE_VELOCITY = 6000; // RPM
+    private static final double MAX_ACCELERATION = 6000; // RPM/s
+    private static final double ALLOWED_ERROR = 0.3; // rotations
 
     // When the motor stalls against the hard stop, current exceeds this.
     // Adjust if the intake homes too early (lower) or too late (higher)
-    private static final double HOMING_CURRENT_THRESHOLD = 15.0; // amps
+    private static final double HOMING_CURRENT_THRESHOLD = 30.0; // amps
     // Speed to retract during homing (negative = retract direction).
     private static final double HOMING_SPEED = -0.1;
 
@@ -80,19 +78,23 @@ public class Intake extends SubsystemBase {
             .getTab("Intake")
             .add("Homed", false)
             .getEntry();
+    private static final GenericEntry pidEntry = Shuffleboard
+            .getTab("Intake")
+            .add("PID output", 0.00)
+            .getEntry();
 
     public Intake() {
         intakeConfig
                 .inverted(true)
                 .idleMode(IdleMode.kCoast)
-                .smartCurrentLimit(20)
+                .smartCurrentLimit(60)
                 .closedLoopRampRate(0.001);
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
         pinionConfig
-                .inverted(false) // TODO: Set based on which direction extends
-                .idleMode(IdleMode.kBrake) // Peter: I think we want brake to hold the position
+                .inverted(true) // TODO: Set based on which direction extends.
+                .idleMode(IdleMode.kCoast)
                 .smartCurrentLimit(40);
 
         pinionConfig.closedLoop
@@ -153,20 +155,13 @@ public class Intake extends SubsystemBase {
 
     /** Retract the intake to the stowed position. */
     public void retract() {
-        if (!isHomed) {
-            return;
-        }
         setPoint = RETRACTED_POSITION;
         setpointEntry.setDouble(setPoint);
     }
 
-    public boolean isAtPosition() {
-        return pinionMotor.getClosedLoopController().isAtSetpoint();
-    }
-
     /** Run the intake wheels. */
     public void run() {
-        intakeMotor.set(1); // ~6800 RPM :)
+        intakeMotor.set(-0.5); // ~6800 RPM :)
     }
 
     /** Stop the intake wheels. */
@@ -179,6 +174,9 @@ public class Intake extends SubsystemBase {
         return pinionEncoder.getPosition();
     }
 
+    /**
+     * @return
+     */
     public boolean isAtSetpoint() {
         return pinionMotor.getClosedLoopController().isAtSetpoint();
     }
@@ -195,6 +193,7 @@ public class Intake extends SubsystemBase {
         if (++telemetryCounter >= 10) {
             positionEntry.setDouble(pinionEncoder.getPosition());
             currentEntry.setDouble(pinionMotor.getOutputCurrent());
+            pidEntry.setDouble(pinionMotor.getAppliedOutput());
             telemetryCounter = 0;
         }
     }

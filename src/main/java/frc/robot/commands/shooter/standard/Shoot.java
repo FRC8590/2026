@@ -24,11 +24,12 @@ public class Shoot extends SequentialCommandGroup {
             SystemWrapper<Indexer> indexer, VisionService vision, SystemWrapper<? extends Swerve> drive) {
         addCommands(
                 new ParallelCommandGroup(
-                        new AimAtTarget(vision, drive),
+                        new AimAtTarget(vision, drive).withTimeout(5), // seconds
                         new SetDynamicShooterSpeed(shooter, drive, vision)),
                 new Feed(belt, indexer)
                         .finallyDo(
-                                () -> shooter.ifEnabled(shoot -> shoot.setGoalRPM(0))));
+                                () -> shooter.ifEnabled(shoot -> 
+                                shoot.setGoalRPM(0))));
     }
 
 }

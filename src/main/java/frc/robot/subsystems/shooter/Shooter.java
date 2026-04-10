@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -79,7 +80,8 @@ public class Shooter extends SubsystemBase {
                 .smartCurrentLimit(60)
                 .closedLoopRampRate(0.001); // TODO: look at this
         shooterConfig.closedLoop
-                .pid(p, i, d);
+                .pid(p, i, d)
+                .allowedClosedLoopError(0.3, ClosedLoopSlot.kSlot0); // TODO: find good error tolerance
         shooterConfig.closedLoop.feedForward
                 .kA(kA)
                 .kV(kV);
@@ -87,12 +89,11 @@ public class Shooter extends SubsystemBase {
                 .cruiseVelocity(cruiseVelocity)
                 .maxAcceleration(maxAcceleration);
 
+        SmartDashboard.putData("Shooting", Commands.runOnce(this::markScore).withName("Scored"));
         frontMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         shooterConfig.inverted(true);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-        SmartDashboard.putData("Shooter/Scoring", Commands.runOnce(this::markScore).withName("Did we score?"));
-
     }
 
     public double registeredRPM = -1;

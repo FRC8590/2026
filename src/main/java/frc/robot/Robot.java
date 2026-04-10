@@ -120,6 +120,14 @@ public class Robot extends TimedRobot {
         robotContainer.resetAndStop();
     }
 
+    private void ensureIntakeHomed() {
+        robotContainer.intake.ifEnabled(intake -> {
+            if (!intake.isHomed()) {
+                CommandScheduler.getInstance().schedule(intake.homeCommand());
+            }
+        });
+    }
+
     /**
      * This autonomous runs the autonomous command selected by your
      * {@link RobotContainer} class.
@@ -128,13 +136,9 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         isRedAllianceEntry.setBoolean(RobotContainer.isRedAlliance());
         robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
-        autonomousCommand = robotContainer.getAutonomousCommand();
+        ensureIntakeHomed();
 
-        robotContainer.intake.ifEnabled(intake -> {
-            if (!intake.isHomed()) {
-                CommandScheduler.getInstance().schedule(intake.homeCommand());
-            }
-        });
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
         if (autonomousCommand != null) {
@@ -157,6 +161,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         DriveNotifier.inform("Robot in teleop");
+        ensureIntakeHomed();
 
         // This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to
@@ -186,9 +191,10 @@ public class Robot extends TimedRobot {
         }
 
         timeUntilEnd.step();
-        
+
         // Controller Diagnostics
-        SmartDashboard.putNumberArray("Controller Values",  new Double[]{driverXbox.getLeftX(), driverXbox.getLeftY(), driverXbox.getRightX(), driverXbox.getRightY()});
+        SmartDashboard.putNumberArray("Controller Values", new Double[] { driverXbox.getLeftX(), driverXbox.getLeftY(),
+                driverXbox.getRightX(), driverXbox.getRightY() });
 
     }
 

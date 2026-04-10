@@ -37,6 +37,11 @@ public class SetDynamicShooterSpeed extends Command {
     }
 
     @Override
+    public void initialize() {
+        usedValues.clear();
+    }
+
+    @Override
     public void execute() {
         var drive = driveSystem.get();
         if (!drive.isPresent()) {
