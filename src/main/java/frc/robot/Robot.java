@@ -76,6 +76,7 @@ public class Robot extends TimedRobot {
         });
 
         robotContainer.vision.startVisionThread();
+        robotContainer.shooter.ifEnabled(shooter -> shooter.initialize());
     }
 
     /**

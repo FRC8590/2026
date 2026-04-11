@@ -89,11 +89,17 @@ public class Shooter extends SubsystemBase {
                 .cruiseVelocity(cruiseVelocity)
                 .maxAcceleration(maxAcceleration);
 
-        SmartDashboard.putData("Shooting", Commands.runOnce(this::markScore).withName("Scored"));
         frontMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         shooterConfig.inverted(true);
         backMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    }
+
+    // TODO: Peter: Supposedly, calling this in the constructor can result in
+    // the key not showing up, because SmartDashboard isn't ready yet at that
+    // stage. If that turns out to be incorrect, then let's remove this.
+    public void initialize() {
+        SmartDashboard.putData("Shooting", Commands.runOnce(this::markScore).withName("Scored"));
     }
 
     public double registeredRPM = -1;
