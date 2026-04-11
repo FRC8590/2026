@@ -94,8 +94,8 @@ public class Intake extends SubsystemBase {
 
         pinionConfig
                 .inverted(true) // TODO: Set based on which direction extends.
-                .idleMode(IdleMode.kCoast)
-                .smartCurrentLimit(40);
+                .idleMode(IdleMode.kBrake)
+                .smartCurrentLimit(60);
 
         pinionConfig.closedLoop
                 .pid(kP, kI, kD);
@@ -155,6 +155,9 @@ public class Intake extends SubsystemBase {
 
     /** Retract the intake to the stowed position. */
     public void retract() {
+        if (!isHomed) {
+            return;
+        }
         setPoint = RETRACTED_POSITION;
         setpointEntry.setDouble(setPoint);
     }
