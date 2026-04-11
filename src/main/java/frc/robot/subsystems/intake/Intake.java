@@ -47,11 +47,11 @@ public class Intake extends SubsystemBase {
 
     private static final double kP = 5.0;
     private static final double kI = 0.0;
-    private static final double kD = 0.005;
+    private static final double kD = 0.05;
 
     private static final double CRUISE_VELOCITY = 6000; // RPM
     private static final double MAX_ACCELERATION = 6000; // RPM/s
-    private static final double ALLOWED_ERROR = 0.3; // rotations
+    private static final double ALLOWED_ERROR = 0.15; // rotations
 
     // When the motor stalls against the hard stop, current exceeds this.
     // Adjust if the intake homes too early (lower) or too late (higher)
