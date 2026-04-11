@@ -39,6 +39,7 @@ public class SystemWrapper<T extends SubsystemBase> extends SubsystemBase {
                 Commands.runOnce(this::toggleEnabled).withName("Toggle"));
         SmartDashboard.putData("Systems/" + name + "/Reboot", Commands.runOnce(this::reboot).withName("Reboot"));
         SmartDashboard.putBoolean("Systems/" + getName() + "/Status", true);
+        cachedSystem = supplier.get();
     }
 
     public void toggleEnabled() {
