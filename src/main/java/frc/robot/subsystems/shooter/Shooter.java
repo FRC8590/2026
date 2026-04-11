@@ -31,7 +31,7 @@ public class Shooter extends SubsystemBase {
 
     // Model (distance only, not scoring): y = 426.11258x + 460.08048
     public static final double RPM_PER_MPS = 426.11258;
-    public static final double RPM_OFFSET = 460.08048;
+    public static final double RPM_OFFSET = 960.08048;
 
     private static final SparkFlex frontMotor = new SparkFlex(FRONT_MOTOR_ID, MotorType.kBrushless);
     private static final SparkFlex backMotor = new SparkFlex(BACK_MOTOR_ID, MotorType.kBrushless);

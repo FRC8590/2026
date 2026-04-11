@@ -63,8 +63,8 @@ public class PhotonVisionCamera extends Camera {
                 robotToCamTransform);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-        singleTagStdDevs = VecBuilder.fill(4, 4, 8);
-        multiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+        singleTagStdDevs = VecBuilder.fill(2, 2, 4);
+        multiTagStdDevs = VecBuilder.fill(0.05, 0.05, 0.1);
     }
 
     public static PhotonVisionCamera newArduCamera(String name, AprilTagFieldLayout fieldLayout,

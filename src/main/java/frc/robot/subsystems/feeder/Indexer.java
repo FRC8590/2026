@@ -36,7 +36,7 @@ public class Indexer extends SubsystemBase {
 
     /* Run the indexer. */
     public void run() {
-        indexMotor.set(0.5);
+        indexMotor.set(1);
     }
 
     /* Stop the indexer. */
@@ -46,7 +46,7 @@ public class Indexer extends SubsystemBase {
 
     /* Run the indexer in reverse. */
     public void runReversed() {
-        indexMotor.set(-0.5);
+        indexMotor.set(-1);
     }
 
     public double getSpeed() {

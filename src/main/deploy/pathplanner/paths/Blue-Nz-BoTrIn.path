@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.4,
-        "y": 4.0
+        "x": 7.7,
+        "y": 3.25
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.3520722891566255,
-        "y": 0.8768915662650612
+        "x": 7.652072289156625,
+        "y": 0.12689156626506115
       },
       "isLocked": false,
       "linkedName": "Blue - neutral zone from bottom"

@@ -84,7 +84,7 @@ public class RobotContainer {
                             Units.inchesToMeters(0.033), // X-Positive -> Forward
                             Units.inchesToMeters(7.006), // Y-Positive -> Left
                             Units.inchesToMeters(18.451)), // Z-Positive -> Up
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(180), 0)))
+                    new Rotation3d(Units.degreesToRadians(69), Units.degreesToRadians(180), 0)))
     };
 
     // Services -- these are essentially non-rebootable background systems
@@ -169,6 +169,7 @@ public class RobotContainer {
         m_chooser.addOption("Red Right NZ", "Red-TrTo-Nz-7To");
         m_chooser.addOption("Blue Left shoot & depot", "Blue-TrTo-7To-Dp-7To");
         m_chooser.addOption("Red Left shoot & depot", "Red-TrBo-7Bo-Dp-7Bo");
+        m_chooser.addOption("Red Mid shoot and depot", "Red-Md-7Bo-Dp-7Bo");
 
         NamedCommands.registerCommand("Shoot", new Shoot(shooter, belt, indexer, vision, drive));
         NamedCommands.registerCommand("Intake Extend", new ExtendIntake(intake));

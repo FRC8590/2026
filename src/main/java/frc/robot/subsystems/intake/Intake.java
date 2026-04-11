@@ -2,7 +2,9 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.GenericEntry;
 
 import com.revrobotics.spark.SparkMax;
@@ -35,29 +37,29 @@ public class Intake extends SubsystemBase {
     private static final SparkFlex intakeMotor = new SparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless);
 
     private final SparkMaxConfig pinionConfig = new SparkMaxConfig();
-    private final SparkFlexConfig intakeConfig = new SparkFlexConfig();
+    private final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
     private final RelativeEncoder pinionEncoder;
 
     private static final double MAX_EXTENSION_ROTATIONS = 12.4;
     private static final double MIN_EXTENSION_ROTATIONS = 0.2;
 
-    private static final double RETRACTED_POSITION = 0.26;
-    private static final double EXTENDED_POSITION = 12.35;
+    private static final double RETRACTED_POSITION = 1;
+    private static final double EXTENDED_POSITION = 12.3;
 
-    private static final double kP = 5.0;
+    private static final double kP = 20.0;
     private static final double kI = 0.0;
-    private static final double kD = 0.05;
+    private static final double kD = 0.07;
 
-    private static final double CRUISE_VELOCITY = 6000; // RPM
-    private static final double MAX_ACCELERATION = 6000; // RPM/s
-    private static final double ALLOWED_ERROR = 0.15; // rotations
+    private static final double CRUISE_VELOCITY = 7000; // RPM
+    private static final double MAX_ACCELERATION = 7000; // RPM/s
+    private static final double ALLOWED_ERROR = 2.5; // rotations
 
     // When the motor stalls against the hard stop, current exceeds this.
     // Adjust if the intake homes too early (lower) or too late (higher)
-    private static final double HOMING_CURRENT_THRESHOLD = 30.0; // amps
+    private static final double HOMING_CURRENT_THRESHOLD = 80.0; // amps
     // Speed to retract during homing (negative = retract direction).
-    private static final double HOMING_SPEED = -0.1;
+    private static final double HOMING_SPEED = -1;
 
     private boolean isHomed = false;
     private double setPoint = 0.0;
@@ -82,20 +84,27 @@ public class Intake extends SubsystemBase {
             .getTab("Intake")
             .add("PID output", 0.00)
             .getEntry();
+    private static final GenericEntry hardStopEntry = Shuffleboard
+            .getTab("Intake")
+            .add("Hard Stopped", false)
+            .getEntry();
+    private static final GenericEntry intakeAtSetpoint = Shuffleboard
+            .getTab("Intake")
+            .add("At setpoint", false)
+            .getEntry();
 
     public Intake() {
         intakeConfig
                 .inverted(true)
                 .idleMode(IdleMode.kCoast)
-                .smartCurrentLimit(60)
-                .closedLoopRampRate(0.001);
+                .smartCurrentLimit(60);
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
 
         pinionConfig
-                .inverted(true) // TODO: Set based on which direction extends.
-                .idleMode(IdleMode.kBrake)
-                .smartCurrentLimit(60);
+                .inverted(true)
+                .idleMode(IdleMode.kCoast)
+                .smartCurrentLimit(80);
 
         pinionConfig.closedLoop
                 .pid(kP, kI, kD);
@@ -114,6 +123,17 @@ public class Intake extends SubsystemBase {
                 PersistMode.kPersistParameters);
 
         pinionEncoder = pinionMotor.getEncoder();
+    }
+
+    private boolean hardStopped = false;
+
+    public void initialize() {
+        SmartDashboard.putData("Intake", Commands.runOnce(this::hardStop).withName("Intake hard stop"));
+    }
+
+    private void hardStop() {
+        hardStopped = !hardStopped;
+        hardStopEntry.setBoolean(hardStopped);
     }
 
     public Command homeCommand() {
@@ -188,7 +208,18 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (hardStopped) {
+            pinionMotor.set(0);
+            return;
+        }
+
         if (isHomed) {
+            /*
+            if (setPoint == EXTENDED_POSITION) {
+                pinionMotor.set(0.2); // .5 seconds to extend and 12 rotations for full extension = 1440rpm
+            } else {
+                pinionMotor.set(-1);
+            }*/
             pinionMotor.getClosedLoopController().setSetpoint(
                     setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
         }
@@ -196,7 +227,8 @@ public class Intake extends SubsystemBase {
         if (++telemetryCounter >= 10) {
             positionEntry.setDouble(pinionEncoder.getPosition());
             currentEntry.setDouble(pinionMotor.getOutputCurrent());
-            pidEntry.setDouble(pinionMotor.getAppliedOutput());
+            pidEntry.setDouble(pinionMotor.getAppliedOutput() * 12);
+            intakeAtSetpoint.setBoolean(isAtSetpoint());
             telemetryCounter = 0;
         }
     }

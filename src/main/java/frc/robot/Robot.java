@@ -77,6 +77,7 @@ public class Robot extends TimedRobot {
 
         robotContainer.vision.startVisionThread();
         robotContainer.shooter.ifEnabled(shooter -> shooter.initialize());
+        robotContainer.intake.ifEnabled(intake -> intake.initialize());
     }
 
     /**
@@ -135,10 +136,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
+        CommandScheduler.getInstance().cancelAll();
         isRedAllianceEntry.setBoolean(RobotContainer.isRedAlliance());
         robotContainer.drive.ifEnabled(swerve -> swerve.zeroGyroWithAlliance());
         ensureIntakeHomed();
-
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
@@ -155,14 +156,12 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-        // Constants.SHOOTER.processIntakeCoralAuto();
         timeUntilEnd.step();
     }
 
     @Override
     public void teleopInit() {
         DriveNotifier.inform("Robot in teleop");
-        ensureIntakeHomed();
 
         // This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to
@@ -173,6 +172,9 @@ public class Robot extends TimedRobot {
             autonomousCommand.cancel();
         }
 
+        CommandScheduler.getInstance().cancelAll();
+
+        ensureIntakeHomed();
         timeUntilEnd.start(140);
         allianceShiftCountdown.start(10); // Transition shift
     }

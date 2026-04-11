@@ -41,6 +41,9 @@ public class DriveUnderTrench extends SequentialCommandGroup {
     private final int[] BLUE_TAG_IDS = IntStream
             .concat(Arrays.stream(BLUE_ENTRY_TAG_IDS), Arrays.stream(BLUE_EXIT_TAG_IDS))
             .toArray();
+    private final int[] ALL_TAG_IDS = IntStream
+            .concat(Arrays.stream(RED_TAG_IDS), Arrays.stream(BLUE_TAG_IDS))
+            .toArray();
 
     private abstract class TrenchPathfinderCommand extends PathfinderCommand {
         private final SystemWrapper<? extends Swerve> driveSystem;
@@ -61,7 +64,7 @@ public class DriveUnderTrench extends SequentialCommandGroup {
             var drive = driveOpt.get();
 
             Pose2d robotPose = drive.getPose();
-            int[] tags = RobotContainer.isRedAlliance() ? RED_TAG_IDS : BLUE_TAG_IDS;
+            int[] tags = ALL_TAG_IDS;
             var nearestTag = visionService.findNearestTag(tags, robotPose);
 
             return Optional.of(nearestTag);
